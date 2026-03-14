@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML → PDF — Tibet's Tools</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0c0e;
+    --panel: #131316;
+    --surface: #1c1c21;
+    --border: #2a2a32;
+    --border2: #38383f;
+    --accent: #6c63ff;
+    --accent-glow: rgba(108,99,255,0.18);
+    --accent-light: #8b85ff;
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.1);
+    --amber: #f59e0b;
+    --text: #e2e0f0;
+    --muted: #6b6a7a;
+    --light: #b0aec8;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 16px; height: 16px; }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-text span { color: var(--accent-light); }
+
+  .header-badge {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 9px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── MAIN ── */
+  main {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    height: calc(100vh - 65px);
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .panel-section {
+    padding: 24px 24px 0;
+  }
+
+  .panel-section + .panel-section {
+    padding-top: 20px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 16px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    font-family: var(--sans);
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .tab:hover:not(.active) { color: var(--light); }
+
+  /* ── INPUT METHOD PANELS ── */
+  .input-method { display: none; }
+  .input-method.active { display: block; }
+
+  /* ── DROPZONE ── */
+  .dropzone {
+    border: 1.5px dashed var(--border2);
+    border-radius: 10px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .dropzone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .dz-icon { font-size: 28px; margin-bottom: 8px; }
+
+  .dz-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .dz-sub { font-size: 12px; color: var(--muted); }
+
+  /* ── URL INPUT ── */
+  .url-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .url-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--mono);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .url-input::placeholder { color: var(--muted); }
+  .url-input:focus { border-color: var(--accent); }
+
+  /* ── CODE EDITOR ── */
+  .code-editor {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .editor-header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .editor-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+
+  .editor-filename {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  textarea#html-code {
+    width: 100%;
+    min-height: 180px;
+    background: transparent;
+    border: none;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #c9d1d9;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+    tab-size: 2;
+  }
+
+  textarea#html-code::placeholder { color: var(--muted); }
+
+  /* ── SETTINGS ── */
+  .setting-row {
+    margin-bottom: 14px;
+  }
+
+  .setting-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--light);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .setting-label .hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  select, .select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--sans);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6a7a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+    transition: border-color 0.15s;
+  }
+
+  select:focus { border-color: var(--accent); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-info { }
+  .toggle-title { font-size: 13px; color: var(--text); font-weight: 500; }
+  .toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .switch {
+    position: relative;
+    width: 38px; height: 22px;
+    flex-shrink: 0;
+  }
+
+  .switch input { opacity: 0; width: 0; height: 0; }
+
+  .slider {
+    position: absolute; inset: 0;
+    background: var(--border2);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(16px); }
+
+  /* ── FILENAME INPUT ── */
+  .filename-row {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .filename-row:focus-within { border-color: var(--accent); }
+
+  .filename-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 9px 12px;
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    outline: none;
+  }
+
+  .filename-ext {
+    padding: 9px 12px 9px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── CONVERT BUTTON ── */
+  .convert-btn {
+    width: calc(100% - 48px);
+    margin: 20px 24px 24px;
+    padding: 13px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .convert-btn:hover { background: #7c74ff; transform: translateY(-1px); }
+  .convert-btn:active { transform: translateY(0); }
+  .convert-btn:disabled { background: var(--border2); color: var(--muted); cursor: not-allowed; transform: none; }
+
+  .convert-btn .btn-arrow {
+    transition: transform 0.2s;
+  }
+
+  .convert-btn:hover .btn-arrow { transform: translateX(3px); }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    width: calc(100% - 48px);
+    margin: 0 24px 20px;
+    display: none;
+  }
+
+  .progress-wrap.visible { display: block; }
+
+  .progress-bar-bg {
+    background: var(--surface);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── RIGHT PANEL · PREVIEW ── */
+  .right-panel {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .preview-toolbar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--light);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  .preview-info {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .preview-action {
+    padding: 5px 11px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--light);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--sans);
+  }
+
+  .preview-action:hover { border-color: var(--accent); color: var(--accent-light); }
+
+  .preview-area {
+    flex: 1;
+    overflow: auto;
+    padding: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  /* ── PREVIEW FRAME ── */
+  #preview-container {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .preview-page {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.5);
+    overflow: hidden;
+    min-height: 300px;
+    margin-bottom: 16px;
+  }
+
+  #html-preview-frame {
+    width: 100%;
+    border: none;
+    display: block;
+    min-height: 500px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: var(--muted);
+    text-align: center;
+    gap: 12px;
+  }
+
+  .empty-icon {
+    width: 56px; height: 56px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+
+  .empty-title { font-size: 15px; font-weight: 600; color: var(--light); }
+  .empty-sub { font-size: 13px; color: var(--muted); max-width: 300px; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 13px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    max-width: 320px;
+  }
+
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: rgba(34,197,94,0.4); }
+  #toast.error { border-color: rgba(239,68,68,0.35); }
+
+  .toast-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .toast-dot.success { background: var(--green); }
+  .toast-dot.error { background: var(--red); }
+  .toast-dot.loading {
+    background: var(--accent);
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── STATUS TAGS ── */
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+
+  .status-loaded { background: var(--green-dim); color: var(--green); }
+  .status-empty { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+<nav style="position:sticky;top:0;z-index:200;background:rgba(12,12,14,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+  <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;background:linear-gradient(90deg,#6c63ff,#6aff7e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;">TIBET'S TOOLS</a>
+  <span style="font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;">html → pdf</span>
+</nav>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="9" y1="13" x2="15" y2="13"/>
+          <line x1="9" y1="17" x2="12" y2="17"/>
+        </svg>
+      </div>
+      <span class="logo-text">HTML <span>→</span> PDF</span>
+    </div>
+    <div class="header-badge">v1.0 · CLIENT-SIDE</div>
+  </header>
+
+  <main>
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- INPUT METHOD -->
+      <div class="panel-section" style="padding-bottom:20px;">
+        <div class="section-label">Input Method</div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('file')">Upload File</button>
+          <button class="tab" onclick="switchTab('paste')">Paste HTML</button>
+          <button class="tab" onclick="switchTab('url')">From URL</button>
+        </div>
+
+        <!-- FILE UPLOAD -->
+        <div class="input-method active" id="tab-file">
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".html,.htm" onchange="handleFile(this.files[0])">
+            <div class="dz-icon">📄</div>
+            <div class="dz-title">Drop your HTML file here</div>
+            <div class="dz-sub">or click to browse · .html / .htm</div>
+          </div>
+          <div id="file-status" class="status-tag status-empty">No file loaded</div>
+        </div>
+
+        <!-- PASTE HTML -->
+        <div class="input-method" id="tab-paste">
+          <div class="code-editor">
+            <div class="editor-header">
+              <div class="editor-dots">
+                <div class="dot dot-r"></div>
+                <div class="dot dot-y"></div>
+                <div class="dot dot-g"></div>
+              </div>
+              <span class="editor-filename">index.html</span>
+            </div>
+            <textarea id="html-code" placeholder="<!DOCTYPE html>&#10;<html>&#10;  <head>...</head>&#10;  <body>&#10;    <!-- Paste your HTML here -->&#10;  </body>&#10;</html>" spellcheck="false" oninput="onCodeInput()"></textarea>
+          </div>
+          <button class="preview-action" style="width:100%; padding:9px; font-size:12px; text-align:center;" onclick="loadFromCode()">Preview HTML ↗</button>
+        </div>
+
+        <!-- URL -->
+        <div class="input-method" id="tab-url">
+          <div class="url-row">
+            <input class="url-input" id="url-input" type="url" placeholder="https://example.com/page.html">
+            <button class="preview-action" style="white-space:nowrap;" onclick="loadFromURL()">Load</button>
+          </div>
+          <p style="font-size:11px; color:var(--muted); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:10px 12px;">
+            ⚠ URL loading uses an iframe. Works best with same-origin or CORS-enabled pages. Some sites block embedding.
+          </p>
+        </div>
+      </div>
+
+      <!-- PDF SETTINGS -->
+      <div class="panel-section" style="padding-bottom:20px;">
+        <div class="section-label">PDF Settings</div>
+
+        <div class="setting-row">
+          <div class="setting-label">Page Size</div>
+          <select id="page-size">
+            <option value="a4">A4 (210 × 297 mm)</option>
+            <option value="a3">A3 (297 × 420 mm)</option>
+            <option value="letter">Letter (8.5 × 11 in)</option>
+            <option value="legal">Legal (8.5 × 14 in)</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Orientation</div>
+          <select id="orientation">
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">
+            Scale / Quality
+            <span class="hint" id="scale-label">2× (High)</span>
+          </div>
+          <input type="range" id="scale-range" min="1" max="3" step="0.5" value="2"
+            style="width:100%; accent-color:var(--accent);"
+            oninput="updateScaleLabel(this.value)">
+        </div>
+
+        <div class="setting-row">
+          <div class="section-label" style="margin-bottom:8px;">Options</div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-title">Background colours</div>
+              <div class="toggle-sub">Include CSS backgrounds</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="opt-bg" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-title">Fit to page width</div>
+              <div class="toggle-sub">Scale content to fill PDF</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="opt-fit" checked><span class="slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-title">Multi-page split</div>
+              <div class="toggle-sub">Break long pages automatically</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="opt-pages" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-label">Output filename</div>
+          <div class="filename-row">
+            <input type="text" id="filename" value="document" placeholder="document">
+            <span class="filename-ext">.pdf</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPACER -->
+      <div style="flex:1;"></div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label" id="progress-label">Preparing...</div>
+      </div>
+
+      <!-- CONVERT BUTTON -->
+      <button class="convert-btn" id="convert-btn" onclick="convertToPDF()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Convert &amp; Download PDF
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- RIGHT PANEL · PREVIEW -->
+    <div class="right-panel">
+      <div class="preview-toolbar">
+        <span class="preview-title">PREVIEW</span>
+        <button class="preview-action" onclick="refreshPreview()">↺ Refresh</button>
+        <button class="preview-action" onclick="clearAll()">✕ Clear</button>
+        <span class="preview-info" id="preview-info">No content loaded</span>
+      </div>
+      <div class="preview-area">
+        <div id="preview-container">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">📄</div>
+            <div class="empty-title">No HTML loaded yet</div>
+            <div class="empty-sub">Upload a file, paste HTML, or enter a URL to see a live preview here.</div>
+          </div>
+          <div class="preview-page" id="preview-page" style="display:none;">
+            <iframe id="html-preview-frame" sandbox="allow-same-origin allow-scripts" onload="onIframeLoad()"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <div class="toast-dot" id="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ── STATE ──
+let currentHTML = null;
+let currentSource = null; // 'file' | 'paste' | 'url'
+let toastTimer = null;
+
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['file','paste','url'][i] === tab);
+  });
+  document.querySelectorAll('.input-method').forEach(m => m.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── FILE HANDLING ──
+function handleFile(file) {
+  if (!file) return;
+  if (!file.name.match(/\.html?$/i)) {
+    showToast('Please upload an .html or .htm file', 'error'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentHTML = e.target.result;
+    currentSource = 'file';
+    const status = document.getElementById('file-status');
+    status.textContent = '✓ ' + file.name + ' (' + formatSize(file.size) + ')';
+    status.className = 'status-tag status-loaded';
+    loadPreview(currentHTML);
+    enableConvert();
+    showToast(file.name + ' loaded', 'success');
+  };
+  reader.readAsText(file);
+}
+
+// Drag and drop
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', (e) => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+// ── CODE PASTE ──
+function onCodeInput() {
+  const code = document.getElementById('html-code').value.trim();
+  if (code.length > 10) enableConvert();
+}
+
+function loadFromCode() {
+  const code = document.getElementById('html-code').value.trim();
+  if (!code) { showToast('Paste some HTML first', 'error'); return; }
+  currentHTML = code;
+  currentSource = 'paste';
+  loadPreview(currentHTML);
+  enableConvert();
+  showToast('HTML loaded from editor', 'success');
+}
+
+// ── URL ──
+function loadFromURL() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) { showToast('Enter a URL first', 'error'); return; }
+  try { new URL(url); } catch { showToast('Invalid URL', 'error'); return; }
+  currentSource = 'url';
+  currentHTML = null;
+  const frame = document.getElementById('html-preview-frame');
+  frame.src = url;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('preview-page').style.display = 'block';
+  document.getElementById('preview-info').textContent = url;
+  enableConvert();
+  showToast('Loading URL...', 'loading');
+}
+
+// ── PREVIEW ──
+function loadPreview(html) {
+  const frame = document.getElementById('html-preview-frame');
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  frame.src = url;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('preview-page').style.display = 'block';
+}
+
+function onIframeLoad() {
+  const frame = document.getElementById('html-preview-frame');
+  try {
+    const h = frame.contentDocument?.body?.scrollHeight;
+    if (h && h > 100) {
+      frame.style.height = h + 'px';
+      document.getElementById('preview-info').textContent = 'Content loaded · ~' + h + 'px tall';
+    }
+  } catch(e) {
+    document.getElementById('preview-info').textContent = 'Cross-origin content (preview limited)';
+  }
+  if (currentSource === 'url') showToast('Page loaded', 'success');
+}
+
+function refreshPreview() {
+  if (currentHTML) loadPreview(currentHTML);
+  else {
+    const frame = document.getElementById('html-preview-frame');
+    frame.src = frame.src;
+  }
+}
+
+function clearAll() {
+  currentHTML = null; currentSource = null;
+  document.getElementById('html-preview-frame').src = 'about:blank';
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('preview-page').style.display = 'none';
+  document.getElementById('preview-info').textContent = 'No content loaded';
+  document.getElementById('file-status').textContent = 'No file loaded';
+  document.getElementById('file-status').className = 'status-tag status-empty';
+  document.getElementById('html-code').value = '';
+  document.getElementById('url-input').value = '';
+  document.getElementById('convert-btn').disabled = true;
+  showToast('Cleared', 'success');
+}
+
+// ── ENABLE / DISABLE ──
+function enableConvert() {
+  document.getElementById('convert-btn').disabled = false;
+}
+
+// ── SCALE LABEL ──
+function updateScaleLabel(v) {
+  const labels = { '1': '1× (Standard)', '1.5': '1.5× (Good)', '2': '2× (High)', '2.5': '2.5× (Very High)', '3': '3× (Ultra)' };
+  document.getElementById('scale-label').textContent = labels[v] || v + '×';
+}
+
+// ── CONVERT TO PDF ──
+async function convertToPDF() {
+  const btn = document.getElementById('convert-btn');
+  btn.disabled = true;
+  showProgress(0, 'Capturing content...');
+  showToast('Converting to PDF...', 'loading');
+
+  try {
+    const pageSize = document.getElementById('page-size').value;
+    const orientation = document.getElementById('orientation').value;
+    const scale = parseFloat(document.getElementById('scale-range').value);
+    const includeBg = document.getElementById('opt-bg').checked;
+    const fitToPage = document.getElementById('opt-fit').checked;
+    const multiPage = document.getElementById('opt-pages').checked;
+    const filename = (document.getElementById('filename').value.trim() || 'document') + '.pdf';
+
+    const frame = document.getElementById('html-preview-frame');
+    let targetDoc, targetEl;
+
+    try {
+      targetDoc = frame.contentDocument;
+      targetEl = targetDoc.documentElement;
+    } catch(e) {
+      throw new Error('Cannot access page content. If using a URL, the page may block cross-origin access.');
+    }
+
+    if (!targetEl) throw new Error('No content to convert.');
+
+    showProgress(20, 'Rendering HTML...');
+    await new Promise(r => setTimeout(r, 100));
+
+    // html2canvas capture
+    const canvas = await html2canvas(targetEl, {
+      scale: scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: includeBg ? null : '#ffffff',
+      logging: false,
+      windowWidth: targetDoc.documentElement.scrollWidth,
+      windowHeight: targetDoc.documentElement.scrollHeight,
+      scrollX: 0,
+      scrollY: 0,
+      x: 0,
+      y: 0,
+      width: targetDoc.documentElement.scrollWidth,
+      height: targetDoc.documentElement.scrollHeight,
+      onclone: (clonedDoc) => {
+        // Ensure backgrounds render
+        if (includeBg) {
+          clonedDoc.documentElement.style.webkitPrintColorAdjust = 'exact';
+          clonedDoc.documentElement.style.printColorAdjust = 'exact';
+        }
+      }
+    });
+
+    showProgress(60, 'Building PDF...');
+    await new Promise(r => setTimeout(r, 50));
+
+    // Page size map (mm)
+    const sizes = {
+      a4: [210, 297], a3: [297, 420],
+      letter: [215.9, 279.4], legal: [215.9, 355.6]
+    };
+
+    let [pw, ph] = sizes[pageSize];
+    if (orientation === 'landscape') [pw, ph] = [ph, pw];
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: pageSize });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const imgW = canvas.width;
+    const imgH = canvas.height;
+
+    if (multiPage) {
+      // Multi-page: split at page boundaries
+      const pxPerMm = scale * (96 / 25.4); // approx px per mm at screen DPI
+      const pageHeightPx = ph * pxPerMm;
+      const pageWidthPx = pw * pxPerMm;
+      const ratio = fitToPage ? (pw / (imgW / (scale * 3.7795))) : 1;
+
+      let imgMmW = imgW / (scale * 3.7795);
+      let imgMmH = imgH / (scale * 3.7795);
+
+      if (fitToPage) {
+        const scaleF = pw / imgMmW;
+        imgMmW = pw;
+        imgMmH = imgMmH * scaleF;
+      }
+
+      const pageContentH = ph;
+      let pagesCount = Math.ceil(imgMmH / pageContentH);
+
+      for (let page = 0; page < pagesCount; page++) {
+        if (page > 0) pdf.addPage([pw, ph], orientation);
+        const srcY = (page * pageContentH / imgMmH) * imgH;
+        const srcH = Math.min((pageContentH / imgMmH) * imgH, imgH - srcY);
+
+        // Slice canvas
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = imgW;
+        pageCanvas.height = Math.ceil(srcH);
+        const ctx = pageCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, srcY, imgW, srcH, 0, 0, imgW, srcH);
+
+        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.92);
+        const destH = (srcH / imgH) * imgMmH;
+        pdf.addImage(pageImgData, 'JPEG', 0, 0, imgMmW, destH);
+
+        showProgress(60 + (page / pagesCount) * 35, `Page ${page + 1} of ${pagesCount}...`);
+        await new Promise(r => setTimeout(r, 10));
+      }
+    } else {
+      // Single page: scale to fit
+      let imgMmW = imgW / (scale * 3.7795);
+      let imgMmH = imgH / (scale * 3.7795);
+
+      if (fitToPage || imgMmW > pw) {
+        const s = pw / imgMmW;
+        imgMmW = pw; imgMmH = imgMmH * s;
+      }
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgMmW, imgMmH);
+    }
+
+    showProgress(98, 'Saving...');
+    await new Promise(r => setTimeout(r, 80));
+
+    pdf.save(filename);
+
+    showProgress(100, 'Done!');
+    showToast('PDF saved as ' + filename, 'success');
+    setTimeout(() => hideProgress(), 2000);
+
+  } catch(err) {
+    hideProgress();
+    showToast('Error: ' + err.message, 'error');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── PROGRESS ──
+function showProgress(pct, label) {
+  const wrap = document.getElementById('progress-wrap');
+  wrap.classList.add('visible');
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+function hideProgress() {
+  const wrap = document.getElementById('progress-wrap');
+  setTimeout(() => {
+    wrap.classList.remove('visible');
+    document.getElementById('progress-fill').style.width = '0%';
+  }, 300);
+}
+
+// ── TOAST ──
+function showToast(msg, type) {
+  if (toastTimer) clearTimeout(toastTimer);
+  const toast = document.getElementById('toast');
+  const dot = document.getElementById('toast-dot');
+  document.getElementById('toast-msg').textContent = msg;
+  dot.className = 'toast-dot ' + type;
+  toast.className = 'show ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : '');
+  if (type !== 'loading') {
+    toastTimer = setTimeout(() => { toast.className = ''; }, 3500);
+  }
+}
+
+// ── UTILS ──
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+</script>
+</body>
+</html>
