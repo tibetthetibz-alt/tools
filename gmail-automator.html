@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gmail Automator — Tibet's Tools</title>
+<link rel="icon" type="image/png" href="logo-dark.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #0e0e12;
+    --bg2:    #16161c;
+    --bg3:    #1c1c24;
+    --border: #2a2a38;
+    --text:   #f0f0ff;
+    --text2:  #7070a0;
+    --accent: #01c6f1;
+    --green:  #6aff7e;
+    --red:    #ff6b6b;
+    --nav-bg: rgba(14,14,18,0.92);
+    --grid-color: rgba(1,198,241,0.025);
+  }
+
+  [data-theme="light"] {
+    --bg:     #f4f4f8;
+    --bg2:    #ffffff;
+    --bg3:    #ebebf2;
+    --border: #d0d0e0;
+    --text:   #0e0e1a;
+    --text2:  #6060a0;
+    --accent: #0099cc;
+    --green:  #22a83a;
+    --red:    #cc2200;
+    --nav-bg: rgba(244,244,248,0.92);
+    --grid-color: rgba(0,153,204,0.04);
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px 100px; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .nav-left { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo-img { width: 32px; height: 32px; object-fit: contain; }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .nav-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--text2); text-transform: uppercase; }
+  .nav-back { font-size: 11px; color: var(--text2); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .nav-back:hover { color: var(--accent); }
+
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--text2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-sun { display: none; }
+  [data-theme="light"] .icon-sun { display: block; }
+  [data-theme="light"] .icon-moon { display: none; }
+
+  /* HERO */
+  .hero { padding: 64px 0 48px; }
+  .breadcrumb { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text2); margin-bottom: 24px; }
+  .breadcrumb a { color: var(--accent); text-decoration: none; }
+  .hero-icon {
+    width: 64px; height: 64px; background: var(--bg3);
+    border: 1px solid var(--border); border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: clamp(40px, 8vw, 80px);
+    font-weight: 900; line-height: 0.95; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--text) 40%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero-desc { font-size: 12px; color: var(--text2); line-height: 1.8; max-width: 560px; margin-bottom: 32px; }
+
+  /* NOTICE BANNER */
+  .notice {
+    background: rgba(1,198,241,0.07); border: 1px solid rgba(1,198,241,0.2);
+    border-radius: 12px; padding: 16px 20px;
+    font-size: 11px; color: var(--text2); line-height: 1.7;
+    margin-bottom: 40px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .notice-icon { color: var(--accent); flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+  .notice strong { color: var(--text); }
+
+  /* LAUNCH BUTTON */
+  .btn-launch {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: #0e0e12;
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.05em;
+    padding: 14px 28px; border-radius: 12px; text-decoration: none;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    margin-bottom: 12px;
+  }
+  .btn-launch:hover { background: #33d4f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(1,198,241,0.25); }
+  .btn-launch:active { transform: translateY(0); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border); color: var(--text2); background: var(--bg2);
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    padding: 12px 20px; border-radius: 12px; text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    margin-left: 10px;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--text); }
+
+  /* SECTION */
+  .section-hdr { display: flex; align-items: center; gap: 16px; margin: 48px 0 24px; }
+  .section-hdr span { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text2); white-space: nowrap; }
+  .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* FEATURES */
+  .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 40px; }
+  .feature {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .feature-icon { font-size: 22px; }
+  .feature-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+  .feature-desc { font-size: 11px; color: var(--text2); line-height: 1.65; }
+
+  /* SETUP */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step { display: flex; gap: 16px; align-items: flex-start; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg3); border: 1px solid var(--border);
+    font-size: 11px; color: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .step-desc { font-size: 11px; color: var(--text2); line-height: 1.65; }
+  .step-desc a { color: var(--accent); text-decoration: none; }
+  .step-desc a:hover { text-decoration: underline; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; font-size: 11px; color: var(--text2); line-height: 1.8;
+    margin-top: 8px; overflow-x: auto;
+  }
+  .code-block .kw { color: var(--accent); }
+  .code-block .val { color: var(--green); }
+  .code-block .cm { color: var(--text2); opacity: 0.6; }
+
+  /* FORMAT TABLE */
+  .format-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .format-table th { text-align: left; color: var(--text2); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+  .format-table td { padding: 10px 12px; border-bottom: 1px solid rgba(42,42,56,0.5); color: var(--text2); vertical-align: top; }
+  .format-table td:first-child { color: var(--accent); font-weight: 500; white-space: nowrap; }
+  .format-table tr:last-child td { border-bottom: none; }
+
+  footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--text2); }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-left" href="index.html">
+    <img class="nav-logo-img" id="nav-logo" src="logo-dark.png" alt="Logo"/>
+  </a>
+  <div class="nav-right">
+    <a class="nav-back" href="index.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      All tools
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="breadcrumb"><a href="index.html">Tools</a> / Gmail Automator</div>
+    <div class="hero-icon">📬</div>
+    <h1>GMAIL AUTOMATOR</h1>
+    <p class="hero-desc">
+      Schedule and automate Gmail sends with precise timing. Connect any Google account via OAuth, write your schedule in a simple text file, and let the server fire emails on time — daily or on repeating intervals.
+    </p>
+
+    <div class="notice">
+      <span class="notice-icon">ℹ</span>
+      <div>
+        <strong>Server-side tool.</strong> Unlike the other tools here, Gmail Automator requires a backend to handle OAuth and scheduling. It's deployed separately on Render. Click Launch to open the live app, or follow the Setup guide below to self-host it.
+      </div>
+    </div>
+
+    <a class="btn-launch" href="https://gmail-automator.onrender.com" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Launch App
+    </a>
+    <a class="btn-secondary" href="https://github.com/tibetthetibz-alt/gmail-automator" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Source on GitHub
+    </a>
+  </section>
+
+  <div class="section-hdr"><span>features</span></div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🔐</div>
+      <div class="feature-name">Password Protected</div>
+      <div class="feature-desc">App-level password gate keeps the scheduler private and accessible only to you.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-name">Gmail OAuth2</div>
+      <div class="feature-desc">Any Google account can connect. Only send access is requested — no reading of emails.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⏰</div>
+      <div class="feature-name">Daily Scheduling</div>
+      <div class="feature-desc">Fire an email at a specific time every day using simple <code>HH:MM</code> notation.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔁</div>
+      <div class="feature-name">Interval Sending</div>
+      <div class="feature-desc">Repeat an email every N minutes with <code>every:10m</code> — perfect for reminders (or chaos).</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📄</div>
+      <div class="feature-name">File-based Schedule</div>
+      <div class="feature-desc">Write all your scheduled emails in a plain <code>.txt</code> file and bulk-import them in one click.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">✍️</div>
+      <div class="feature-name">Manual Compose</div>
+      <div class="feature-desc">Quick one-off sends or scheduled messages directly from the dashboard UI.</div>
+    </div>
+  </div>
+
+  <div class="section-hdr"><span>schedule file format</span></div>
+
+  <div class="code-block">
+    <span class="cm"># One email per line. Pipe-separated.</span><br>
+    <span class="cm"># Format: TIME | RECIPIENT | SUBJECT | BODY</span><br><br>
+    <span class="cm"># Daily at HH:MM</span><br>
+    <span class="kw">09:00</span> | friend@gmail.com | Morning! | Have an amazing day 🌅<br>
+    <span class="kw">20:30</span> | mum@gmail.com | Goodnight | Love you, sleep well ✨<br><br>
+    <span class="cm"># Repeating every X minutes</span><br>
+    <span class="kw">every:10m</span> | ex@gmail.com | Hey... | I miss you, please respond 😭
+  </div>
+
+  <div style="margin-top: 14px;">
+    <table class="format-table">
+      <thead>
+        <tr><th>Field</th><th>Format</th><th>Example</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>TIME</td><td>HH:MM for daily · every:Xm for interval</td><td>09:00 · every:10m</td></tr>
+        <tr><td>RECIPIENT</td><td>Valid email address</td><td>someone@gmail.com</td></tr>
+        <tr><td>SUBJECT</td><td>Plain text</td><td>Good morning!</td></tr>
+        <tr><td>BODY</td><td>Plain text (emoji OK)</td><td>Have a great day 🌟</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-hdr"><span>self-hosting setup</span></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Clone the repository</div>
+        <div class="code-block">git clone https://github.com/tibetthetibz-alt/gmail-automator<br>cd gmail-automator &amp;&amp; npm install</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Create a Google OAuth app</div>
+        <div class="step-desc">
+          Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> → New project → APIs &amp; Services → OAuth consent screen → Add scope <code>gmail.send</code>.<br>
+          Then Credentials → Create OAuth 2.0 Client ID (Web app) → add your Render URL as an authorised redirect URI: <code>https://your-app.onrender.com/auth/callback</code>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Configure environment variables</div>
+        <div class="code-block">
+          <span class="kw">GOOGLE_CLIENT_ID</span>=<span class="val">your_client_id</span><br>
+          <span class="kw">GOOGLE_CLIENT_SECRET</span>=<span class="val">your_client_secret</span><br>
+          <span class="kw">REDIRECT_URI</span>=<span class="val">https://your-app.onrender.com/auth/callback</span><br>
+          <span class="kw">SESSION_SECRET</span>=<span class="val">any_long_random_string</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Deploy to Render</div>
+        <div class="step-desc">
+          Connect your fork on <a href="https://render.com" target="_blank">render.com</a> → New Web Service → Build: <code>npm install</code> · Start: <code>npm start</code> · Add env vars above.
+          A <code>render.yaml</code> is included in the repo for one-click deploy.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a> · All tools run entirely client-side except where noted</footer>
+</div>
+
+<script>
+  const html = document.documentElement;
+  const navLogo = document.getElementById('nav-logo');
+  const saved = localStorage.getItem('theme') || 'dark';
+  setTheme(saved);
+
+  function setTheme(t) {
+    html.setAttribute('data-theme', t);
+    navLogo.src = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
+    localStorage.setItem('theme', t);
+  }
+
+  function toggleTheme() {
+    setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+</script>
+</body>
+</html>
