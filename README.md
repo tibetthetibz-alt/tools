@@ -9,6 +9,7 @@ A personal collection of client-side developer utilities. Everything runs entire
 | [Font Picker](fonts.html) | Browse 100+ Google Fonts by category, preview live, multi-select & copy `@import` |
 | [HAR Separator](har-separator.html) | Drop a `.har` file, filter requests, inspect details, export cURL commands |
 | [HTML → PDF](html-to-pdf.html) | Convert HTML to a downloadable PDF client-side with html2canvas + jsPDF |
+| [Gmail Automator](gmail-automator.html) | Schedule and automate Gmail sends via OAuth2 — daily times or repeating intervals |
 
 ## Usage
 
