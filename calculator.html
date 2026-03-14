@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FX-991CW — Tibet's Tools</title>
 <link rel="icon" type="image/png" href="logo-dark.png"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -14,12 +14,14 @@
   --nav-bg:rgba(14,14,18,0.92);--grid:rgba(1,198,241,0.025);
 }
 [data-theme="light"]{
-  --bg:#f4f4f8;--bg2:#ffffff;--bg3:#ebebf2;--border:#d0d0e0;
+  --bg:#f0f0f4;--bg2:#ffffff;--bg3:#e8e8f0;--border:#d0d0e0;
   --text:#0e0e1a;--text2:#6060a0;--accent:#0099cc;--green:#22a83a;
-  --nav-bg:rgba(244,244,248,0.92);--grid:rgba(0,153,204,0.04);
+  --nav-bg:rgba(240,240,244,0.92);--grid:rgba(0,153,204,0.04);
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;transition:background .3s,color .3s}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* NAV */
 nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
 .nav-left{display:flex;align-items:center;gap:12px;text-decoration:none}
 .nav-logo-img{width:30px;height:30px;object-fit:contain}
@@ -29,12 +31,13 @@ nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:bl
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 .icon-sun{display:none}.icon-moon{display:block}
 [data-theme="light"] .icon-sun{display:block}[data-theme="light"] .icon-moon{display:none}
-.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:36px 24px 80px}
-.page-header{margin-bottom:28px}
-.page-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(32px,6vw,52px);font-weight:900;background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
-.page-sub{font-size:11px;color:var(--text2);margin-top:6px}
-.layout{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start}
-@media(max-width:800px){.layout{grid-template-columns:1fr}}
+
+/* PAGE */
+.page{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:36px 24px 80px}
+.page-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(28px,5vw,48px);font-weight:900;background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.page-sub{font-size:11px;color:var(--text2);margin-bottom:28px}
+.layout{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start}
+@media(max-width:780px){.layout{grid-template-columns:1fr;justify-items:center}}
 </style>
 </head>
 <body>
@@ -51,472 +54,576 @@ nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:bl
   </div>
 </nav>
 <div class="page">
-  <div class="page-header">
-    <div class="page-title">FX-991CW</div>
-    <div class="page-sub">Casio ClassWiz simulator · paste numbers in · history panel with copy</div>
-  </div>
+  <div class="page-title">FX-991CW</div>
+  <div class="page-sub">Casio ClassWiz · 1:1 simulator · keyboard + paste support · history panel</div>
   <div class="layout">
-    <div id="calc-wrap"></div>
-    <div id="hist-wrap"></div>
+    <div id="calc-root"></div>
+    <div id="hist-root"></div>
   </div>
 </div>
 
-<!-- CALCULATOR CSS -->
+<!-- CALCULATOR STYLES - faithful FX-991CW recreation -->
 <style>
-/* ── CASIO BODY ── */
-.casio{
-  background:linear-gradient(170deg,#f5f5f5 0%,#e8e8e8 100%);
-  border-radius:16px 16px 28px 28px;
-  padding:14px 12px 20px;
-  width:272px;
-  box-shadow:0 6px 0 #aaa,0 10px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.9);
-  border:1.5px solid #c8c8c8;
-  position:relative;
-  flex-shrink:0;
+/* ═══ CASIO BODY ═══ */
+.fx991cw {
+  width: 290px;
+  background: #f2f2f2;
+  border-radius: 12px 12px 40px 40px;
+  padding: 0;
+  box-shadow:
+    0 0 0 1px #c8c8c8,
+    0 4px 0 1px #b0b0b0,
+    0 8px 2px rgba(0,0,0,.25),
+    0 16px 40px rgba(0,0,0,.35);
+  position: relative;
+  font-family: 'Roboto', Arial, sans-serif;
+  overflow: hidden;
 }
-.casio-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;padding:0 2px}
-.brand-left{display:flex;flex-direction:column;gap:1px}
-.brand-casio{font-size:16px;font-weight:900;letter-spacing:3px;color:#111;font-family:Arial,sans-serif;line-height:1}
-.brand-cw{font-size:8px;color:#d00;font-weight:800;letter-spacing:2px}
-.brand-classwiz{font-size:7px;color:#555;letter-spacing:1px}
-.brand-right{font-size:7px;color:#999;text-align:right;font-family:Arial,sans-serif;line-height:1.4}
-/* Solar */
-.solar{height:11px;background:linear-gradient(90deg,#1a1a2a,#2a3a5a,#1a1a2a);border-radius:2px;margin-bottom:8px;display:flex;gap:1px;overflow:hidden;padding:0 2px}
-.sc{flex:1;background:rgba(255,255,255,.04);border-radius:1px}
-/* Display */
-.calc-disp{
-  background:#c0d0a8;
-  border-radius:5px;border:2px solid #7a8a6a;
-  box-shadow:inset 0 2px 8px rgba(0,0,0,.35);
-  padding:7px 9px 6px;margin-bottom:10px;min-height:68px;
+
+/* Top navy banner */
+.fx-top-banner {
+  background: linear-gradient(180deg, #1a2a6c 0%, #0f1a50 100%);
+  padding: 10px 14px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
-.disp-status{display:flex;gap:5px;margin-bottom:3px;flex-wrap:wrap}
-.ds{font-size:6.5px;color:#2a3a1a;font-family:'DM Mono',monospace;opacity:.55;border:1px solid #2a3a1a;padding:0 2px;border-radius:1px;line-height:13px}
-.ds.on{opacity:1;background:#2a3a1a;color:#c0d0a8}
-.disp-expr{font-size:11px;color:#0a1a00;font-family:'DM Mono',monospace;text-align:right;min-height:16px;word-break:break-all;opacity:.75;letter-spacing:.3px}
-.disp-ans{font-size:21px;color:#0a1a00;font-family:'DM Mono',monospace;text-align:right;font-weight:500;min-height:26px;word-break:break-all;letter-spacing:.5px}
-/* Buttons */
-.btn-area{display:flex;flex-direction:column;gap:4px}
-.brow{display:flex;gap:4px;justify-content:center}
-/* base */
-.b{
-  border-radius:50%;border:none;cursor:pointer;
-  font-family:'DM Mono',monospace;font-size:9px;font-weight:700;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  width:36px;height:36px;position:relative;
-  transition:filter .08s,transform .08s;
-  box-shadow:0 3px 0 rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.18);
-  user-select:none;-webkit-user-select:none;line-height:1.1;text-align:center;
+.fx-brand-left { display: flex; flex-direction: column; gap: 1px; }
+.fx-casio-text {
+  font-size: 22px; font-weight: 900; letter-spacing: 3px;
+  color: #fff; font-family: 'Roboto', Arial, sans-serif; line-height: 1;
 }
-.b:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.3);filter:brightness(.88)}
-.bd{background:linear-gradient(170deg,#252525,#101010);color:#fff}
-.bm{background:linear-gradient(170deg,#898989,#676767);color:#fff}
-.bl{background:linear-gradient(170deg,#dcdcdc,#bababa);color:#222}
-.bb{background:linear-gradient(170deg,#3a6abf,#2a4a9f);color:#fff}
-.bo{background:linear-gradient(170deg,#e07828,#b85a10);color:#fff}
-.br{background:linear-gradient(170deg,#c0392b,#8e1a12);color:#fff}
-.bwide{border-radius:11px;width:56px}
-.bxw{border-radius:11px;width:78px}
-/* shift/alpha labels */
-.bwrap{position:relative;padding-top:11px;display:flex;flex-direction:column;align-items:center}
-.lshift{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:6px;color:#d4a000;white-space:nowrap;font-weight:800;pointer-events:none}
-.lalpha{position:absolute;top:0;right:-2px;font-size:6px;color:#c040a0;white-space:nowrap;font-weight:800;pointer-events:none}
-/* nav cross */
-.ncross{display:grid;grid-template-columns:36px 36px 36px;grid-template-rows:36px 36px 36px;gap:3px;margin:0 auto}
-.nc-blank{width:36px;height:36px}
+.fx-model-text { font-size: 10px; color: #8fb3ff; letter-spacing: 1.5px; font-weight: 500; }
+.fx-classwiz { font-size: 8px; color: #5588ff; letter-spacing: 1px; }
+.fx-brand-right { text-align: right; }
+.fx-natural { font-size: 7px; color: #aac4ff; letter-spacing: .5px; line-height: 1.5; }
+
+/* Solar strip */
+.fx-solar {
+  background: linear-gradient(90deg, #0a0a0a, #1a2240, #0a0a0a);
+  height: 9px; margin: 0 14px 0;
+  border-radius: 0 0 2px 2px;
+  display: flex; gap: 1px; padding: 1px 2px; overflow: hidden;
+}
+.fx-sc { flex: 1; background: linear-gradient(180deg,#1a3060,#0a1030); border-radius: 1px; }
+
+/* Display area */
+.fx-display-wrap {
+  margin: 8px 10px 6px;
+  background: #c5d8b0;
+  border-radius: 4px;
+  border: 2px solid #8a9e72;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.32), inset 0 0 0 1px rgba(0,0,0,.1);
+  padding: 5px 8px 6px;
+  min-height: 72px;
+  position: relative;
+}
+.fx-disp-indicators {
+  display: flex; gap: 4px; margin-bottom: 2px; flex-wrap: wrap;
+}
+.fx-ind {
+  font-size: 6px; color: #263a10;
+  font-family: 'Roboto', sans-serif; font-weight: 700;
+  opacity: .45; letter-spacing: .3px; line-height: 1;
+  padding: 0 2px; border: .5px solid rgba(38,58,16,.35); border-radius: 1px;
+}
+.fx-ind.lit { opacity: 1; background: rgba(38,58,16,.15); }
+.fx-disp-expr {
+  font-size: 11px; color: #1a2e08;
+  text-align: right; min-height: 15px;
+  word-break: break-all; opacity: .75;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .2px; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fx-disp-result {
+  font-size: 24px; color: #0e1e04;
+  text-align: right; font-weight: 400;
+  font-family: 'DM Mono', monospace;
+  min-height: 30px; word-break: break-all;
+  letter-spacing: .5px; line-height: 1.15;
+}
+
+/* Body below display */
+.fx-body { background: #f2f2f2; padding: 4px 10px 18px; }
+
+/* ── Button base ── */
+.fx-btn-grid { display: flex; flex-direction: column; gap: 3px; }
+.fx-row { display: flex; gap: 4px; justify-content: center; align-items: flex-end; }
+
+/* outer wrapper keeps label + button together */
+.bw { display: flex; flex-direction: column; align-items: center; position: relative; }
+
+/* secondary labels above button */
+.sl { /* shift label - yellow */
+  font-size: 5.8px; color: #c8860a; font-weight: 800;
+  font-family: 'Roboto', sans-serif; line-height: 1;
+  margin-bottom: 2px; white-space: nowrap; min-height: 8px;
+  text-align: center; width: 100%;
+}
+.al { /* alpha label - red */
+  position: absolute; top: 0; right: -1px;
+  font-size: 5.5px; color: #c0302a; font-weight: 800;
+  font-family: 'Roboto', sans-serif; line-height: 1;
+  white-space: nowrap;
+}
+
+/* The actual button */
+.b {
+  border: none; cursor: pointer; outline: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 50%;
+  width: 38px; height: 38px;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 10px; font-weight: 700;
+  line-height: 1.1; text-align: center;
+  position: relative;
+  transition: filter .07s, transform .07s;
+  user-select: none; -webkit-user-select: none;
+}
+.b:active { transform: translateY(2px) scale(.97); filter: brightness(.82); }
+
+/* Sub-label inside button (smaller text below main) */
+.b-sub { font-size: 6px; font-weight: 400; opacity: .75; line-height: 1; margin-top: 1px; }
+
+/* Colour variants */
+/* Dark charcoal - numbers & main ops */
+.bd {
+  background: radial-gradient(ellipse at 40% 30%, #4a4a4a, #1c1c1c);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #0a0a0a, 0 1px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12);
+}
+/* Medium grey - secondary functions */
+.bm {
+  background: radial-gradient(ellipse at 40% 30%, #8a8a8a, #5a5a5a);
+  color: #fff;
+  box-shadow: 0 3px 0 #333, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+}
+/* Light grey - some function keys */
+.bl {
+  background: radial-gradient(ellipse at 40% 30%, #e0e0e0, #bdbdbd);
+  color: #111;
+  box-shadow: 0 3px 0 #888, 0 1px 3px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.6);
+}
+/* Blue - SHIFT, ALPHA, navigation */
+.bb {
+  background: radial-gradient(ellipse at 40% 30%, #4a7ae0, #2348b8);
+  color: #fff;
+  box-shadow: 0 3px 0 #112090, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.2);
+}
+/* Orange-red = sign */
+.bo {
+  background: radial-gradient(ellipse at 40% 30%, #e86820, #c04408);
+  color: #fff;
+  box-shadow: 0 3px 0 #802000, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.18);
+}
+/* Red - AC/ON */
+.br {
+  background: radial-gradient(ellipse at 40% 30%, #d42020, #a00808);
+  color: #fff;
+  box-shadow: 0 3px 0 #600000, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+}
+/* Pill shapes */
+.bwide  { border-radius: 12px; width: 58px; }
+.bxwide { border-radius: 12px; width: 80px; }
+
+/* Arrow nav cross */
+.fx-nav { display: grid; grid-template-columns: 38px 38px 38px; grid-template-rows: 38px 38px 38px; gap: 3px; }
+.fnb { width: 38px; height: 38px; } /* blank */
+/* Arrow buttons get cut corners */
+.b-up    { border-radius: 8px 8px 50% 50%; }
+.b-down  { border-radius: 50% 50% 8px 8px; }
+.b-left  { border-radius: 50% 8px 8px 50%; }
+.b-right { border-radius: 8px 50% 50% 8px; }
+.b-ok    { border-radius: 50%; }
 </style>
 
-<!-- HISTORY CSS -->
+<!-- HISTORY STYLES -->
 <style>
-.hist-panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.hist-panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:280px}
 .hist-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .hist-title{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text2)}
-.hist-actions{display:flex;gap:8px}
 .hbtn{font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
 .hbtn:hover{border-color:var(--accent);color:var(--accent)}
-.hist-list{flex:1;overflow-y:auto;max-height:520px}
-.hist-list::-webkit-scrollbar{width:4px}
+.hist-list{flex:1;overflow-y:auto;max-height:480px}
+.hist-list::-webkit-scrollbar{width:3px}
 .hist-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.hist-empty{padding:40px 20px;text-align:center;font-size:11px;color:var(--text2)}
-.hist-item{
-  padding:11px 18px;border-bottom:1px solid var(--border);
-  display:grid;grid-template-columns:1fr auto;gap:8px;
-  cursor:pointer;transition:background .15s;
-}
+.hist-empty{padding:40px 20px;text-align:center;font-size:11px;color:var(--text2);line-height:1.6}
+.hist-item{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
 .hist-item:hover{background:var(--bg3)}
 .hist-item:last-child{border-bottom:none}
-.hi-expr{font-size:11px;color:var(--text2);word-break:break-all}
-.hi-result{font-size:14px;color:var(--text);font-weight:600;text-align:right;word-break:break-all}
-.hi-copy{
-  opacity:0;font-size:9px;padding:3px 8px;border-radius:5px;
-  border:1px solid var(--border);background:var(--bg3);color:var(--text2);
-  cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;
-  align-self:center;white-space:nowrap;flex-shrink:0;
-}
+.hi-body{flex:1;min-width:0}
+.hi-expr{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Mono',monospace}
+.hi-result{font-size:16px;color:var(--text);font-weight:600;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-copy{opacity:0;font-size:9px;padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;flex-shrink:0}
 .hist-item:hover .hi-copy{opacity:1}
 .hi-copy:hover{border-color:var(--green);color:var(--green)}
-.hi-meta{display:flex;flex-direction:column;gap:2px}
 .hist-hint{padding:8px 18px 12px;font-size:10px;color:var(--text2);text-align:center;border-top:1px solid var(--border)}
 </style>
 
-<!-- CALCULATOR HTML -->
+<!-- BUILD CALCULATOR DOM -->
 <script>
-// ── BUILD CALCULATOR UI ──
-document.getElementById('calc-wrap').innerHTML = `
-<div class="casio">
-  <div class="casio-top">
-    <div class="brand-left">
-      <span class="brand-casio">CASIO</span>
-      <span class="brand-cw">fx-991CW</span>
-      <span class="brand-classwiz">ClassWiz</span>
+document.getElementById('calc-root').innerHTML = `
+<div class="fx991cw">
+
+  <!-- TOP NAVY BANNER -->
+  <div class="fx-top-banner">
+    <div class="fx-brand-left">
+      <span class="fx-casio-text">CASIO</span>
+      <span class="fx-model-text">fx-991CW</span>
+      <span class="fx-classwiz">ClassWiz</span>
     </div>
-    <div class="brand-right">NATURAL-V.P.A.M.<br>2-LINE DISPLAY</div>
+    <div class="fx-brand-right">
+      <div class="fx-natural">NATURAL-V.P.A.M.<br/>552 FUNCTIONS</div>
+    </div>
   </div>
-  <div class="solar">${Array(14).fill('<div class="sc"></div>').join('')}</div>
-  <div class="calc-disp">
-    <div class="disp-status">
-      <span class="ds" id="ds-s">S</span><span class="ds" id="ds-a">A</span>
-      <span class="ds" id="ds-m">M</span><span class="ds" id="ds-sto">STO</span>
-      <span class="ds" id="ds-rcl">RCL</span><span class="ds" id="ds-stat">STAT</span>
-      <span class="ds" id="ds-d">D</span><span class="ds" id="ds-r">R</span><span class="ds" id="ds-g">G</span>
+
+  <!-- SOLAR STRIP -->
+  <div class="fx-solar">${Array(16).fill('<div class="fx-sc"></div>').join('')}</div>
+
+  <!-- DISPLAY -->
+  <div class="fx-display-wrap">
+    <div class="fx-disp-indicators">
+      <span class="fx-ind" id="di-s">S</span>
+      <span class="fx-ind" id="di-a">A</span>
+      <span class="fx-ind" id="di-m">M</span>
+      <span class="fx-ind" id="di-sto">STO</span>
+      <span class="fx-ind" id="di-rcl">RCL</span>
+      <span class="fx-ind" id="di-d">D</span>
+      <span class="fx-ind" id="di-r">R</span>
+      <span class="fx-ind" id="di-g">G</span>
+      <span class="fx-ind" id="di-fix">FIX</span>
+      <span class="fx-ind" id="di-sci">SCI</span>
     </div>
-    <div class="disp-expr" id="disp-expr"></div>
-    <div class="disp-ans" id="disp-ans">0</div>
+    <div class="fx-disp-expr" id="disp-expr"></div>
+    <div class="fx-disp-result" id="disp-ans">0</div>
   </div>
-  <div class="btn-area">
-    <!-- Row 1: MENU HOME UNDO ^^ -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">CATALOG</span><button class="b bd" onclick="cp('MENU')"><span style="font-size:8px">MENU</span></button></div>
-      <div class="bwrap"><span class="lshift">RESET</span><button class="b bd" onclick="cp('HOME')"><span style="font-size:8px">HOME</span></button></div>
-      <div class="bwrap"><span class="lshift">INS</span><button class="b bd" onclick="doUndo()"><span style="font-size:7px">UNDO</span></button></div>
-      <div class="bwrap"><span class="lshift">OFF</span><button class="b bo" onclick="doClear(true)"><span style="font-size:10px">ON</span></button></div>
+
+  <div class="fx-body">
+  <div class="fx-btn-grid">
+
+    <!-- ROW 1: MENU  HOME  UNDO  ON -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">CATALOG</div><button class="b bm" onclick="cp('MENU')" style="font-size:8px;font-weight:900">MENU</button></div>
+      <div class="bw"><div class="sl">RESET</div><button class="b bm" onclick="cp('HOME')" style="font-size:8px;font-weight:900">HOME</button></div>
+      <div class="bw"><div class="sl">INS</div><button class="b bm" onclick="doUndo()" style="font-size:8px;font-weight:900">UNDO</button></div>
+      <div class="bw"><div class="sl">OFF</div><button class="b br" onclick="doClear(true)" style="font-size:10px;font-weight:900;letter-spacing:.5px">ON</button></div>
     </div>
-    <!-- Row 2: SHIFT ALPHA x10^ Ans -->
-    <div class="brow">
-      <div class="bwrap"><button class="b bb" id="btn-shift" onclick="toggleMode('shift')"><span style="font-size:8px;font-weight:900">SHIFT</span></button></div>
-      <div class="bwrap"><button class="b bb" id="btn-alpha" onclick="toggleMode('alpha')"><span style="font-size:8px;font-weight:900">ALPHA</span></button></div>
-      <div class="bwrap"><span class="lshift">10^x</span><span class="lalpha">e</span><button class="b bd" onclick="appendStr('×10^(')"><span style="font-size:7px">×10<sup>x</sup></span></button></div>
-      <div class="bwrap"><span class="lshift">DRG</span><span class="lalpha">:</span><button class="b bd" onclick="appendAns()"><span style="font-size:8px">Ans</span></button></div>
+
+    <!-- ROW 2: SHIFT  ALPHA  x10^x  Ans -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">&nbsp;</div><button class="b bb" id="btn-shift" onclick="toggleShift()" style="font-size:8px;font-weight:900;letter-spacing:.3px">SHIFT</button></div>
+      <div class="bw"><div class="sl">&nbsp;</div><button class="b bb" id="btn-alpha" onclick="toggleAlpha()" style="font-size:8px;font-weight:900;letter-spacing:.3px">ALPHA</button></div>
+      <div class="bw"><div class="sl">10<sup>x</sup></div><button class="b bd" onclick="appendStr('×10^(')" style="font-size:8px">×10<sup style="font-size:6px">x</sup></button></div>
+      <div class="bw"><div class="sl">DRG▸</div><button class="b bd" onclick="appendAns()" style="font-size:9px;font-weight:900">Ans</button></div>
     </div>
-    <!-- Row 3: x^2 x^-1 x! sqrt -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">x^3</span><button class="b bd" onclick="appendStr('^2')"><span style="font-size:9px">x²</span></button></div>
-      <div class="bwrap"><span class="lshift">cbrt</span><button class="b bd" onclick="appendStr('^(-1)')"><span style="font-size:9px">x⁻¹</span></button></div>
-      <div class="bwrap"><span class="lshift">nPr</span><button class="b bd" onclick="appendStr('!')"><span style="font-size:10px">x!</span></button></div>
-      <div class="bwrap"><span class="lshift">nth√</span><button class="b bd" onclick="appendStr('sqrt(')"><span style="font-size:9px">√</span></button></div>
+
+    <!-- ROW 3: x²  x⁻¹  x!  √ -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">x³</div><button class="b bd" onclick="appendStr('^2')" style="font-size:11px">x²</button></div>
+      <div class="bw"><div class="sl">∛</div><button class="b bd" onclick="appendStr('^(-1)')" style="font-size:11px">x⁻¹</button></div>
+      <div class="bw"><div class="sl">nPr</div><button class="b bd" onclick="appendStr('!')" style="font-size:11px">x!</button></div>
+      <div class="bw"><div class="sl"><sup>x</sup>√</div><button class="b bd" onclick="appendStr('√(')" style="font-size:14px">√</button></div>
     </div>
-    <!-- Row 4: log ln ^ ( ) -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">10^x</span><button class="b bd" onclick="appendStr('log(')"><span style="font-size:9px">log</span></button></div>
-      <div class="bwrap"><span class="lshift">e^x</span><button class="b bd" onclick="appendStr('ln(')"><span style="font-size:9px">ln</span></button></div>
-      <div class="bwrap"><span class="lshift">abs</span><button class="b bd" onclick="appendStr('^(')"><span style="font-size:10px">^</span></button></div>
-      <div class="bwrap"><button class="b bm" onclick="appendStr('(')"><span style="font-size:11px">(</span></button></div>
-      <div class="bwrap"><button class="b bm" onclick="appendStr(')')"><span style="font-size:11px">)</span></button></div>
+
+    <!-- ROW 4: log  ln  ^  (  ) -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">10<sup>x</sup></div><button class="b bd" onclick="appendStr('log(')" style="font-size:10px">log</button></div>
+      <div class="bw"><div class="sl">e<sup>x</sup></div><button class="b bd" onclick="appendStr('ln(')" style="font-size:10px">ln</button></div>
+      <div class="bw"><div class="sl">Abs</div><button class="b bd" onclick="appendStr('^(')" style="font-size:12px;font-weight:900">^</button></div>
+      <div class="bw"><div class="sl">Pol(</div><button class="b bm" onclick="appendStr('(')" style="font-size:14px;font-weight:700">(</button></div>
+      <div class="bw"><div class="sl">Rec(</div><button class="b bm" onclick="appendStr(')')" style="font-size:14px;font-weight:700">)</button></div>
     </div>
-    <!-- Row 5: sin cos tan , -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">sin⁻¹</span><button class="b bd" onclick="appendStr('sin(')"><span style="font-size:9px">sin</span></button></div>
-      <div class="bwrap"><span class="lshift">cos⁻¹</span><button class="b bd" onclick="appendStr('cos(')"><span style="font-size:9px">cos</span></button></div>
-      <div class="bwrap"><span class="lshift">tan⁻¹</span><button class="b bd" onclick="appendStr('tan(')"><span style="font-size:9px">tan</span></button></div>
-      <div class="bwrap"><span class="lshift">°'"</span><button class="b bm" onclick="appendStr(',')"><span style="font-size:10px">,</span></button></div>
-      <div class="bwrap"><span class="lshift">hyp</span><button class="b bm" onclick="appendStr('%')"><span style="font-size:10px">%</span></button></div>
+
+    <!-- ROW 5: sin  cos  tan  ,  % -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">sin⁻¹</div><button class="b bd" onclick="appendStr('sin(')" style="font-size:10px">sin</button></div>
+      <div class="bw"><div class="sl">cos⁻¹</div><button class="b bd" onclick="appendStr('cos(')" style="font-size:10px">cos</button></div>
+      <div class="bw"><div class="sl">tan⁻¹</div><button class="b bd" onclick="appendStr('tan(')" style="font-size:10px">tan</button></div>
+      <div class="bw"><div class="sl">°'"</div><button class="b bm" onclick="appendStr(',')" style="font-size:12px">,</button></div>
+      <div class="bw"><div class="sl">Ran#</div><button class="b bm" onclick="appendStr('%')" style="font-size:12px">%</button></div>
     </div>
-    <!-- Nav cross -->
-    <div style="display:flex;justify-content:center;margin:2px 0">
-      <div class="ncross">
-        <div class="nc-blank"></div>
-        <button class="b bm" onclick="cursorMove(-1)" style="border-radius:50% 50% 20% 20%">▲</button>
-        <div class="nc-blank"></div>
-        <button class="b bm" onclick="cursorMoveLeft()" style="border-radius:50% 20% 20% 50%">◀</button>
-        <button class="b bl" onclick="doEquals()" style="font-size:11px;font-weight:900;border-radius:50%">=</button>
-        <button class="b bm" onclick="cursorMoveRight()" style="border-radius:20% 50% 50% 20%">▶</button>
-        <div class="nc-blank"></div>
-        <button class="b bm" onclick="cursorMove(1)" style="border-radius:20% 20% 50% 50%">▼</button>
-        <div class="nc-blank"></div>
+
+    <!-- NAVIGATION CROSS -->
+    <div class="fx-row" style="margin:2px 0">
+      <div class="bw"><div class="sl">&nbsp;</div>
+        <div class="fx-nav">
+          <div class="fnb"></div>
+          <button class="b bm b-up" onclick="histUp()" style="font-size:11px">▲</button>
+          <div class="fnb"></div>
+          <button class="b bm b-left" onclick="cursorLeft()" style="font-size:11px">◀</button>
+          <button class="b bl b-ok" onclick="doEquals()" style="font-size:11px;font-weight:900;color:#111">=</button>
+          <button class="b bm b-right" onclick="cursorRight()" style="font-size:11px">▶</button>
+          <div class="fnb"></div>
+          <button class="b bm b-down" onclick="histDown()" style="font-size:11px">▼</button>
+          <div class="fnb"></div>
+        </div>
       </div>
     </div>
-    <!-- Row 6: DEL AC / x -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">INS</span><button class="b bm bwide" onclick="doBackspace()"><span style="font-size:9px">DEL</span></button></div>
-      <div class="bwrap"><span class="lshift">CLR</span><button class="b br bwide" onclick="doClear(false)"><span style="font-size:9px">AC</span></button></div>
-      <div class="bwrap"><button class="b bd" onclick="appendStr('/')"><span style="font-size:12px">÷</span></button></div>
-      <div class="bwrap"><button class="b bd" onclick="appendStr('*')"><span style="font-size:12px">×</span></button></div>
-    </div>
-    <!-- Number rows -->
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">A</span><button class="b bd" onclick="appendNum('7')"><span style="font-size:13px">7</span></button></div>
-      <div class="bwrap"><span class="lshift">B</span><button class="b bd" onclick="appendNum('8')"><span style="font-size:13px">8</span></button></div>
-      <div class="bwrap"><span class="lshift">C</span><button class="b bd" onclick="appendNum('9')"><span style="font-size:13px">9</span></button></div>
-      <div class="bwrap"><button class="b bd" onclick="appendStr('-')"><span style="font-size:14px">−</span></button></div>
-    </div>
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">D</span><button class="b bd" onclick="appendNum('4')"><span style="font-size:13px">4</span></button></div>
-      <div class="bwrap"><span class="lshift">E</span><button class="b bd" onclick="appendNum('5')"><span style="font-size:13px">5</span></button></div>
-      <div class="bwrap"><span class="lshift">F</span><button class="b bd" onclick="appendNum('6')"><span style="font-size:13px">6</span></button></div>
-      <div class="bwrap"><button class="b bd" onclick="appendStr('+')"><span style="font-size:14px">+</span></button></div>
-    </div>
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">M+</span><button class="b bd" onclick="appendNum('1')"><span style="font-size:13px">1</span></button></div>
-      <div class="bwrap"><span class="lshift">M−</span><button class="b bd" onclick="appendNum('2')"><span style="font-size:13px">2</span></button></div>
-      <div class="bwrap"><span class="lshift">MRC</span><button class="b bd" onclick="appendNum('3')"><span style="font-size:13px">3</span></button></div>
-      <div class="bwrap"><button class="b bm" onclick="toggleNeg()"><span style="font-size:11px">(−)</span></button></div>
-    </div>
-    <div class="brow">
-      <div class="bwrap"><span class="lshift">RND</span><button class="b bd bxw" onclick="appendNum('0')"><span style="font-size:13px">0</span></button></div>
-      <div class="bwrap"><button class="b bd" onclick="appendStr('.')"><span style="font-size:14px">.</span></button></div>
-      <div class="bwrap"><button class="b bo" onclick="doEquals()" style="font-size:10px;font-weight:900">=</button></div>
-    </div>
-  </div>
-</div>`;
-</script>
 
-<!-- HISTORY HTML -->
-<script>
-document.getElementById('hist-wrap').innerHTML = `
+    <!-- ROW 6: DEL  AC  ÷  × -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">INS</div><button class="b bm bwide" onclick="doBackspace()" style="font-size:9px;font-weight:900">DEL</button></div>
+      <div class="bw"><div class="sl">CLR</div><button class="b br bwide" onclick="doClear(false)" style="font-size:9px;font-weight:900;letter-spacing:.5px">AC</button></div>
+      <div class="bw"><div class="sl">INTG</div><button class="b bd" onclick="appendStr('/')" style="font-size:15px">÷</button></div>
+      <div class="bw"><div class="sl">d/dx</div><button class="b bd" onclick="appendStr('*')" style="font-size:15px">×</button></div>
+    </div>
+
+    <!-- ROW 7: 7  8  9  − -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">A</div><button class="b bd" onclick="appendNum('7')" style="font-size:16px;font-weight:500">7</button></div>
+      <div class="bw"><div class="sl">B</div><button class="b bd" onclick="appendNum('8')" style="font-size:16px;font-weight:500">8</button></div>
+      <div class="bw"><div class="sl">C</div><button class="b bd" onclick="appendNum('9')" style="font-size:16px;font-weight:500">9</button></div>
+      <div class="bw"><div class="sl">Neg</div><button class="b bd" onclick="appendStr('-')" style="font-size:18px;font-weight:300">−</button></div>
+    </div>
+
+    <!-- ROW 8: 4  5  6  + -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">D</div><button class="b bd" onclick="appendNum('4')" style="font-size:16px;font-weight:500">4</button></div>
+      <div class="bw"><div class="sl">E</div><button class="b bd" onclick="appendNum('5')" style="font-size:16px;font-weight:500">5</button></div>
+      <div class="bw"><div class="sl">F</div><button class="b bd" onclick="appendNum('6')" style="font-size:16px;font-weight:500">6</button></div>
+      <div class="bw"><div class="sl">M+</div><button class="b bd" onclick="appendStr('+')" style="font-size:18px;font-weight:300">+</button></div>
+    </div>
+
+    <!-- ROW 9: 1  2  3  (−) -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">M-</div><button class="b bd" onclick="appendNum('1')" style="font-size:16px;font-weight:500">1</button></div>
+      <div class="bw"><div class="sl">MRC</div><button class="b bd" onclick="appendNum('2')" style="font-size:16px;font-weight:500">2</button></div>
+      <div class="bw"><div class="sl">STO</div><button class="b bd" onclick="appendNum('3')" style="font-size:16px;font-weight:500">3</button></div>
+      <div class="bw"><div class="sl">RCL</div><button class="b bm" onclick="toggleNeg()" style="font-size:9px;font-weight:700">(−)</button></div>
+    </div>
+
+    <!-- ROW 10: 0 (wide)  .  EXE -->
+    <div class="fx-row">
+      <div class="bw"><div class="sl">Rnd</div><button class="b bd bxwide" onclick="appendNum('0')" style="font-size:16px;font-weight:500">0</button></div>
+      <div class="bw"><div class="sl">π</div><button class="b bd" onclick="appendStr('.')" style="font-size:16px;font-weight:700">.</button></div>
+      <div class="bw"><div class="sl">&nbsp;</div><button class="b bo" onclick="doEquals()" style="font-size:9px;font-weight:900;letter-spacing:.3px">EXE</button></div>
+    </div>
+
+  </div><!-- /btn-grid -->
+  </div><!-- /fx-body -->
+</div>`;
+
+document.getElementById('hist-root').innerHTML = `
 <div class="hist-panel">
   <div class="hist-head">
     <span class="hist-title">History</span>
-    <div class="hist-actions">
-      <button class="hbtn" onclick="clearHistory()">Clear</button>
-    </div>
+    <button class="hbtn" onclick="clearHist()">Clear all</button>
   </div>
   <div class="hist-list" id="hist-list">
-    <div class="hist-empty" id="hist-empty">No calculations yet.<br>Results will appear here.</div>
+    <div class="hist-empty">No calculations yet.<br>Results appear here.</div>
   </div>
-  <div class="hist-hint">Click a result to paste it · hover to copy</div>
+  <div class="hist-hint">Click a result to paste into calculator · hover to copy</div>
 </div>`;
 </script>
 
-<!-- CALCULATOR ENGINE -->
+<!-- ENGINE -->
 <script>
-let expr = '';
-let lastAns = 0;
-let history = [];
+// ── STATE ──
+let expr = '', cursorPos = 0, lastAns = 0;
+let history = [], histIdx = -1;
 let shiftOn = false, alphaOn = false;
-let cursorPos = 0;
 
-const elExpr = () => document.getElementById('disp-expr');
-const elAns  = () => document.getElementById('disp-ans');
+const $expr = () => document.getElementById('disp-expr');
+const $ans  = () => document.getElementById('disp-ans');
 
-function updateDisplay() {
-  const e = elExpr();
-  const a = elAns();
-  if (!e || !a) return;
-  // Show cursor in expression
-  const disp = expr.slice(0, cursorPos) + '|' + expr.slice(cursorPos);
-  e.textContent = disp.replace(/\*/g,'×').replace(/\//g,'÷');
-  if (expr === '') { a.textContent = '0'; }
+function render() {
+  const e = $expr(); if (!e) return;
+  const display = (expr.slice(0,cursorPos) + '▌' + expr.slice(cursorPos))
+    .replace(/\*/g,'×').replace(/\//g,'÷').replace(/sqrt/g,'√');
+  e.textContent = display || '';
 }
 
 function appendStr(s) {
-  expr = expr.slice(0, cursorPos) + s + expr.slice(cursorPos);
-  cursorPos += s.length;
-  updateDisplay();
+  expr = expr.slice(0,cursorPos) + s + expr.slice(cursorPos);
+  cursorPos += s.length; render();
 }
-
 function appendNum(n) { appendStr(n); }
-
-function appendAns() { appendStr(String(lastAns)); }
-
-function cursorMove(d) { /* up/down for history navigation — stub */ }
-function cursorMoveLeft()  { cursorPos = Math.max(0, cursorPos - 1); updateDisplay(); }
-function cursorMoveRight() { cursorPos = Math.min(expr.length, cursorPos + 1); updateDisplay(); }
+function appendAns()  { appendStr(String(lastAns)); }
+function cursorLeft()  { cursorPos = Math.max(0, cursorPos-1); render(); }
+function cursorRight() { cursorPos = Math.min(expr.length, cursorPos+1); render(); }
+function histUp()   { if (histIdx < history.length-1) { histIdx++; loadHist(histIdx); } }
+function histDown() { if (histIdx > 0) { histIdx--; loadHist(histIdx); } else { histIdx=-1; expr=''; cursorPos=0; render(); } }
+function loadHist(i){ expr = history[i].expr; cursorPos = expr.length; render(); }
 
 function doBackspace() {
-  if (cursorPos === 0) return;
-  expr = expr.slice(0, cursorPos - 1) + expr.slice(cursorPos);
-  cursorPos--;
-  updateDisplay();
+  if (cursorPos===0) return;
+  expr = expr.slice(0,cursorPos-1) + expr.slice(cursorPos);
+  cursorPos--; render();
 }
-
 function doClear(full) {
-  expr = ''; cursorPos = 0;
-  if (full) { lastAns = 0; elAns().textContent = '0'; }
-  elExpr().textContent = '';
-  updateDisplay();
+  expr=''; cursorPos=0; histIdx=-1;
+  if (full) { lastAns=0; if($ans()) $ans().textContent='0'; }
+  render();
+  if($expr()) $expr().textContent='';
 }
-
 function doUndo() { doBackspace(); }
+function cp(x) {} // MENU/HOME stubs
 
 function toggleNeg() {
-  if (expr === '' || expr === '0') { appendStr('-'); return; }
-  if (expr.startsWith('-')) { expr = expr.slice(1); cursorPos = Math.max(0, cursorPos-1); }
-  else { expr = '-' + expr; cursorPos++; }
-  updateDisplay();
+  if (expr===''||expr==='0') { appendStr('-'); return; }
+  if (expr.startsWith('-')) { expr=expr.slice(1); cursorPos=Math.max(0,cursorPos-1); }
+  else { expr='-'+expr; cursorPos++; }
+  render();
 }
-
-function toggleMode(m) {
-  if (m === 'shift') {
-    shiftOn = !shiftOn; alphaOn = false;
-    document.getElementById('btn-shift').style.opacity = shiftOn ? '1' : '0.7';
-    document.getElementById('btn-alpha').style.opacity = '0.7';
-    document.getElementById('ds-s').classList.toggle('on', shiftOn);
-    document.getElementById('ds-a').classList.remove('on');
-  } else {
-    alphaOn = !alphaOn; shiftOn = false;
-    document.getElementById('btn-alpha').style.opacity = alphaOn ? '1' : '0.7';
-    document.getElementById('btn-shift').style.opacity = '0.7';
-    document.getElementById('ds-a').classList.toggle('on', alphaOn);
-    document.getElementById('ds-s').classList.remove('on');
-  }
+function toggleShift() {
+  shiftOn=!shiftOn; alphaOn=false;
+  document.getElementById('btn-shift').style.boxShadow = shiftOn
+    ? '0 0 0 2px #c8860a, 0 3px 0 #112090' : '';
+  document.getElementById('btn-alpha').style.boxShadow = '';
+  document.getElementById('di-s').classList.toggle('lit', shiftOn);
+  document.getElementById('di-a').classList.remove('lit');
 }
-
-function cp(label) { /* MENU/HOME stubs */ }
+function toggleAlpha() {
+  alphaOn=!alphaOn; shiftOn=false;
+  document.getElementById('btn-alpha').style.boxShadow = alphaOn
+    ? '0 0 0 2px #c0302a, 0 3px 0 #112090' : '';
+  document.getElementById('btn-shift').style.boxShadow = '';
+  document.getElementById('di-a').classList.toggle('lit', alphaOn);
+  document.getElementById('di-s').classList.remove('lit');
+}
 
 // ── EVALUATE ──
 function doEquals() {
-  if (expr.trim() === '') return;
+  if (!expr.trim()) return;
   const raw = expr;
   try {
     const result = safeEval(raw);
-    if (result === null || result === undefined || isNaN(result)) throw new Error('Invalid');
+    if (result===null||result===undefined||typeof result!=='number'||isNaN(result)) throw 0;
+    if (!isFinite(result)) throw 0;
     const rounded = parseFloat(result.toPrecision(10));
     lastAns = rounded;
-    elExpr().textContent = raw.replace(/\*/g,'×').replace(/\//g,'÷');
-    elAns().textContent = formatResult(rounded);
-    addHistory(raw, rounded);
-    expr = String(rounded);
-    cursorPos = expr.length;
+    if($expr()) $expr().textContent = raw.replace(/\*/g,'×').replace(/\//g,'÷').replace(/sqrt/g,'√');
+    if($ans())  $ans().textContent  = fmtResult(rounded);
+    addHist(raw, rounded);
+    expr = String(rounded); cursorPos = expr.length; histIdx = -1;
   } catch(e) {
-    elAns().textContent = 'Math ERROR';
-    setTimeout(() => { elAns().textContent = expr || '0'; }, 1200);
+    if($ans()) { $ans().textContent='Math ERROR'; setTimeout(()=>{ if($ans()) $ans().textContent=fmtResult(lastAns)||'0'; },1400); }
   }
 }
 
-function formatResult(n) {
-  if (Math.abs(n) >= 1e10 || (Math.abs(n) < 1e-4 && n !== 0)) {
-    return n.toExponential(6).replace(/e\+?(-?)(\d+)/, (_, s, d) => `×10^${s}${parseInt(d)}`);
+function fmtResult(n) {
+  if (n===0) return '0';
+  if (Math.abs(n)>=1e10 || (Math.abs(n)<0.001 && n!==0)) {
+    return n.toExponential(6).replace(/e\+?(-?)0*(\d+)/,(_, s, d)=>`×10^${s}${d}`);
   }
-  const s = parseFloat(n.toPrecision(10)).toString();
-  return s;
+  return parseFloat(n.toPrecision(10)).toString();
 }
 
-// ── SAFE EVAL ──
+// ── SAFE MATH EVAL ──
 function safeEval(raw) {
   let s = raw
     .replace(/×/g,'*').replace(/÷/g,'/')
+    .replace(/√\(/g,'Math.sqrt(')
     .replace(/sqrt\(/g,'Math.sqrt(')
     .replace(/log\(/g,'Math.log10(')
     .replace(/ln\(/g,'Math.log(')
-    .replace(/sin\(/g,'Math.sin(DEG(')
-    .replace(/cos\(/g,'Math.cos(DEG(')
-    .replace(/tan\(/g,'Math.tan(DEG(')
+    .replace(/sin\(/g,'__sin(')
+    .replace(/cos\(/g,'__cos(')
+    .replace(/tan\(/g,'__tan(')
     .replace(/π/g,'Math.PI')
     .replace(/×10\^\(/g,'*Math.pow(10,')
-    .replace(/\^/g,'**')
-    .replace(/(\d+)!/g, (_, n) => factorial(parseInt(n)));
-
-  // close unmatched parens
-  let open = (s.match(/\(/g)||[]).length - (s.match(/\)/g)||[]).length;
-  s += ')'.repeat(Math.max(0, open));
-
-  // DEG helper for trig
-  s = s.replace(/Math\.(sin|cos|tan)\(DEG\(/g, (_, fn) => `Math.${fn}(Math.PI/180*(`);
-
-  return Function('"use strict"; return (' + s + ')')();
+    .replace(/\^/g,'**');
+  // factorial
+  s = s.replace(/(\d+)!/g, (_,n)=>String(factorial(+n)));
+  // close parens
+  const open = (s.match(/\(/g)||[]).length-(s.match(/\)/g)||[]).length;
+  s += ')'.repeat(Math.max(0,open));
+  const __sin=x=>Math.sin(x*Math.PI/180);
+  const __cos=x=>Math.cos(x*Math.PI/180);
+  const __tan=x=>Math.tan(x*Math.PI/180);
+  return Function('"use strict";const __sin='+__sin+';const __cos='+__cos+';const __tan='+__tan+'; return('+s+')')();
 }
 
 function factorial(n) {
-  if (n < 0 || n > 170) return NaN;
-  if (n === 0 || n === 1) return 1;
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
+  if(n<0||n>170||!Number.isInteger(n)) return NaN;
+  let r=1; for(let i=2;i<=n;i++) r*=i; return r;
 }
-
-function DEG(x) { return x * Math.PI / 180; }
 
 // ── HISTORY ──
-function addHistory(ex, res) {
-  history.unshift({ expr: ex, result: res });
-  if (history.length > 50) history.pop();
-  renderHistory();
+function addHist(ex, res) {
+  history.unshift({expr:ex, result:res});
+  if(history.length>80) history.pop();
+  renderHist();
 }
-
-function renderHistory() {
+function renderHist() {
   const list = document.getElementById('hist-list');
-  const empty = document.getElementById('hist-empty');
   if (!list) return;
-  if (history.length === 0) {
-    list.innerHTML = '<div class="hist-empty" id="hist-empty">No calculations yet.<br>Results will appear here.</div>';
-    return;
-  }
-  list.innerHTML = history.map((h, i) => `
+  if (!history.length) { list.innerHTML='<div class="hist-empty">No calculations yet.<br>Results appear here.</div>'; return; }
+  list.innerHTML = history.map((h,i)=>`
     <div class="hist-item" onclick="pasteResult(${i})">
-      <div class="hi-meta">
+      <div class="hi-body">
         <div class="hi-expr">${h.expr.replace(/\*/g,'×').replace(/\//g,'÷')}</div>
-        <div class="hi-result">= ${formatResult(h.result)}</div>
+        <div class="hi-result">= ${fmtResult(h.result)}</div>
       </div>
-      <button class="hi-copy" onclick="event.stopPropagation();copyResult(${i})" title="Copy">Copy</button>
+      <button class="hi-copy" onclick="event.stopPropagation();copyResult(${i})">Copy</button>
     </div>`).join('');
 }
-
 function pasteResult(i) {
-  const val = String(history[i].result);
-  expr = expr.slice(0, cursorPos) + val + expr.slice(cursorPos);
-  cursorPos += val.length;
-  updateDisplay();
+  const v=String(history[i].result);
+  expr=expr.slice(0,cursorPos)+v+expr.slice(cursorPos);
+  cursorPos+=v.length; render();
 }
-
 function copyResult(i) {
-  navigator.clipboard.writeText(String(history[i].result)).then(() => showToast('Copied!'));
+  navigator.clipboard.writeText(String(history[i].result))
+    .then(()=>toast('Copied!'));
 }
+function clearHist() { history=[]; renderHist(); }
 
-function clearHistory() { history = []; renderHistory(); }
+// ── KEYBOARD ──
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key>='0'&&e.key<='9') appendNum(e.key);
+  else if(e.key==='.') appendStr('.');
+  else if(e.key==='+') appendStr('+');
+  else if(e.key==='-') appendStr('-');
+  else if(e.key==='*') appendStr('*');
+  else if(e.key==='/'){e.preventDefault();appendStr('/');}
+  else if(e.key==='(') appendStr('(');
+  else if(e.key===')') appendStr(')');
+  else if(e.key==='^') appendStr('^(');
+  else if(e.key==='Enter'||e.key==='=') doEquals();
+  else if(e.key==='Backspace') doBackspace();
+  else if(e.key==='Escape') doClear(false);
+  else if(e.key==='ArrowLeft') cursorLeft();
+  else if(e.key==='ArrowRight') cursorRight();
+  else if(e.key==='ArrowUp') histUp();
+  else if(e.key==='ArrowDown') histDown();
+});
+
+// ── PASTE ──
+document.addEventListener('paste', e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  e.preventDefault();
+  const txt=(e.clipboardData||window.clipboardData).getData('text');
+  const clean=txt.replace(/[^\d.\-+*/()^%]/g,'');
+  if(clean) appendStr(clean);
+});
 
 // ── TOAST ──
-function showToast(msg) {
-  let t = document.getElementById('calc-toast');
-  if (!t) { t = document.createElement('div'); t.id='calc-toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#6aff7e;color:#000;padding:8px 18px;border-radius:8px;font-family:DM Mono,monospace;font-size:12px;font-weight:700;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;pointer-events:none'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(80px)'; }, 1800);
+function toast(msg) {
+  let t=document.getElementById('fx-toast');
+  if(!t){t=document.createElement('div');t.id='fx-toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#6aff7e;color:#000;padding:8px 18px;border-radius:8px;font-family:DM Mono,monospace;font-size:12px;font-weight:700;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:9999;pointer-events:none';
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{t.style.transform='translateX(-50%) translateY(80px)';},1800);
 }
 
-// ── KEYBOARD INPUT ──
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  if (e.key >= '0' && e.key <= '9') appendNum(e.key);
-  else if (e.key === '.') appendStr('.');
-  else if (e.key === '+') appendStr('+');
-  else if (e.key === '-') appendStr('-');
-  else if (e.key === '*') appendStr('*');
-  else if (e.key === '/') { e.preventDefault(); appendStr('/'); }
-  else if (e.key === '(') appendStr('(');
-  else if (e.key === ')') appendStr(')');
-  else if (e.key === 'Enter' || e.key === '=') doEquals();
-  else if (e.key === 'Backspace') doBackspace();
-  else if (e.key === 'Escape') doClear(false);
-  else if (e.key === 'ArrowLeft') cursorMoveLeft();
-  else if (e.key === 'ArrowRight') cursorMoveRight();
-});
-
-// ── PASTE SUPPORT ──
-document.addEventListener('paste', e => {
-  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
-  e.preventDefault();
-  const txt = (e.clipboardData || window.clipboardData).getData('text');
-  const nums = txt.replace(/[^0-9.\-+*/()]/g, '');
-  if (nums) appendStr(nums);
-});
-
-// ── INIT ──
-updateDisplay();
-</script>
-
-<!-- THEME JS -->
-<script>
-const _saved = localStorage.getItem('theme') || 'dark';
-document.documentElement.setAttribute('data-theme', _saved);
-const _nl = document.getElementById('nav-logo');
-if (_nl) _nl.src = _saved === 'dark' ? 'logo-dark.png' : 'logo-light.png';
-function toggleTheme() {
-  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  const nl = document.getElementById('nav-logo');
-  if (nl) nl.src = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
-  localStorage.setItem('theme', t);
+// ── THEME ──
+const _sv=localStorage.getItem('theme')||'dark';
+document.documentElement.setAttribute('data-theme',_sv);
+const _nl=document.getElementById('nav-logo');
+if(_nl) _nl.src=_sv==='dark'?'logo-dark.png':'logo-light.png';
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  const nl=document.getElementById('nav-logo');
+  if(nl) nl.src=t==='dark'?'logo-dark.png':'logo-light.png';
+  localStorage.setItem('theme',t);
 }
+
+render();
 </script>
 </body>
 </html>
