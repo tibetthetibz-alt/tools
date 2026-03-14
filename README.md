@@ -1,4 +1,4 @@
-# 🛠️ Tibet's Tools
+# Tools
 
 A personal collection of client-side developer utilities. Everything runs entirely in your browser — no data is sent to any server.
 
