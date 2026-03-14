@@ -35,7 +35,9 @@
     --nav-bg: rgba(244,244,248,0.92);
     --grid-color: rgba(0,153,204,0.04);
   }
+</style>
 
+<style>
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
 
   body::before {
@@ -48,66 +50,49 @@
 
   .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
 
-  /* NAV */
   nav {
     position: sticky; top: 0; z-index: 50;
-    background: var(--nav-bg);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 24px;
+    background: var(--nav-bg); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border); padding: 12px 24px;
     display: flex; align-items: center; justify-content: space-between;
     transition: background 0.3s, border-color 0.3s;
   }
-
   .nav-left { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-
   .nav-logo-img { width: 32px; height: 32px; object-fit: contain; }
-
   .nav-right { display: flex; align-items: center; gap: 14px; }
-
   .nav-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--text2); text-transform: uppercase; }
 
-  /* THEME TOGGLE */
   .theme-toggle {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg3);
-    color: var(--text2);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-    flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--text2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
   }
   .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-  .icon-sun { display: none; }
-  .icon-moon { display: block; }
+  .icon-sun { display: none; } .icon-moon { display: block; }
   [data-theme="light"] .icon-sun { display: block; }
   [data-theme="light"] .icon-moon { display: none; }
 
-  /* HERO */
   .hero { padding: 80px 0 64px; text-align: center; }
   .hero-logo { width: 72px; height: 72px; margin: 0 auto 24px; display: block; object-fit: contain; }
   .hero-eyebrow { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
   .hero h1 {
     font-family: 'Big Shoulders Display', sans-serif;
-    font-size: clamp(56px, 12vw, 120px);
-    font-weight: 900; line-height: 0.9; letter-spacing: -2px;
+    font-size: clamp(56px, 12vw, 120px); font-weight: 900; line-height: 0.9; letter-spacing: -2px;
     background: linear-gradient(135deg, var(--text) 40%, var(--accent) 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     margin-bottom: 24px;
   }
   .hero p { font-size: 13px; color: var(--text2); max-width: 380px; margin: 0 auto; line-height: 1.7; }
+</style>
 
-  /* SECTION HDR */
+<style>
   .section-hdr { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
   .section-hdr span { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text2); white-space: nowrap; }
   .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* GRID */
   .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
 
-  /* CARD */
   .tool-card {
     background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 28px;
     text-decoration: none; color: inherit;
@@ -132,7 +117,6 @@
   .tool-arrow { position: absolute; top: 28px; right: 28px; color: var(--border); transition: color 0.2s, transform 0.2s; }
   .tool-card:hover .tool-arrow { color: var(--accent); transform: translate(2px, -2px); }
 
-  /* FOOTER */
   footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--text2); }
   footer a { color: var(--accent); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
@@ -164,6 +148,7 @@
   <div class="section-hdr"><span>all tools</span></div>
 
   <div class="tools-grid">
+
     <a class="tool-card" href="fonts.html">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       <div class="tool-icon">𝐀</div>
@@ -193,11 +178,10 @@
       </div>
       <div class="tool-tags"><span class="tag">pdf</span><span class="tag">html</span><span class="tag">converter</span></div>
     </a>
-  </div>
 
     <a class="tool-card" href="calculator.html">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="14" y2="18"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">FX-991CW</div>
         <div class="tool-desc">Casio ClassWiz calculator simulator with history panel, copy results, and keyboard + paste support.</div>
@@ -205,17 +189,7 @@
       <div class="tool-tags"><span class="tag">calculator</span><span class="tag">casio</span><span class="tag">maths</span></div>
     </a>
 
-    <a class="tool-card" href="noter.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6aff7e" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Noter</div>
-        <div class="tool-desc">Local markdown-style notepad with multiple notes, search, word count, and .txt export. Saves to browser storage.</div>
-      </div>
-      <div class="tool-tags"><span class="tag">notes</span><span class="tag">markdown</span><span class="tag">local</span></div>
-    </a>
-
-    <a class="tool-card" href="gmail-automator.html">
+    <a class="tool-card" href="https://gmail-automator.onrender.com" target="_blank" rel="noopener">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
       <div class="tool-info">
@@ -225,9 +199,28 @@
       <div class="tool-tags"><span class="tag">gmail</span><span class="tag">scheduler</span><span class="tag">oauth</span><span class="tag" style="color:var(--green);border-color:var(--green)">server-side</span></div>
     </a>
 
+    <div class="tool-card" onclick="openSketcher()">
+      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6aff7e" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+      <div class="tool-info">
+        <div class="tool-name">Sketcher</div>
+        <div class="tool-desc">A canvas drawing tool for quick sketches and diagrams, right in your browser.</div>
+      </div>
+      <div class="tool-tags"><span class="tag">drawing</span><span class="tag">canvas</span><span class="tag">design</span></div>
+    </div>
+
   </div>
 
   <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a> · All tools run entirely client-side</footer>
+</div>
+
+<!-- Sketcher Panel -->
+<div id="sketcher-panel" style="display:none; position:fixed; inset:0; z-index:200; background:var(--bg); flex-direction:column;">
+  <div style="display:flex; align-items:center; gap:16px; padding:10px 20px; background:rgba(14,14,18,0.95); border-bottom:1px solid var(--border); backdrop-filter:blur(14px);">
+    <span style="font-family:'Big Shoulders Display',sans-serif; font-size:18px; font-weight:900; background:linear-gradient(90deg,var(--accent),var(--green)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">SKETCHER</span>
+    <button onclick="closeSketcher()" style="margin-left:auto; background:var(--bg3); border:1px solid var(--border); color:var(--text2); padding:6px 14px; border-radius:8px; cursor:pointer; font-family:'DM Mono',monospace; font-size:12px;">✕ Close</button>
+  </div>
+  <iframe id="sketcher-iframe" src="" style="flex:1; border:none; width:100%; height:100%;"></iframe>
 </div>
 
 <script>
@@ -239,13 +232,23 @@
 
   function setTheme(t) {
     html.setAttribute('data-theme', t);
-    navLogo.src  = t === 'dark' ? 'logo-dark.png'  : 'logo-light.png';
-    heroLogo.src = t === 'dark' ? 'logo-dark.png'  : 'logo-light.png';
+    navLogo.src  = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
+    heroLogo.src = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
     localStorage.setItem('theme', t);
   }
-
   function toggleTheme() {
     setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  function openSketcher() {
+    const panel = document.getElementById('sketcher-panel');
+    const iframe = document.getElementById('sketcher-iframe');
+    if (!iframe.src || iframe.src === window.location.href) iframe.src = 'Sketcher.html';
+    panel.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSketcher() {
+    document.getElementById('sketcher-panel').style.display = 'none';
+    document.body.style.overflow = '';
   }
 </script>
 </body>
