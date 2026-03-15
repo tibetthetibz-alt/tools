@@ -11,12 +11,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg:#0e0e12; --bg2:#16161c; --bg3:#1c1c24; --border:#2a2a38;
-    --text:#f0f0ff; --text2:#7070a0; --accent:#01c6f1; --green:#6aff7e;
+    --text:#f0f0ff; --text2:#7070a0;
+    --accent:#01c6f1; --accent2:#1BD3D6; --accent3:#27DEC4; --green:#6AFF7E; --teal:#46EDA5;
     --nav-bg:rgba(14,14,18,0.92); --grid-color:rgba(1,198,241,0.025);
   }
   [data-theme="light"] {
     --bg:#f4f4f8; --bg2:#ffffff; --bg3:#ebebf2; --border:#d0d0e0;
-    --text:#0e0e1a; --text2:#6060a0; --accent:#0099cc; --green:#22a83a;
+    --text:#0e0e1a; --text2:#6060a0;
+    --accent:#0099cc; --accent2:#1aacb0; --accent3:#1dbfa0; --green:#22a83a; --teal:#2db87a;
     --nav-bg:rgba(244,244,248,0.92); --grid-color:rgba(0,153,204,0.04);
   }
   html,body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; overflow-x:hidden; transition:background .3s,color .3s; }
@@ -32,8 +34,20 @@
   .icon-sun{display:none} .icon-moon{display:block}
   [data-theme="light"] .icon-sun{display:block} [data-theme="light"] .icon-moon{display:none}
   .hero { padding:80px 0 64px; text-align:center; }
+  /* Fix flash: hide logos until JS applies correct theme src */
+  .hero-logo, .nav-logo-img { visibility:hidden; }
   .hero-logo { width:72px; height:72px; margin:0 auto 24px; display:block; object-fit:contain; }
-  .hero h1 { font-family:'Big Shoulders Display',sans-serif; font-size:clamp(56px,12vw,120px); font-weight:900; line-height:.9; letter-spacing:-2px; background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:24px; }
+  .hero h1 {
+    font-family:'Big Shoulders Display',sans-serif;
+    font-size:clamp(56px,12vw,120px); font-weight:900; line-height:.9; letter-spacing:-2px;
+    background:linear-gradient(135deg, #6AFF7E 0%, #27DEC4 35%, #01c6f1 65%, #00007E 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:24px;
+  }
+  [data-theme="light"] .hero h1 {
+    background:linear-gradient(135deg, #22a83a 0%, #1dbfa0 35%, #0099cc 65%, #000066 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
   .section-hdr { display:flex; align-items:center; gap:16px; margin-bottom:28px; }
   .section-hdr span { font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--text2); white-space:nowrap; }
   .section-hdr::after { content:''; flex:1; height:1px; background:var(--border); }
@@ -57,8 +71,8 @@
 </head>
 <body>
 <nav>
-  <a class="nav-left" href="index.html">
-    <img class="nav-logo-img" id="nav-logo" src="logo-dark.png" alt="Logo"/>
+  <a class="nav-left" href="/">
+    <img class="nav-logo-img" id="nav-logo" src="" alt="Logo"/>
   </a>
   <div class="nav-right">
     <span class="nav-tag">dev utilities</span>
@@ -70,15 +84,15 @@
 </nav>
 <div class="wrap">
   <section class="hero">
-    <img class="hero-logo" id="hero-logo" src="logo-dark.png" alt="Tibet's Tools Logo"/>
+    <img class="hero-logo" id="hero-logo" src="" alt="Tibet's Tools Logo"/>
     <h1>TOOLS</h1>
   </section>
   <div class="section-hdr"><span>all tools</span></div>
   <div class="tools-grid">
 
-    <a class="tool-card" href="gridfinity-editor.html">
+    <a class="tool-card" href="/gridfinity-editor">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6aff7e" stroke-width="1.8"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">Gridfinity</div>
         <div class="tool-desc">Full gridfinity generator — design baseplates and boxes, configure grid layouts, export STL-ready models.</div>
@@ -86,9 +100,9 @@
       <div class="tool-tags"><span class="tag">3d printing</span><span class="tag">gridfinity</span><span class="tag">generator</span></div>
     </a>
 
-    <a class="tool-card" href="fonts.html">
+    <a class="tool-card" href="/fonts">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon">𝐀</div>
+      <div class="tool-icon" style="color:#46EDA5;font-size:20px;">𝐀</div>
       <div class="tool-info">
         <div class="tool-name">Font Picker</div>
         <div class="tool-desc">Browse 100+ Google Fonts by category, preview them live, multi-select and copy @import links instantly.</div>
@@ -96,7 +110,7 @@
       <div class="tool-tags"><span class="tag">typography</span><span class="tag">google fonts</span><span class="tag">css</span></div>
     </a>
 
-    <a class="tool-card" href="har-separator.html">
+    <a class="tool-card" href="/har-separator">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
       <div class="tool-info">
@@ -106,9 +120,9 @@
       <div class="tool-tags"><span class="tag">network</span><span class="tag">devtools</span><span class="tag">har</span></div>
     </a>
 
-    <a class="tool-card" href="html-to-pdf.html">
+    <a class="tool-card" href="/html-to-pdf">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6aff7e" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2l2 4 2-8 2 6h2"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27DEC4" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2l2 4 2-8 2 6h2"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">HTML → PDF</div>
         <div class="tool-desc">Paste or write HTML and convert it to a downloadable PDF in-browser using html2canvas and jsPDF.</div>
@@ -116,9 +130,9 @@
       <div class="tool-tags"><span class="tag">pdf</span><span class="tag">html</span><span class="tag">converter</span></div>
     </a>
 
-    <a class="tool-card" href="calculator.html">
+    <a class="tool-card" href="/calculator">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1BD3D6" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">Scientific Calculator</div>
         <div class="tool-desc">Full-featured scientific calculator with trig, logarithms, exponents, history panel, and keyboard support.</div>
@@ -126,9 +140,9 @@
       <div class="tool-tags"><span class="tag">calculator</span><span class="tag">scientific</span><span class="tag">maths</span></div>
     </a>
 
-    <a class="tool-card" href="https://gmail-automator.onrender.com">
+    <a class="tool-card" href="https://gmail-automator.onrender.com" target="_blank">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#46EDA5" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">Gmail Automator</div>
         <div class="tool-desc">Schedule and automate Gmail sends via OAuth. Daily times, repeating intervals, or bulk-import from a .txt file.</div>
@@ -138,10 +152,10 @@
 
     <div class="tool-card" onclick="openSketcher()">
       <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6aff7e" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
       <div class="tool-info">
         <div class="tool-name">Sketcher</div>
-        <div class="tool-desc">CAD-style canvas drawing tool with snap, constraints, dimensions, and export to PNG/SVG/PDF.</div>
+        <div class="tool-desc">CAD-style canvas drawing tool with snap, constraints, dimensions, and export to PNG/SVG.</div>
       </div>
       <div class="tool-tags"><span class="tag">drawing</span><span class="tag">cad</span><span class="tag">design</span></div>
     </div>
@@ -156,13 +170,62 @@
 </div>
 
 <script>
-  const html=document.documentElement,navLogo=document.getElementById('nav-logo'),heroLogo=document.getElementById('hero-logo');
-  const saved=localStorage.getItem('theme')||'dark';setTheme(saved);
-  function setTheme(t){html.setAttribute('data-theme',t);navLogo.src=heroLogo.src=t==='dark'?'logo-dark.png':'logo-light.png';localStorage.setItem('theme',t);}
+  const html=document.documentElement;
+  const navLogo=document.getElementById('nav-logo');
+  const heroLogo=document.getElementById('hero-logo');
+
+  // Apply theme immediately — logos start src="" and visibility:hidden to avoid flash
+  const saved=localStorage.getItem('theme')||'dark';
+  setTheme(saved);
+
+  function setTheme(t){
+    html.setAttribute('data-theme',t);
+    const src=t==='dark'?'logo-dark.png':'logo-light.png';
+    navLogo.src=heroLogo.src=src;
+    navLogo.style.visibility='visible';
+    heroLogo.style.visibility='visible';
+    localStorage.setItem('theme',t);
+  }
   function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
-  function openSketcher(){const p=document.getElementById('sketcher-panel'),f=document.getElementById('sketcher-iframe');if(!f.src||f.src===location.href)f.src='Sketcher.html';p.style.display='flex';document.body.style.overflow='hidden';}
-  function closeSketcher(){document.getElementById('sketcher-panel').style.display='none';document.body.style.overflow='';}
+
+  // Clean URLs — rewrite /gridfinity-editor → gridfinity-editor.html internally
+  const urlMap={
+    '/gridfinity-editor':'gridfinity-editor.html',
+    '/fonts':'fonts.html',
+    '/har-separator':'har-separator.html',
+    '/html-to-pdf':'html-to-pdf.html',
+    '/calculator':'calculator.html',
+    '/sketcher':'Sketcher.html',
+  };
+  document.querySelectorAll('a.tool-card[href^="/"]').forEach(a=>{
+    const clean=a.getAttribute('href');
+    const real=urlMap[clean];
+    if(real){
+      a.addEventListener('click',e=>{
+        e.preventDefault();
+        window.history.pushState({},'',clean);
+        window.location.href=real;
+      });
+    }
+  });
+
+  function openSketcher(){
+    const p=document.getElementById('sketcher-panel');
+    const f=document.getElementById('sketcher-iframe');
+    if(!f.src||f.src===location.href)f.src='Sketcher.html';
+    p.style.display='flex';
+    document.body.style.overflow='hidden';
+    window.history.pushState({},'','/sketcher');
+  }
+  function closeSketcher(){
+    document.getElementById('sketcher-panel').style.display='none';
+    document.body.style.overflow='';
+    window.history.pushState({},'','/');
+  }
   window.addEventListener('message',e=>{if(e.data==='closeSketcher')closeSketcher();});
+  window.addEventListener('popstate',()=>{
+    if(document.getElementById('sketcher-panel').style.display!=='none')closeSketcher();
+  });
 </script>
 </body>
 </html>
