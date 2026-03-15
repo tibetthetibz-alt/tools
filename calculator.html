@@ -5,39 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Scientific Calculator — Tibet's Tools</title>
 <link rel="icon" type="image/png" href="logo-light.png"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#0e0e12;--bg2:#16161c;--bg3:#1c1c24;--border:#2a2a38;
   --text:#f0f0ff;--text2:#7070a0;--accent:#01c6f1;--green:#6aff7e;
-  --nav-bg:rgba(14,14,18,0.92);--grid:rgba(1,198,241,0.025);
+  --nav-bg:rgba(14,14,18,0.92);--grid-color:rgba(1,198,241,0.025);
+  --btn-num:#1a1a24;--btn-num-h:#22222e;
+  --btn-op:#141420;--btn-op-h:#1c1c2c;
+  --btn-fn:#101018;--btn-fn-h:#181826;
+  --btn-eq-from:#01c6f1;--btn-eq-to:#00a8cc;
 }
 [data-theme="light"]{
-  --bg:#f0f0f4;--bg2:#ffffff;--bg3:#e8e8f0;--border:#d0d0e0;
+  --bg:#f4f4f8;--bg2:#ffffff;--bg3:#ebebf2;--border:#d0d0e0;
   --text:#0e0e1a;--text2:#6060a0;--accent:#0099cc;--green:#22a83a;
-  --nav-bg:rgba(240,240,244,0.92);--grid:rgba(0,153,204,0.04);
+  --nav-bg:rgba(244,244,248,0.92);--grid-color:rgba(0,153,204,0.04);
+  --btn-num:#e8e8f0;--btn-num-h:#dcdcea;
+  --btn-op:#dde0f0;--btn-op-h:#d0d4e8;
+  --btn-fn:#e0e8f4;--btn-fn-h:#d4dced;
+  --btn-eq-from:#0099cc;--btn-eq-to:#007aaa;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;transition:background .3s,color .3s}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
-
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 /* NAV */
-nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
-.nav-left{display:flex;align-items:center;gap:12px;text-decoration:none}
-.nav-logo-img{width:30px;height:30px;object-fit:contain}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-tag{font-size:10px;letter-spacing:.2em;color:var(--text2);text-transform:uppercase}
-.theme-toggle{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;transition:background .3s,border-color .3s;}
+.nav-left{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;}
+.nav-logo-img{width:32px;height:32px;object-fit:contain;}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.nav-tag{font-size:10px;letter-spacing:.2em;color:var(--text2);text-transform:uppercase;}
+.theme-toggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
 .icon-sun{display:none}.icon-moon{display:block}
 [data-theme="light"] .icon-sun{display:block}[data-theme="light"] .icon-moon{display:none}
-
-/* PAGE */
-.page{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:36px 24px 80px}
-.page-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(28px,5vw,48px);font-weight:900;background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
-.page-sub{font-size:11px;color:var(--text2);margin-bottom:28px}
-.layout{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start}
-@media(max-width:780px){.layout{grid-template-columns:1fr;justify-items:center}}
+/* LAYOUT */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px 100px;}
+.page-hdr{padding:48px 0 32px;}
+.page-hdr-top{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+.back-btn{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--text2);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;}
+.back-btn:hover{color:var(--accent);}
+.page-title{font-family:'Big Shoulders Display',sans-serif;font-size:clamp(32px,8vw,72px);font-weight:900;line-height:.9;letter-spacing:-1px;background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:11px;color:var(--text2);margin-top:10px;letter-spacing:.05em;}
+.section-hdr{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.section-hdr span{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text2);white-space:nowrap;}
+.section-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
+/* CALCULATOR SHELL */
+.calc-outer{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:24px;max-width:520px;}
+/* MODE BAR */
+.mode-bar{display:flex;gap:6px;align-items:center;margin-bottom:14px;}
+.mode-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;padding:5px 12px;cursor:pointer;transition:all .2s;letter-spacing:.08em;text-transform:uppercase;}
+.mode-btn.active{background:rgba(1,198,241,0.12);border-color:var(--accent);color:var(--accent);}
+.mode-btn:hover:not(.active){border-color:var(--text2);}
+.angle-btn{margin-left:auto;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:'DM Mono',monospace;font-size:10px;padding:5px 12px;cursor:pointer;transition:all .2s;letter-spacing:.08em;}
+.angle-btn:hover{border-color:var(--text2);}
+.angle-btn.rad{border-color:var(--green);color:var(--green);background:rgba(106,255,126,0.08);}
+/* DISPLAY */
+.display{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px 20px 14px;margin-bottom:14px;min-height:130px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;}
+.display::before{content:'FX-991EX';position:absolute;top:10px;left:14px;font-size:9px;letter-spacing:.25em;color:var(--text2);opacity:.4;text-transform:uppercase;}
+.hist-line{font-size:11px;color:var(--text2);text-align:right;min-height:16px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.expr-line{font-size:13px;color:var(--text2);text-align:right;min-height:18px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.main-num{font-size:44px;font-weight:300;color:var(--text);text-align:right;letter-spacing:-1px;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:font-size .1s;}
+.main-num.sm{font-size:30px;}
+.main-num.xs{font-size:20px;}
+.display-flags{display:flex;gap:8px;margin-top:8px;}
+.dflag{font-size:9px;padding:2px 6px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);letter-spacing:.08em;opacity:.6;}
+.dflag.on{opacity:1;border-color:var(--accent);color:var(--accent);}
+/* BUTTON GRIDS */
+.sci-rows{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .3s ease,margin .3s ease;margin-bottom:0;}
+.sci-rows.open{max-height:300px;opacity:1;margin-bottom:10px;}
+.btn-row{display:grid;gap:6px;margin-bottom:6px;}
+.r5{grid-template-columns:repeat(5,1fr);}
+.r4{grid-template-columns:repeat(4,1fr);}
+.basic-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+/* BUTTONS */
+.btn{border:none;border-radius:10px;font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;height:52px;display:flex;align-items:center;justify-content:center;transition:transform .08s,filter .1s,background .15s;position:relative;user-select:none;-webkit-tap-highlight-color:transparent;flex-direction:column;gap:1px;}
+.btn:active{transform:scale(0.92);}
+.btn sub{font-size:8px;opacity:.6;}
+/* Number */
+.bn{background:var(--btn-num);color:var(--text);font-size:18px;}
+.bn:hover{background:var(--btn-num-h);}
+/* Operator */
+.bo{background:var(--btn-op);color:var(--accent);font-size:18px;}
+.bo:hover{background:var(--btn-op-h);}
+/* Function / shift */
+.bf{background:var(--btn-fn);color:var(--text2);font-size:11px;height:40px;border-radius:8px;}
+.bf:hover{background:var(--btn-fn-h);color:var(--text);}
+.bf.hi{color:var(--accent);}
+.bf.gr{color:var(--green);}
+/* Equals */
+.be{background:linear-gradient(135deg,var(--btn-eq-from),var(--btn-eq-to));color:#fff;font-size:22px;box-shadow:0 4px 18px rgba(1,198,241,0.25);}
+.be:hover{filter:brightness(1.12);}
+/* Clear */
+.bc{background:rgba(255,80,80,0.1);color:#ff6060;font-size:14px;}
+.bc:hover{background:rgba(255,80,80,0.18);}
+/* Del */
+.bd{background:var(--btn-fn);color:var(--text2);}
+.bd:hover{background:var(--btn-fn-h);}
+/* Span 2 */
+.s2{grid-column:span 2;}
+/* footer */
+footer{margin-top:80px;padding-top:28px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--text2);}
+footer a{color:var(--accent);text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+/* STAT TABLE */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:340px;max-height:80vh;overflow-y:auto;}
+.modal h2{font-family:'Big Shoulders Display',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;}
+.modal input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:8px 12px;margin-bottom:8px;}
+.modal input:focus{outline:none;border-color:var(--accent);}
+.modal .mrow{display:flex;gap:8px;margin-bottom:8px;}
+.modal .mrow button{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:8px;cursor:pointer;transition:all .2s;}
+.modal .mrow button:hover{border-color:var(--accent);color:var(--accent);}
+.modal .mrow button.primary{background:var(--accent);color:#000;border-color:var(--accent);}
+.stat-result{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;font-size:12px;line-height:1.8;}
+.stat-result span{color:var(--accent);}
 </style>
 </head>
 <body>
@@ -48,582 +131,511 @@ nav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:bl
   <div class="nav-right">
     <span class="nav-tag">scientific calculator</span>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
   </div>
 </nav>
-<div class="page">
-  <div class="page-title">Scientific Calculator</div>
-  <div class="page-sub">Trig · Logarithms · Exponents · History panel · Keyboard + paste support</div>
-  <div class="layout">
-    <div id="calc-root"></div>
-    <div id="hist-root"></div>
+
+<div class="wrap">
+  <div class="page-hdr">
+    <div class="page-hdr-top">
+      <a class="back-btn" href="index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        All Tools
+      </a>
+    </div>
+    <div class="page-title">CALCULATOR</div>
+    <div class="page-sub">FX-991EX ClassWiz — 552 functions &nbsp;·&nbsp; DEG / RAD / GRAD &nbsp;·&nbsp; Statistics &nbsp;·&nbsp; Complex &nbsp;·&nbsp; Base-N &nbsp;·&nbsp; Equations</div>
   </div>
+
+  <div class="section-hdr"><span>fx-991ex classwiz</span></div>
+
+  <div class="calc-outer">
+
+    <div class="mode-bar">
+      <button class="mode-btn active" onclick="setMode('calc')">Calc</button>
+      <button class="mode-btn" onclick="setMode('stat')">Stat</button>
+      <button class="mode-btn" onclick="setMode('complex')">Cmplx</button>
+      <button class="mode-btn" onclick="setMode('base')">Base-N</button>
+      <button class="mode-btn" onclick="setMode('eqn')">Eqn</button>
+      <button class="angle-btn" id="angleBtn" onclick="cycleAngle()">DEG</button>
+    </div>
+
+    <div class="display">
+      <div class="hist-line" id="histLine"></div>
+      <div class="expr-line" id="exprLine"></div>
+      <div class="main-num" id="mainNum">0</div>
+      <div class="display-flags">
+        <span class="dflag" id="flagMode">COMP</span>
+        <span class="dflag" id="flagAngle">D</span>
+        <span class="dflag" id="flagShift">S</span>
+        <span class="dflag" id="flagAlpha">A</span>
+      </div>
+    </div>
+
+    <!-- Scientific rows (shown when mode = calc + sci toggled) -->
+    <div class="sci-rows" id="sciRows">
+      <div class="btn-row r5">
+        <button class="btn bf hi" onclick="sf('sin')">sin</button>
+        <button class="btn bf hi" onclick="sf('cos')">cos</button>
+        <button class="btn bf hi" onclick="sf('tan')">tan</button>
+        <button class="btn bf hi" onclick="sf('asin')">sin⁻¹</button>
+        <button class="btn bf hi" onclick="sf('acos')">cos⁻¹</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf hi" onclick="sf('atan')">tan⁻¹</button>
+        <button class="btn bf hi" onclick="sf('sinh')">sinh</button>
+        <button class="btn bf hi" onclick="sf('cosh')">cosh</button>
+        <button class="btn bf hi" onclick="sf('tanh')">tanh</button>
+        <button class="btn bf hi" onclick="sf('asinh')">sinh⁻¹</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf hi" onclick="sf('acosh')">cosh⁻¹</button>
+        <button class="btn bf hi" onclick="sf('atanh')">tanh⁻¹</button>
+        <button class="btn bf gr" onclick="sf('log')">log</button>
+        <button class="btn bf gr" onclick="sf('ln')">ln</button>
+        <button class="btn bf gr" onclick="sf('log2')">log₂</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf gr" onclick="sf('10x')">10ˣ</button>
+        <button class="btn bf gr" onclick="sf('ex')">eˣ</button>
+        <button class="btn bf gr" onclick="sf('sqrt')">√</button>
+        <button class="btn bf gr" onclick="sf('cbrt')">∛</button>
+        <button class="btn bf gr" onclick="sf('sq')">x²</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf gr" onclick="sf('cube')">x³</button>
+        <button class="btn bf gr" onclick="inputOp('^')">xʸ</button>
+        <button class="btn bf" onclick="sf('inv')">x⁻¹</button>
+        <button class="btn bf" onclick="sf('abs')">|x|</button>
+        <button class="btn bf" onclick="sf('nPr')">nPr</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf" onclick="sf('nCr')">nCr</button>
+        <button class="btn bf" onclick="sf('fact')">x!</button>
+        <button class="btn bf" onclick="sf('pi')">π</button>
+        <button class="btn bf" onclick="sf('e_const')">e</button>
+        <button class="btn bf" onclick="sf('rand')">Rnd</button>
+      </div>
+      <div class="btn-row r5">
+        <button class="btn bf" onclick="sf('gcd')">GCD</button>
+        <button class="btn bf" onclick="sf('lcm')">LCM</button>
+        <button class="btn bf" onclick="sf('int')">Int</button>
+        <button class="btn bf" onclick="sf('intg')">Intg</button>
+        <button class="btn bf" onclick="sf('frac')">Frac</button>
+      </div>
+    </div>
+
+    <!-- Basic grid -->
+    <div class="basic-grid">
+      <button class="btn bc" onclick="clearAll()">AC</button>
+      <button class="btn bd" onclick="toggleSci()">SCI</button>
+      <button class="btn bo" onclick="pct()">%</button>
+      <button class="btn bo" onclick="inputOp('/')">÷</button>
+
+      <button class="btn bn" onclick="dig('7')">7</button>
+      <button class="btn bn" onclick="dig('8')">8</button>
+      <button class="btn bn" onclick="dig('9')">9</button>
+      <button class="btn bo" onclick="inputOp('*')">×</button>
+
+      <button class="btn bn" onclick="dig('4')">4</button>
+      <button class="btn bn" onclick="dig('5')">5</button>
+      <button class="btn bn" onclick="dig('6')">6</button>
+      <button class="btn bo" onclick="inputOp('-')">−</button>
+
+      <button class="btn bn" onclick="dig('1')">1</button>
+      <button class="btn bn" onclick="dig('2')">2</button>
+      <button class="btn bn" onclick="dig('3')">3</button>
+      <button class="btn bo" onclick="inputOp('+')">+</button>
+
+      <button class="btn bn" onclick="toggleSign()">+/−</button>
+      <button class="btn bn" onclick="dig('0')">0</button>
+      <button class="btn bn" onclick="dot()">.</button>
+      <button class="btn be" onclick="calc()">=</button>
+    </div>
+
+    <!-- Complex mode extra -->
+    <div id="complexExtra" style="display:none;margin-top:10px;">
+      <div class="btn-row r5">
+        <button class="btn bf hi" onclick="sf('re')">Re</button>
+        <button class="btn bf hi" onclick="sf('im')">Im</button>
+        <button class="btn bf hi" onclick="sf('conj')">Conj</button>
+        <button class="btn bf hi" onclick="sf('arg')">Arg</button>
+        <button class="btn bf hi" onclick="sf('cabs')">|z|</button>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text2);">Enter complex as: <span style="color:var(--accent)">a+bi</span> — use i button:</div>
+      <div class="btn-row r5" style="margin-top:6px;">
+        <button class="btn bf gr" onclick="insertI()">i</button>
+        <button class="btn bf" onclick="sf('polar')">→Pol</button>
+        <button class="btn bf" onclick="sf('rect')">→Rec</button>
+        <button class="btn bf" onclick="">∠</button>
+        <button class="btn bf" onclick=""></button>
+      </div>
+    </div>
+
+    <!-- Base-N mode extra -->
+    <div id="baseExtra" style="display:none;margin-top:10px;">
+      <div class="btn-row r4">
+        <button class="btn bf hi" id="baseHex" onclick="setBase(16)">HEX</button>
+        <button class="btn bf hi active" id="baseDec" onclick="setBase(10)">DEC</button>
+        <button class="btn bf hi" id="baseOct" onclick="setBase(8)">OCT</button>
+        <button class="btn bf hi" id="baseBin" onclick="setBase(2)">BIN</button>
+      </div>
+      <div class="btn-row r4" style="margin-top:6px;" id="hexBtns">
+        <button class="btn bf" onclick="dig('A')">A</button>
+        <button class="btn bf" onclick="dig('B')">B</button>
+        <button class="btn bf" onclick="dig('C')">C</button>
+        <button class="btn bf" onclick="dig('D')">D</button>
+      </div>
+      <div class="btn-row r4" id="hexBtns2">
+        <button class="btn bf" onclick="dig('E')">E</button>
+        <button class="btn bf" onclick="dig('F')">F</button>
+        <button class="btn bf hi" onclick="baseOp('AND')">AND</button>
+        <button class="btn bf hi" onclick="baseOp('OR')">OR</button>
+      </div>
+      <div class="btn-row r4" id="hexBtns3">
+        <button class="btn bf hi" onclick="baseOp('XOR')">XOR</button>
+        <button class="btn bf hi" onclick="baseOp('XNOR')">XNOR</button>
+        <button class="btn bf hi" onclick="baseOp('NOT')">NOT</button>
+        <button class="btn bf hi" onclick="baseOp('NEG')">NEG</button>
+      </div>
+    </div>
+
+    <!-- Equation solver mode -->
+    <div id="eqnExtra" style="display:none;margin-top:10px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Simultaneous / Polynomial equations</div>
+      <div class="btn-row r4">
+        <button class="btn bf hi" onclick="openEqnSolver(2,'sim')">2 Unknown</button>
+        <button class="btn bf hi" onclick="openEqnSolver(3,'sim')">3 Unknown</button>
+        <button class="btn bf gr" onclick="openEqnSolver(2,'poly')">Quadratic</button>
+        <button class="btn bf gr" onclick="openEqnSolver(3,'poly')">Cubic</button>
+      </div>
+    </div>
+
+  </div><!-- /calc-outer -->
+
+  <!-- STAT MODAL -->
+  <div class="modal-bg" id="statModal">
+    <div class="modal">
+      <h2>Statistics</h2>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Enter values separated by commas or new lines</div>
+      <textarea id="statInput" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:10px;height:90px;resize:none;" placeholder="e.g. 5, 10, 15, 20"></textarea>
+      <div class="mrow"><button onclick="calcStats()">Calculate</button><button class="primary" onclick="closeModal('statModal')">Close</button></div>
+      <div class="stat-result" id="statResult" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- EQUATION SOLVER MODAL -->
+  <div class="modal-bg" id="eqnModal">
+    <div class="modal">
+      <h2 id="eqnTitle">Equation Solver</h2>
+      <div id="eqnFields"></div>
+      <div class="mrow" style="margin-top:10px;"><button onclick="solveEqn()">Solve</button><button class="primary" onclick="closeModal('eqnModal')">Close</button></div>
+      <div class="stat-result" id="eqnResult" style="display:none;"></div>
+    </div>
+  </div>
+
+  <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></footer>
 </div>
-
-<!-- CALCULATOR STYLES - faithful FX-991CW recreation -->
-<style>
-/* ═══ CASIO BODY ═══ */
-.fx991cw {
-  width: 290px;
-  background: #f2f2f2;
-  border-radius: 12px 12px 40px 40px;
-  padding: 0;
-  box-shadow:
-    0 0 0 1px #c8c8c8,
-    0 4px 0 1px #b0b0b0,
-    0 8px 2px rgba(0,0,0,.25),
-    0 16px 40px rgba(0,0,0,.35);
-  position: relative;
-  font-family: 'Roboto', Arial, sans-serif;
-  overflow: hidden;
-}
-
-/* Top navy banner */
-.fx-top-banner {
-  background: linear-gradient(180deg, #1a2a6c 0%, #0f1a50 100%);
-  padding: 10px 14px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-.fx-brand-left { display: flex; flex-direction: column; gap: 1px; }
-.fx-casio-text {
-  font-size: 22px; font-weight: 900; letter-spacing: 3px;
-  color: #fff; font-family: 'Roboto', Arial, sans-serif; line-height: 1;
-}
-.fx-model-text { font-size: 10px; color: #8fb3ff; letter-spacing: 1.5px; font-weight: 500; }
-.fx-classwiz { font-size: 8px; color: #5588ff; letter-spacing: 1px; }
-.fx-brand-right { text-align: right; }
-.fx-natural { font-size: 7px; color: #aac4ff; letter-spacing: .5px; line-height: 1.5; }
-
-/* Solar strip */
-.fx-solar {
-  background: linear-gradient(90deg, #0a0a0a, #1a2240, #0a0a0a);
-  height: 9px; margin: 0 14px 0;
-  border-radius: 0 0 2px 2px;
-  display: flex; gap: 1px; padding: 1px 2px; overflow: hidden;
-}
-.fx-sc { flex: 1; background: linear-gradient(180deg,#1a3060,#0a1030); border-radius: 1px; }
-
-/* Display area */
-.fx-display-wrap {
-  margin: 8px 10px 6px;
-  background: #c5d8b0;
-  border-radius: 4px;
-  border: 2px solid #8a9e72;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.32), inset 0 0 0 1px rgba(0,0,0,.1);
-  padding: 5px 8px 6px;
-  min-height: 72px;
-  position: relative;
-}
-.fx-disp-indicators {
-  display: flex; gap: 4px; margin-bottom: 2px; flex-wrap: wrap;
-}
-.fx-ind {
-  font-size: 6px; color: #263a10;
-  font-family: 'Roboto', sans-serif; font-weight: 700;
-  opacity: .45; letter-spacing: .3px; line-height: 1;
-  padding: 0 2px; border: .5px solid rgba(38,58,16,.35); border-radius: 1px;
-}
-.fx-ind.lit { opacity: 1; background: rgba(38,58,16,.15); }
-.fx-disp-expr {
-  font-size: 11px; color: #1a2e08;
-  text-align: right; min-height: 15px;
-  word-break: break-all; opacity: .75;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: .2px; line-height: 1.3;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.fx-disp-result {
-  font-size: 24px; color: #0e1e04;
-  text-align: right; font-weight: 400;
-  font-family: 'DM Mono', monospace;
-  min-height: 30px; word-break: break-all;
-  letter-spacing: .5px; line-height: 1.15;
-}
-
-/* Body below display */
-.fx-body { background: #f2f2f2; padding: 4px 10px 18px; }
-
-/* ── Button base ── */
-.fx-btn-grid { display: flex; flex-direction: column; gap: 3px; }
-.fx-row { display: flex; gap: 4px; justify-content: center; align-items: flex-end; }
-
-/* outer wrapper keeps label + button together */
-.bw { display: flex; flex-direction: column; align-items: center; position: relative; }
-
-/* secondary labels above button */
-.sl { /* shift label - yellow */
-  font-size: 5.8px; color: #c8860a; font-weight: 800;
-  font-family: 'Roboto', sans-serif; line-height: 1;
-  margin-bottom: 2px; white-space: nowrap; min-height: 8px;
-  text-align: center; width: 100%;
-}
-.al { /* alpha label - red */
-  position: absolute; top: 0; right: -1px;
-  font-size: 5.5px; color: #c0302a; font-weight: 800;
-  font-family: 'Roboto', sans-serif; line-height: 1;
-  white-space: nowrap;
-}
-
-/* The actual button */
-.b {
-  border: none; cursor: pointer; outline: none;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border-radius: 50%;
-  width: 38px; height: 38px;
-  font-family: 'Roboto', Arial, sans-serif;
-  font-size: 10px; font-weight: 700;
-  line-height: 1.1; text-align: center;
-  position: relative;
-  transition: filter .07s, transform .07s;
-  user-select: none; -webkit-user-select: none;
-}
-.b:active { transform: translateY(2px) scale(.97); filter: brightness(.82); }
-
-/* Sub-label inside button (smaller text below main) */
-.b-sub { font-size: 6px; font-weight: 400; opacity: .75; line-height: 1; margin-top: 1px; }
-
-/* Colour variants */
-/* Dark charcoal - numbers & main ops */
-.bd {
-  background: radial-gradient(ellipse at 40% 30%, #4a4a4a, #1c1c1c);
-  color: #ffffff;
-  box-shadow: 0 3px 0 #0a0a0a, 0 1px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12);
-}
-/* Medium grey - secondary functions */
-.bm {
-  background: radial-gradient(ellipse at 40% 30%, #8a8a8a, #5a5a5a);
-  color: #fff;
-  box-shadow: 0 3px 0 #333, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
-}
-/* Light grey - some function keys */
-.bl {
-  background: radial-gradient(ellipse at 40% 30%, #e0e0e0, #bdbdbd);
-  color: #111;
-  box-shadow: 0 3px 0 #888, 0 1px 3px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.6);
-}
-/* Blue - SHIFT, ALPHA, navigation */
-.bb {
-  background: radial-gradient(ellipse at 40% 30%, #4a7ae0, #2348b8);
-  color: #fff;
-  box-shadow: 0 3px 0 #112090, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.2);
-}
-/* Orange-red = sign */
-.bo {
-  background: radial-gradient(ellipse at 40% 30%, #e86820, #c04408);
-  color: #fff;
-  box-shadow: 0 3px 0 #802000, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.18);
-}
-/* Red - AC/ON */
-.br {
-  background: radial-gradient(ellipse at 40% 30%, #d42020, #a00808);
-  color: #fff;
-  box-shadow: 0 3px 0 #600000, 0 1px 3px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
-}
-/* Pill shapes */
-.bwide  { border-radius: 12px; width: 58px; }
-.bxwide { border-radius: 12px; width: 80px; }
-
-/* Arrow nav cross */
-.fx-nav { display: grid; grid-template-columns: 38px 38px 38px; grid-template-rows: 38px 38px 38px; gap: 3px; }
-.fnb { width: 38px; height: 38px; } /* blank */
-/* Arrow buttons get cut corners */
-.b-up    { border-radius: 8px 8px 50% 50%; }
-.b-down  { border-radius: 50% 50% 8px 8px; }
-.b-left  { border-radius: 50% 8px 8px 50%; }
-.b-right { border-radius: 8px 50% 50% 8px; }
-.b-ok    { border-radius: 50%; }
-</style>
-
-<!-- HISTORY STYLES -->
-<style>
-.hist-panel{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:280px}
-.hist-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.hist-title{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text2)}
-.hbtn{font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
-.hbtn:hover{border-color:var(--accent);color:var(--accent)}
-.hist-list{flex:1;overflow-y:auto;max-height:480px}
-.hist-list::-webkit-scrollbar{width:3px}
-.hist-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.hist-empty{padding:40px 20px;text-align:center;font-size:11px;color:var(--text2);line-height:1.6}
-.hist-item{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
-.hist-item:hover{background:var(--bg3)}
-.hist-item:last-child{border-bottom:none}
-.hi-body{flex:1;min-width:0}
-.hi-expr{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Mono',monospace}
-.hi-result{font-size:16px;color:var(--text);font-weight:600;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hi-copy{opacity:0;font-size:9px;padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s;flex-shrink:0}
-.hist-item:hover .hi-copy{opacity:1}
-.hi-copy:hover{border-color:var(--green);color:var(--green)}
-.hist-hint{padding:8px 18px 12px;font-size:10px;color:var(--text2);text-align:center;border-top:1px solid var(--border)}
-</style>
-
-<!-- BUILD CALCULATOR DOM -->
 <script>
-document.getElementById('calc-root').innerHTML = `
-<div class="fx991cw">
+// ── Theme ──────────────────────────────────────────────────────────────────
+const html=document.documentElement,navLogo=document.getElementById('nav-logo');
+const saved=localStorage.getItem('theme')||'dark';setTheme(saved);
+function setTheme(t){html.setAttribute('data-theme',t);navLogo.src=t==='dark'?'logo-dark.png':'logo-light.png';localStorage.setItem('theme',t);}
+function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
 
-  <!-- TOP NAVY BANNER -->
-  <div class="fx-top-banner">
-    <div class="fx-brand-left">
-      <span class="fx-casio-text">CASIO</span>
-      <span class="fx-model-text">fx-991CW</span>
-      <span class="fx-classwiz">ClassWiz</span>
-    </div>
-    <div class="fx-brand-right">
-      <div class="fx-natural">NATURAL-V.P.A.M.<br/>552 FUNCTIONS</div>
-    </div>
-  </div>
+// ── State ──────────────────────────────────────────────────────────────────
+let cur='0', stored=null, op=null, waiting=false, justCalc=false;
+let exprStr='', angle='DEG', mode='calc', sciOpen=false, base=10;
+let isComplex=false;
 
-  <!-- SOLAR STRIP -->
-  <div class="fx-solar">${Array(16).fill('<div class="fx-sc"></div>').join('')}</div>
+// ── DOM ────────────────────────────────────────────────────────────────────
+const D=id=>document.getElementById(id);
+const mainNum=D('mainNum'),exprLine=D('exprLine'),histLine=D('histLine');
+const flagMode=D('flagMode'),flagAngle=D('flagAngle'),flagShift=D('flagShift'),flagAlpha=D('flagAlpha');
 
-  <!-- DISPLAY -->
-  <div class="fx-display-wrap">
-    <div class="fx-disp-indicators">
-      <span class="fx-ind" id="di-s">S</span>
-      <span class="fx-ind" id="di-a">A</span>
-      <span class="fx-ind" id="di-m">M</span>
-      <span class="fx-ind" id="di-sto">STO</span>
-      <span class="fx-ind" id="di-rcl">RCL</span>
-      <span class="fx-ind" id="di-d">D</span>
-      <span class="fx-ind" id="di-r">R</span>
-      <span class="fx-ind" id="di-g">G</span>
-      <span class="fx-ind" id="di-fix">FIX</span>
-      <span class="fx-ind" id="di-sci">SCI</span>
-    </div>
-    <div class="fx-disp-expr" id="disp-expr"></div>
-    <div class="fx-disp-result" id="disp-ans">0</div>
-  </div>
-
-  <div class="fx-body">
-  <div class="fx-btn-grid">
-
-    <!-- ROW 1: MENU  HOME  UNDO  ON -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">CATALOG</div><button class="b bm" onclick="cp('MENU')" style="font-size:8px;font-weight:900">MENU</button></div>
-      <div class="bw"><div class="sl">RESET</div><button class="b bm" onclick="cp('HOME')" style="font-size:8px;font-weight:900">HOME</button></div>
-      <div class="bw"><div class="sl">INS</div><button class="b bm" onclick="doUndo()" style="font-size:8px;font-weight:900">UNDO</button></div>
-      <div class="bw"><div class="sl">OFF</div><button class="b br" onclick="doClear(true)" style="font-size:10px;font-weight:900;letter-spacing:.5px">ON</button></div>
-    </div>
-
-    <!-- ROW 2: SHIFT  ALPHA  x10^x  Ans -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">&nbsp;</div><button class="b bb" id="btn-shift" onclick="toggleShift()" style="font-size:8px;font-weight:900;letter-spacing:.3px">SHIFT</button></div>
-      <div class="bw"><div class="sl">&nbsp;</div><button class="b bb" id="btn-alpha" onclick="toggleAlpha()" style="font-size:8px;font-weight:900;letter-spacing:.3px">ALPHA</button></div>
-      <div class="bw"><div class="sl">10<sup>x</sup></div><button class="b bd" onclick="appendStr('×10^(')" style="font-size:8px">×10<sup style="font-size:6px">x</sup></button></div>
-      <div class="bw"><div class="sl">DRG▸</div><button class="b bd" onclick="appendAns()" style="font-size:9px;font-weight:900">Ans</button></div>
-    </div>
-
-    <!-- ROW 3: x²  x⁻¹  x!  √ -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">x³</div><button class="b bd" onclick="appendStr('^2')" style="font-size:11px">x²</button></div>
-      <div class="bw"><div class="sl">∛</div><button class="b bd" onclick="appendStr('^(-1)')" style="font-size:11px">x⁻¹</button></div>
-      <div class="bw"><div class="sl">nPr</div><button class="b bd" onclick="appendStr('!')" style="font-size:11px">x!</button></div>
-      <div class="bw"><div class="sl"><sup>x</sup>√</div><button class="b bd" onclick="appendStr('√(')" style="font-size:14px">√</button></div>
-    </div>
-
-    <!-- ROW 4: log  ln  ^  (  ) -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">10<sup>x</sup></div><button class="b bd" onclick="appendStr('log(')" style="font-size:10px">log</button></div>
-      <div class="bw"><div class="sl">e<sup>x</sup></div><button class="b bd" onclick="appendStr('ln(')" style="font-size:10px">ln</button></div>
-      <div class="bw"><div class="sl">Abs</div><button class="b bd" onclick="appendStr('^(')" style="font-size:12px;font-weight:900">^</button></div>
-      <div class="bw"><div class="sl">Pol(</div><button class="b bm" onclick="appendStr('(')" style="font-size:14px;font-weight:700">(</button></div>
-      <div class="bw"><div class="sl">Rec(</div><button class="b bm" onclick="appendStr(')')" style="font-size:14px;font-weight:700">)</button></div>
-    </div>
-
-    <!-- ROW 5: sin  cos  tan  ,  % -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">sin⁻¹</div><button class="b bd" onclick="appendStr('sin(')" style="font-size:10px">sin</button></div>
-      <div class="bw"><div class="sl">cos⁻¹</div><button class="b bd" onclick="appendStr('cos(')" style="font-size:10px">cos</button></div>
-      <div class="bw"><div class="sl">tan⁻¹</div><button class="b bd" onclick="appendStr('tan(')" style="font-size:10px">tan</button></div>
-      <div class="bw"><div class="sl">°'"</div><button class="b bm" onclick="appendStr(',')" style="font-size:12px">,</button></div>
-      <div class="bw"><div class="sl">Ran#</div><button class="b bm" onclick="appendStr('%')" style="font-size:12px">%</button></div>
-    </div>
-
-    <!-- NAVIGATION CROSS -->
-    <div class="fx-row" style="margin:2px 0">
-      <div class="bw"><div class="sl">&nbsp;</div>
-        <div class="fx-nav">
-          <div class="fnb"></div>
-          <button class="b bm b-up" onclick="histUp()" style="font-size:11px">▲</button>
-          <div class="fnb"></div>
-          <button class="b bm b-left" onclick="cursorLeft()" style="font-size:11px">◀</button>
-          <button class="b bl b-ok" onclick="doEquals()" style="font-size:11px;font-weight:900;color:#111">=</button>
-          <button class="b bm b-right" onclick="cursorRight()" style="font-size:11px">▶</button>
-          <div class="fnb"></div>
-          <button class="b bm b-down" onclick="histDown()" style="font-size:11px">▼</button>
-          <div class="fnb"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ROW 6: DEL  AC  ÷  × -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">INS</div><button class="b bm bwide" onclick="doBackspace()" style="font-size:9px;font-weight:900">DEL</button></div>
-      <div class="bw"><div class="sl">CLR</div><button class="b br bwide" onclick="doClear(false)" style="font-size:9px;font-weight:900;letter-spacing:.5px">AC</button></div>
-      <div class="bw"><div class="sl">INTG</div><button class="b bd" onclick="appendStr('/')" style="font-size:15px">÷</button></div>
-      <div class="bw"><div class="sl">d/dx</div><button class="b bd" onclick="appendStr('*')" style="font-size:15px">×</button></div>
-    </div>
-
-    <!-- ROW 7: 7  8  9  − -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">A</div><button class="b bd" onclick="appendNum('7')" style="font-size:16px;font-weight:500">7</button></div>
-      <div class="bw"><div class="sl">B</div><button class="b bd" onclick="appendNum('8')" style="font-size:16px;font-weight:500">8</button></div>
-      <div class="bw"><div class="sl">C</div><button class="b bd" onclick="appendNum('9')" style="font-size:16px;font-weight:500">9</button></div>
-      <div class="bw"><div class="sl">Neg</div><button class="b bd" onclick="appendStr('-')" style="font-size:18px;font-weight:300">−</button></div>
-    </div>
-
-    <!-- ROW 8: 4  5  6  + -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">D</div><button class="b bd" onclick="appendNum('4')" style="font-size:16px;font-weight:500">4</button></div>
-      <div class="bw"><div class="sl">E</div><button class="b bd" onclick="appendNum('5')" style="font-size:16px;font-weight:500">5</button></div>
-      <div class="bw"><div class="sl">F</div><button class="b bd" onclick="appendNum('6')" style="font-size:16px;font-weight:500">6</button></div>
-      <div class="bw"><div class="sl">M+</div><button class="b bd" onclick="appendStr('+')" style="font-size:18px;font-weight:300">+</button></div>
-    </div>
-
-    <!-- ROW 9: 1  2  3  (−) -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">M-</div><button class="b bd" onclick="appendNum('1')" style="font-size:16px;font-weight:500">1</button></div>
-      <div class="bw"><div class="sl">MRC</div><button class="b bd" onclick="appendNum('2')" style="font-size:16px;font-weight:500">2</button></div>
-      <div class="bw"><div class="sl">STO</div><button class="b bd" onclick="appendNum('3')" style="font-size:16px;font-weight:500">3</button></div>
-      <div class="bw"><div class="sl">RCL</div><button class="b bm" onclick="toggleNeg()" style="font-size:9px;font-weight:700">(−)</button></div>
-    </div>
-
-    <!-- ROW 10: 0 (wide)  .  EXE -->
-    <div class="fx-row">
-      <div class="bw"><div class="sl">Rnd</div><button class="b bd bxwide" onclick="appendNum('0')" style="font-size:16px;font-weight:500">0</button></div>
-      <div class="bw"><div class="sl">π</div><button class="b bd" onclick="appendStr('.')" style="font-size:16px;font-weight:700">.</button></div>
-      <div class="bw"><div class="sl">&nbsp;</div><button class="b bo" onclick="doEquals()" style="font-size:9px;font-weight:900;letter-spacing:.3px">EXE</button></div>
-    </div>
-
-  </div><!-- /btn-grid -->
-  </div><!-- /fx-body -->
-</div>`;
-
-document.getElementById('hist-root').innerHTML = `
-<div class="hist-panel">
-  <div class="hist-head">
-    <span class="hist-title">History</span>
-    <button class="hbtn" onclick="clearHist()">Clear all</button>
-  </div>
-  <div class="hist-list" id="hist-list">
-    <div class="hist-empty">No calculations yet.<br>Results appear here.</div>
-  </div>
-  <div class="hist-hint">Click a result to paste into calculator · hover to copy</div>
-</div>`;
-</script>
-
-<!-- ENGINE -->
-<script>
-// ── STATE ──
-let expr = '', cursorPos = 0, lastAns = 0;
-let history = [], histIdx = -1;
-let shiftOn = false, alphaOn = false;
-
-const $expr = () => document.getElementById('disp-expr');
-const $ans  = () => document.getElementById('disp-ans');
-
-function render() {
-  const e = $expr(); if (!e) return;
-  const display = (expr.slice(0,cursorPos) + '▌' + expr.slice(cursorPos))
-    .replace(/\*/g,'×').replace(/\//g,'÷').replace(/sqrt/g,'√');
-  e.textContent = display || '';
+function upd(v){
+  cur=String(v);
+  mainNum.className='main-num';
+  if(cur.length>16)mainNum.classList.add('xs');
+  else if(cur.length>11)mainNum.classList.add('sm');
+  mainNum.textContent=cur;
 }
 
-function appendStr(s) {
-  expr = expr.slice(0,cursorPos) + s + expr.slice(cursorPos);
-  cursorPos += s.length; render();
-}
-function appendNum(n) { appendStr(n); }
-function appendAns()  { appendStr(String(lastAns)); }
-function cursorLeft()  { cursorPos = Math.max(0, cursorPos-1); render(); }
-function cursorRight() { cursorPos = Math.min(expr.length, cursorPos+1); render(); }
-function histUp()   { if (histIdx < history.length-1) { histIdx++; loadHist(histIdx); } }
-function histDown() { if (histIdx > 0) { histIdx--; loadHist(histIdx); } else { histIdx=-1; expr=''; cursorPos=0; render(); } }
-function loadHist(i){ expr = history[i].expr; cursorPos = expr.length; render(); }
-
-function doBackspace() {
-  if (cursorPos===0) return;
-  expr = expr.slice(0,cursorPos-1) + expr.slice(cursorPos);
-  cursorPos--; render();
-}
-function doClear(full) {
-  expr=''; cursorPos=0; histIdx=-1;
-  if (full) { lastAns=0; if($ans()) $ans().textContent='0'; }
-  render();
-  if($expr()) $expr().textContent='';
-}
-function doUndo() { doBackspace(); }
-function cp(x) {} // MENU/HOME stubs
-
-function toggleNeg() {
-  if (expr===''||expr==='0') { appendStr('-'); return; }
-  if (expr.startsWith('-')) { expr=expr.slice(1); cursorPos=Math.max(0,cursorPos-1); }
-  else { expr='-'+expr; cursorPos++; }
-  render();
-}
-function toggleShift() {
-  shiftOn=!shiftOn; alphaOn=false;
-  document.getElementById('btn-shift').style.boxShadow = shiftOn
-    ? '0 0 0 2px #c8860a, 0 3px 0 #112090' : '';
-  document.getElementById('btn-alpha').style.boxShadow = '';
-  document.getElementById('di-s').classList.toggle('lit', shiftOn);
-  document.getElementById('di-a').classList.remove('lit');
-}
-function toggleAlpha() {
-  alphaOn=!alphaOn; shiftOn=false;
-  document.getElementById('btn-alpha').style.boxShadow = alphaOn
-    ? '0 0 0 2px #c0302a, 0 3px 0 #112090' : '';
-  document.getElementById('btn-shift').style.boxShadow = '';
-  document.getElementById('di-a').classList.toggle('lit', alphaOn);
-  document.getElementById('di-s').classList.remove('lit');
+// ── Mode ───────────────────────────────────────────────────────────────────
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['calc','stat','complex','base','eqn'][i]===m);
+  });
+  D('complexExtra').style.display=m==='complex'?'block':'none';
+  D('baseExtra').style.display=m==='base'?'block':'none';
+  D('eqnExtra').style.display=m==='eqn'?'block':'none';
+  if(m==='stat'){openModal('statModal');return;}
+  flagMode.textContent={calc:'COMP',stat:'STAT',complex:'CMPLX',base:'BASE',eqn:'EQN'}[m]||'COMP';
 }
 
-// ── EVALUATE ──
-function doEquals() {
-  if (!expr.trim()) return;
-  const raw = expr;
-  try {
-    const result = safeEval(raw);
-    if (result===null||result===undefined||typeof result!=='number'||isNaN(result)) throw 0;
-    if (!isFinite(result)) throw 0;
-    const rounded = parseFloat(result.toPrecision(10));
-    lastAns = rounded;
-    if($expr()) $expr().textContent = raw.replace(/\*/g,'×').replace(/\//g,'÷').replace(/sqrt/g,'√');
-    if($ans())  $ans().textContent  = fmtResult(rounded);
-    addHist(raw, rounded);
-    expr = String(rounded); cursorPos = expr.length; histIdx = -1;
-  } catch(e) {
-    if($ans()) { $ans().textContent='Math ERROR'; setTimeout(()=>{ if($ans()) $ans().textContent=fmtResult(lastAns)||'0'; },1400); }
+// ── Angle ──────────────────────────────────────────────────────────────────
+function cycleAngle(){
+  const a=['DEG','RAD','GRAD'];
+  angle=a[(a.indexOf(angle)+1)%3];
+  D('angleBtn').textContent=angle;
+  D('angleBtn').className='angle-btn'+(angle==='RAD'?' rad':'');
+  flagAngle.textContent=angle[0];
+}
+function toRad(v){if(angle==='DEG')return v*Math.PI/180;if(angle==='GRAD')return v*Math.PI/200;return v;}
+function fromRad(v){if(angle==='DEG')return v*180/Math.PI;if(angle==='GRAD')return v*200/Math.PI;return v;}
+
+// ── Digit / dot ────────────────────────────────────────────────────────────
+function dig(d){
+  if(mode==='base'&&base<16&&'ABCDEF'.includes(d))return;
+  if(waiting||justCalc){upd(d);waiting=false;justCalc=false;}
+  else upd(cur==='0'?d:cur+d);
+}
+function dot(){if(waiting){upd('0.');waiting=false;return;}if(!cur.includes('.'))upd(cur+'.');}
+function toggleSign(){upd(fmt(-parseFloat(cur)||0));}
+function insertI(){dig('i');}
+
+// ── Operators ─────────────────────────────────────────────────────────────
+function inputOp(o){
+  let v=parseFloat(cur);
+  if(stored!==null&&!waiting){v=compute(stored,v,op);upd(fmt(v));}
+  stored=parseFloat(cur);op=o;waiting=true;justCalc=false;
+  const sym={'+':'+','-':'−','*':'×','/':'÷','^':'ˣ'}[o]||o;
+  exprStr=cur+' '+sym;exprLine.textContent=exprStr;histLine.textContent='';
+}
+function compute(a,b,o){
+  switch(o){
+    case'+':return a+b;case'-':return a-b;case'*':return a*b;
+    case'/':return b===0?NaN:a/b;case'^':return Math.pow(a,b);
+  }return b;
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────
+function calc(){
+  if(op===null||waiting)return;
+  const b=parseFloat(cur);
+  const r=compute(stored,b,op);
+  const sym={'+':'+','-':'−','*':'×','/':'÷','^':'ˣ'}[op]||op;
+  histLine.textContent=exprStr+' '+cur+' =';
+  exprLine.textContent='';exprStr='';
+  upd(fmt(r));stored=null;op=null;waiting=false;justCalc=true;
+}
+// ── Format ─────────────────────────────────────────────────────────────────
+function fmt(n){
+  if(!isFinite(n))return'Error';
+  if(Number.isNaN(n))return'Math ERROR';
+  return parseFloat(n.toPrecision(12)).toString();
+}
+
+// ── Clear ──────────────────────────────────────────────────────────────────
+function clearAll(){
+  cur='0';stored=null;op=null;waiting=false;justCalc=false;exprStr='';
+  upd('0');exprLine.textContent='';histLine.textContent='';
+}
+function pct(){
+  if(stored!==null&&op)upd(fmt(stored*parseFloat(cur)/100));
+  else upd(fmt(parseFloat(cur)/100));
+}
+
+// ── Toggle Sci panel ───────────────────────────────────────────────────────
+function toggleSci(){
+  sciOpen=!sciOpen;
+  D('sciRows').classList.toggle('open',sciOpen);
+  document.querySelector('.btn.bd').style.color=sciOpen?'var(--accent)':'';
+}
+
+// ── Scientific functions ───────────────────────────────────────────────────
+function sf(fn){
+  const v=parseFloat(cur);let r;
+  switch(fn){
+    case'sin': r=Math.sin(toRad(v));break;
+    case'cos': r=Math.cos(toRad(v));break;
+    case'tan': r=Math.tan(toRad(v));break;
+    case'asin':r=fromRad(Math.asin(v));break;
+    case'acos':r=fromRad(Math.acos(v));break;
+    case'atan':r=fromRad(Math.atan(v));break;
+    case'sinh':r=Math.sinh(v);break;
+    case'cosh':r=Math.cosh(v);break;
+    case'tanh':r=Math.tanh(v);break;
+    case'asinh':r=Math.asinh(v);break;
+    case'acosh':r=Math.acosh(v);break;
+    case'atanh':r=Math.atanh(v);break;
+    case'log': r=Math.log10(v);break;
+    case'ln':  r=Math.log(v);break;
+    case'log2':r=Math.log2(v);break;
+    case'10x': r=Math.pow(10,v);break;
+    case'ex':  r=Math.exp(v);break;
+    case'sqrt':r=Math.sqrt(v);break;
+    case'cbrt':r=Math.cbrt(v);break;
+    case'sq':  r=v*v;break;
+    case'cube':r=v*v*v;break;
+    case'inv': r=1/v;break;
+    case'abs': r=Math.abs(v);break;
+    case'fact':r=factorial(Math.round(v));break;
+    case'nPr': {const n=Math.round(v),rr=parseInt(prompt('r=','2')||'0');r=factorial(n)/factorial(n-rr);break;}
+    case'nCr': {const n=Math.round(v),rr=parseInt(prompt('r=','2')||'0');r=factorial(n)/(factorial(rr)*factorial(n-rr));break;}
+    case'pi':  upd(fmt(Math.PI));histLine.textContent='π';justCalc=true;return;
+    case'e_const':upd(fmt(Math.E));histLine.textContent='e';justCalc=true;return;
+    case'rand':r=Math.random();break;
+    case'gcd': {const b=parseInt(prompt('b=','0')||'0');r=gcd(Math.round(v),b);break;}
+    case'lcm': {const b=parseInt(prompt('b=','0')||'0');r=Math.abs(Math.round(v)*b)/gcd(Math.round(v),b);break;}
+    case'int': r=Math.trunc(v);break;
+    case'intg':r=Math.floor(v);break;
+    case'frac':r=v-Math.trunc(v);break;
+    case're':  r=v;break;
+    case'im':  r=0;break;
+    case'conj':r=v;break;
+    case'arg': r=v>=0?0:Math.PI;break;
+    case'cabs':r=Math.abs(v);break;
+    case'polar':case'rect':upd(fmt(v));return;
+    default:   r=v;
   }
+  histLine.textContent=fn+'('+cur+') =';
+  upd(fmt(r));justCalc=true;
 }
 
-function fmtResult(n) {
-  if (n===0) return '0';
-  if (Math.abs(n)>=1e10 || (Math.abs(n)<0.001 && n!==0)) {
-    return n.toExponential(6).replace(/e\+?(-?)0*(\d+)/,(_, s, d)=>`×10^${s}${d}`);
+function factorial(n){if(n<0||n>170)return Infinity;if(n<=1)return 1;let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){const t=b;b=a%b;a=t;}return a;}
+
+// ── Base-N ─────────────────────────────────────────────────────────────────
+function setBase(b){
+  base=b;
+  ['Hex','Dec','Oct','Bin'].forEach(n=>{
+    const el=D('base'+n);
+    if(el)el.classList.toggle('active',({Hex:16,Dec:10,Oct:8,Bin:2}[n]===b));
+  });
+  ['hexBtns','hexBtns2','hexBtns3'].forEach(id=>{
+    const el=D(id);if(el)el.style.opacity=b===16?'1':'0.3';
+  });
+  const v=parseInt(cur,10)||0;
+  if(b===16)upd(v.toString(16).toUpperCase());
+  else if(b===8)upd(v.toString(8));
+  else if(b===2)upd(v.toString(2));
+  else upd(String(v));
+}
+function baseOp(op){
+  const a=parseInt(cur,base);
+  const b=parseInt(prompt(op+' with:','0')||'0',base);
+  let r;
+  if(op==='AND')r=a&b;else if(op==='OR')r=a|b;else if(op==='XOR')r=a^b;
+  else if(op==='XNOR')r=~(a^b);else if(op==='NOT')r=~a;else if(op==='NEG')r=-a;
+  upd(base===16?(r>>>0).toString(16).toUpperCase():base===8?(r>>>0).toString(8):base===2?(r>>>0).toString(2):String(r));
+}
+// ── Statistics ─────────────────────────────────────────────────────────────
+function calcStats(){
+  const raw=D('statInput').value.replace(/\n/g,',').split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v));
+  if(!raw.length){D('statResult').style.display='none';return;}
+  const n=raw.length,sum=raw.reduce((a,b)=>a+b,0),mean=sum/n;
+  const sorted=[...raw].sort((a,b)=>a-b);
+  const med=n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+  const variance=raw.reduce((a,v)=>a+(v-mean)**2,0)/n;
+  const varS=raw.reduce((a,v)=>a+(v-mean)**2,0)/(n-1);
+  const sd=Math.sqrt(variance),sdS=Math.sqrt(varS);
+  const min=sorted[0],max=sorted[sorted.length-1];
+  const q1=sorted[Math.floor(n/4)],q3=sorted[Math.floor(3*n/4)];
+  D('statResult').style.display='block';
+  D('statResult').innerHTML=`
+    n = <span>${n}</span><br>
+    Σx = <span>${fmt(sum)}</span><br>
+    x̄ = <span>${fmt(mean)}</span><br>
+    Median = <span>${fmt(med)}</span><br>
+    σ (pop) = <span>${fmt(sd)}</span><br>
+    s (sample) = <span>${fmt(sdS)}</span><br>
+    Var = <span>${fmt(variance)}</span><br>
+    Min = <span>${fmt(min)}</span> &nbsp; Max = <span>${fmt(max)}</span><br>
+    Q1 = <span>${fmt(q1)}</span> &nbsp; Q3 = <span>${fmt(q3)}</span><br>
+    IQR = <span>${fmt(q3-q1)}</span>
+  `;
+}
+
+// ── Equation Solver ────────────────────────────────────────────────────────
+let _eqnType='sim',_eqnN=2;
+function openEqnSolver(n,type){
+  _eqnN=n;_eqnType=type;
+  D('eqnTitle').textContent=type==='sim'?`${n}×${n} Simultaneous`:`${n==='2'||n===2?'Quadratic':'Cubic'} Equation`;
+  const f=D('eqnFields');f.innerHTML='';
+  if(type==='sim'){
+    for(let i=0;i<n;i++){
+      let row='<div style="display:flex;gap:6px;margin-bottom:6px;">';
+      for(let j=0;j<n;j++)row+=`<input id="c${i}${j}" placeholder="${String.fromCharCode(97+j)}${i+1}" type="number"/>`;
+      row+=`<input id="c${i}${n}" placeholder="= ?" type="number"/>`;
+      row+='</div>';f.innerHTML+=row;
+    }
+  }else{
+    const vars=n===2?['a','b','c']:['a','b','c','d'];
+    let row='<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+    vars.forEach(v=>row+=`<input id="coef_${v}" placeholder="${v}" type="number" style="width:70px;"/>`);
+    row+='</div>';f.innerHTML=row;
+    f.innerHTML+=`<div style="font-size:11px;color:var(--text2);margin-top:6px;">${n===2?'ax²+bx+c=0':'ax³+bx²+cx+d=0'}</div>`;
   }
-  return parseFloat(n.toPrecision(10)).toString();
+  openModal('eqnModal');
+}
+function solveEqn(){
+  const r=D('eqnResult');r.style.display='block';
+  try{
+    if(_eqnType==='sim'){
+      if(_eqnN===2){
+        const a1=+D('c00').value,b1=+D('c01').value,c1=+D('c02').value;
+        const a2=+D('c10').value,b2=+D('c11').value,c2=+D('c12').value;
+        const det=a1*b2-a2*b1;
+        if(det===0){r.innerHTML='No unique solution';return;}
+        const x=(c1*b2-c2*b1)/det,y=(a1*c2-a2*c1)/det;
+        r.innerHTML=`x = <span>${fmt(x)}</span><br>y = <span>${fmt(y)}</span>`;
+      }else{
+        const a=[[+D('c00').value,+D('c01').value,+D('c02').value,+D('c03').value],
+                  [+D('c10').value,+D('c11').value,+D('c12').value,+D('c13').value],
+                  [+D('c20').value,+D('c21').value,+D('c22').value,+D('c23').value]];
+        const res=gaussElim(a,3);
+        r.innerHTML=`x = <span>${fmt(res[0])}</span><br>y = <span>${fmt(res[1])}</span><br>z = <span>${fmt(res[2])}</span>`;
+      }
+    }else{
+      if(_eqnN===2){
+        const a=+D('coef_a').value,b=+D('coef_b').value,c=+D('coef_c').value;
+        const disc=b*b-4*a*c;
+        if(disc<0)r.innerHTML=`No real roots (disc = ${fmt(disc)})`;
+        else if(disc===0)r.innerHTML=`x = <span>${fmt(-b/(2*a))}</span>`;
+        else r.innerHTML=`x₁ = <span>${fmt((-b+Math.sqrt(disc))/(2*a))}</span><br>x₂ = <span>${fmt((-b-Math.sqrt(disc))/(2*a))}</span>`;
+      }else{
+        const a=+D('coef_a').value,b=+D('coef_b').value,c=+D('coef_c').value,d=+D('coef_d').value;
+        const roots=solveCubic(a,b,c,d);
+        r.innerHTML=roots.map((v,i)=>`x${i+1} = <span>${fmt(v)}</span>`).join('<br>');
+      }
+    }
+  }catch(e){r.innerHTML='Error: '+e.message;}
+}
+function gaussElim(m,n){
+  for(let c=0;c<n;c++){let mx=c;for(let r=c+1;r<n;r++)if(Math.abs(m[r][c])>Math.abs(m[mx][c]))mx=r;[m[c],m[mx]]=[m[mx],m[c]];for(let r=c+1;r<n;r++){const f=m[r][c]/m[c][c];for(let k=c;k<=n;k++)m[r][k]-=f*m[c][k];}}
+  const x=new Array(n);for(let i=n-1;i>=0;i--){x[i]=m[i][n];for(let j=i+1;j<n;j++)x[i]-=m[i][j]*x[j];x[i]/=m[i][i];}return x;
+}
+function solveCubic(a,b,c,d){
+  b/=a;c/=a;d/=a;const p=c-b*b/3,q=2*b*b*b/27-b*c/3+d;
+  const D3=q*q/4+p*p*p/27;
+  if(D3>0){const u=Math.cbrt(-q/2+Math.sqrt(D3)),v=Math.cbrt(-q/2-Math.sqrt(D3));return[u+v-b/3];}
+  if(D3===0){const u=Math.cbrt(-q/2);return[2*u-b/3,-u-b/3,-u-b/3];}
+  const r=Math.sqrt(-p*p*p/27),theta=Math.acos(-q/(2*r));
+  return[0,1,2].map(k=>2*Math.cbrt(r)*Math.cos((theta+2*Math.PI*k)/3)-b/3);
 }
 
-// ── SAFE MATH EVAL ──
-function safeEval(raw) {
-  let s = raw
-    .replace(/×/g,'*').replace(/÷/g,'/')
-    .replace(/√\(/g,'Math.sqrt(')
-    .replace(/sqrt\(/g,'Math.sqrt(')
-    .replace(/log\(/g,'Math.log10(')
-    .replace(/ln\(/g,'Math.log(')
-    .replace(/sin\(/g,'__sin(')
-    .replace(/cos\(/g,'__cos(')
-    .replace(/tan\(/g,'__tan(')
-    .replace(/π/g,'Math.PI')
-    .replace(/×10\^\(/g,'*Math.pow(10,')
-    .replace(/\^/g,'**');
-  // factorial
-  s = s.replace(/(\d+)!/g, (_,n)=>String(factorial(+n)));
-  // close parens
-  const open = (s.match(/\(/g)||[]).length-(s.match(/\)/g)||[]).length;
-  s += ')'.repeat(Math.max(0,open));
-  const __sin=x=>Math.sin(x*Math.PI/180);
-  const __cos=x=>Math.cos(x*Math.PI/180);
-  const __tan=x=>Math.tan(x*Math.PI/180);
-  return Function('"use strict";const __sin='+__sin+';const __cos='+__cos+';const __tan='+__tan+'; return('+s+')')();
-}
+// ── Modals ─────────────────────────────────────────────────────────────────
+function openModal(id){D(id).classList.add('show');}
+function closeModal(id){D(id).classList.remove('show');}
 
-function factorial(n) {
-  if(n<0||n>170||!Number.isInteger(n)) return NaN;
-  let r=1; for(let i=2;i<=n;i++) r*=i; return r;
-}
-
-// ── HISTORY ──
-function addHist(ex, res) {
-  history.unshift({expr:ex, result:res});
-  if(history.length>80) history.pop();
-  renderHist();
-}
-function renderHist() {
-  const list = document.getElementById('hist-list');
-  if (!list) return;
-  if (!history.length) { list.innerHTML='<div class="hist-empty">No calculations yet.<br>Results appear here.</div>'; return; }
-  list.innerHTML = history.map((h,i)=>`
-    <div class="hist-item" onclick="pasteResult(${i})">
-      <div class="hi-body">
-        <div class="hi-expr">${h.expr.replace(/\*/g,'×').replace(/\//g,'÷')}</div>
-        <div class="hi-result">= ${fmtResult(h.result)}</div>
-      </div>
-      <button class="hi-copy" onclick="event.stopPropagation();copyResult(${i})">Copy</button>
-    </div>`).join('');
-}
-function pasteResult(i) {
-  const v=String(history[i].result);
-  expr=expr.slice(0,cursorPos)+v+expr.slice(cursorPos);
-  cursorPos+=v.length; render();
-}
-function copyResult(i) {
-  navigator.clipboard.writeText(String(history[i].result))
-    .then(()=>toast('Copied!'));
-}
-function clearHist() { history=[]; renderHist(); }
-
-// ── KEYBOARD ──
-document.addEventListener('keydown', e=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  if(e.key>='0'&&e.key<='9') appendNum(e.key);
-  else if(e.key==='.') appendStr('.');
-  else if(e.key==='+') appendStr('+');
-  else if(e.key==='-') appendStr('-');
-  else if(e.key==='*') appendStr('*');
-  else if(e.key==='/'){e.preventDefault();appendStr('/');}
-  else if(e.key==='(') appendStr('(');
-  else if(e.key===')') appendStr(')');
-  else if(e.key==='^') appendStr('^(');
-  else if(e.key==='Enter'||e.key==='=') doEquals();
-  else if(e.key==='Backspace') doBackspace();
-  else if(e.key==='Escape') doClear(false);
-  else if(e.key==='ArrowLeft') cursorLeft();
-  else if(e.key==='ArrowRight') cursorRight();
-  else if(e.key==='ArrowUp') histUp();
-  else if(e.key==='ArrowDown') histDown();
+// ── Keyboard ───────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key>='0'&&e.key<='9')dig(e.key);
+  else if(e.key==='.')dot();
+  else if(e.key==='+')inputOp('+');
+  else if(e.key==='-')inputOp('-');
+  else if(e.key==='*')inputOp('*');
+  else if(e.key==='/'){ e.preventDefault();inputOp('/');}
+  else if(e.key==='Enter'||e.key==='=')calc();
+  else if(e.key==='Escape')clearAll();
+  else if(e.key==='Backspace'){upd(cur.length>1?cur.slice(0,-1):'0');}
+  else if(e.key==='%')pct();
 });
-
-// ── PASTE ──
-document.addEventListener('paste', e=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  e.preventDefault();
-  const txt=(e.clipboardData||window.clipboardData).getData('text');
-  const clean=txt.replace(/[^\d.\-+*/()^%]/g,'');
-  if(clean) appendStr(clean);
-});
-
-// ── TOAST ──
-function toast(msg) {
-  let t=document.getElementById('fx-toast');
-  if(!t){t=document.createElement('div');t.id='fx-toast';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#6aff7e;color:#000;padding:8px 18px;border-radius:8px;font-family:DM Mono,monospace;font-size:12px;font-weight:700;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:9999;pointer-events:none';
-    document.body.appendChild(t);}
-  t.textContent=msg;t.style.transform='translateX(-50%) translateY(0)';
-  setTimeout(()=>{t.style.transform='translateX(-50%) translateY(80px)';},1800);
-}
-
-// ── THEME ──
-const _sv=localStorage.getItem('theme')||'dark';
-document.documentElement.setAttribute('data-theme',_sv);
-const _nl=document.getElementById('nav-logo');
-if(_nl) _nl.src=_sv==='dark'?'logo-dark.png':'logo-light.png';
-function toggleTheme(){
-  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',t);
-  const nl=document.getElementById('nav-logo');
-  if(nl) nl.src=t==='dark'?'logo-dark.png':'logo-light.png';
-  localStorage.setItem('theme',t);
-}
-
-render();
 </script>
 </body>
 </html>
