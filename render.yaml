@@ -6,5 +6,14 @@ services:
     buildCommand: ""
     routes:
       - type: rewrite
+        source: /box
+        destination: /gridfinity-box.html
+      - type: rewrite
+        source: /baseplate
+        destination: /gridfinity-baseplate.html
+      - type: rewrite
+        source: /editor
+        destination: /gridfinity-editor.html
+      - type: rewrite
         source: /*
         destination: /index.html
