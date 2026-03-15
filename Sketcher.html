@@ -63,7 +63,7 @@ nav{height:46px;background:var(--nav-bg);backdrop-filter:blur(14px);border-botto
 /* CANVAS AREA */
 #cvwrap{flex:1;overflow:hidden;position:relative;background:var(--bg);}
 canvas{position:absolute;top:0;left:0;image-rendering:pixelated;}
-#hud{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:var(--tb-bg);border:1px solid var(--border);border-radius:8px;padding:4px 14px;font-size:10px;color:var(--text2);pointer-events:none;letter-spacing:.06em;}
+#hud{display:none;}
 /* STATUS BAR */
 #statusbar{height:24px;background:var(--tb-bg);border-top:1px solid var(--tb-border);display:flex;align-items:center;padding:0 14px;gap:20px;font-size:10px;color:var(--text2);position:absolute;bottom:0;left:48px;right:210px;}
 #statusbar span{white-space:nowrap;}
@@ -230,10 +230,9 @@ function resizeCanvas(){
   cv.style.width=W+'px';cv.style.height=H+'px';
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
   redraw();
 }
-// Use ResizeObserver so it fires correctly inside an iframe too
 new ResizeObserver(resizeCanvas).observe(wrap);
 window.addEventListener('resize',resizeCanvas);
 
@@ -826,16 +825,22 @@ document.getElementById('strokeW').oninput=function(){strokeW=+this.value||1.5;}
 document.getElementById('polySides').oninput=function(){polySides=Math.max(3,+this.value||6);};
 
 // ═══════════════════════════════════════════════════════════
-// INIT
+// INIT — defer until layout is painted (fixes iframe sizing)
 // ═══════════════════════════════════════════════════════════
-resizeCanvas();
-detectDPI();
-// center origin
-panX=wrap.clientWidth/2;
-panY=wrap.clientHeight/2;
-document.getElementById('hud').textContent='';
-setTool('select');
-updateSB();
+function init(){
+  resizeCanvas();
+  // if wrap still has no size (iframe not laid out yet), retry
+  if(!wrap.clientWidth||!wrap.clientHeight){
+    setTimeout(init, 50); return;
+  }
+  detectDPI();
+  panX=wrap.clientWidth/2;
+  panY=wrap.clientHeight/2;
+  setTool('select');
+  updateSB();
+  redraw();
+}
+requestAnimationFrame(()=>requestAnimationFrame(init));
 </script>
 </body>
 </html>
