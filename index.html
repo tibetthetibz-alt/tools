@@ -152,10 +152,6 @@
 
 <!-- Sketcher Panel -->
 <div id="sketcher-panel" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
-  <div style="display:flex;align-items:center;gap:16px;padding:10px 20px;background:rgba(14,14,18,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);">
-    <span style="font-family:'Big Shoulders Display',sans-serif;font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SKETCHER</span>
-    <button onclick="closeSketcher()" style="margin-left:auto;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;">✕ Close</button>
-  </div>
   <iframe id="sketcher-iframe" src="" style="flex:1;border:none;width:100%;height:100%;"></iframe>
 </div>
 
@@ -166,6 +162,7 @@
   function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
   function openSketcher(){const p=document.getElementById('sketcher-panel'),f=document.getElementById('sketcher-iframe');if(!f.src||f.src===location.href)f.src='Sketcher.html';p.style.display='flex';document.body.style.overflow='hidden';}
   function closeSketcher(){document.getElementById('sketcher-panel').style.display='none';document.body.style.overflow='';}
+  window.addEventListener('message',e=>{if(e.data==='closeSketcher')closeSketcher();});
 </script>
 </body>
 </html>

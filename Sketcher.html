@@ -72,7 +72,7 @@ canvas{position:absolute;top:0;left:0;image-rendering:pixelated;}
 <body>
 <!-- NAV -->
 <nav>
-  <a href="index.html"><img id="nav-logo" class="nav-logo" src="logo-dark.png" alt=""/></a>
+  <a href="#" onclick="goHome()" style="display:flex;align-items:center;"><img id="nav-logo" class="nav-logo" src="logo-dark.png" alt=""/></a>
   <span class="nav-title">SKETCHER</span>
   <div class="nav-sep"></div>
   <span style="font-size:10px;color:var(--text2);letter-spacing:.08em;">Onshape-style 2D sketch tool</span>
@@ -211,9 +211,10 @@ canvas{position:absolute;top:0;left:0;image-rendering:pixelated;}
 // ═══════════════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════════════
+function goHome(){if(window.parent&&window.parent!==window){window.parent.postMessage('closeSketcher','*');}else{window.location.href='index.html';}}
 const htmlEl=document.documentElement,navLogo=document.getElementById('nav-logo');
 (function(){const t=localStorage.getItem('theme')||'dark';setTheme(t);})();
-function setTheme(t){htmlEl.setAttribute('data-theme',t);navLogo.src=t==='dark'?'logo-dark.png':'logo-light.png';localStorage.setItem('theme',t);redraw();}
+function setTheme(t){htmlEl.setAttribute('data-theme',t);navLogo.src=t==='dark'?'logo-dark.png':'logo-light.png';localStorage.setItem('theme',t);if(ctx)redraw();}
 function toggleTheme(){setTheme(htmlEl.getAttribute('data-theme')==='dark'?'light':'dark');}
 
 // ═══════════════════════════════════════════════════════════
@@ -225,12 +226,15 @@ let ctx,dpr=window.devicePixelRatio||1;
 
 function resizeCanvas(){
   const W=wrap.clientWidth,H=wrap.clientHeight;
+  if(!W||!H)return;
   cv.style.width=W+'px';cv.style.height=H+'px';
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
   redraw();
 }
+// Use ResizeObserver so it fires correctly inside an iframe too
+new ResizeObserver(resizeCanvas).observe(wrap);
 window.addEventListener('resize',resizeCanvas);
 
 // ═══════════════════════════════════════════════════════════
