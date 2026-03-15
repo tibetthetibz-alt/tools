@@ -24,7 +24,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* NAV */
 nav{height:46px;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;position:relative;z-index:200;}
 .nav-logo{width:26px;height:26px;object-fit:contain;}
-.nav-title{font-family:'Big Shoulders Display',sans-serif;font-size:15px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px;}
+.nav-title{font-family:'Big Shoulders Display',sans-serif;font-size:15px;font-weight:900;background:linear-gradient(135deg,#6AFF7E 0%,#27DEC4 40%,#01c6f1 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px;}
 .nav-sep{width:1px;height:22px;background:var(--border);margin:0 2px;}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:7px;}
 .nb{height:28px;padding:0 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
@@ -211,7 +211,7 @@ canvas{position:absolute;top:0;left:0;image-rendering:pixelated;}
 // ═══════════════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════════════
-function goHome(){if(window.parent&&window.parent!==window){window.parent.postMessage('closeSketcher','*');}else{window.location.href='index.html';}}
+function goHome(){if(window.parent&&window.parent!==window){window.parent.postMessage('closeSketcher','*');}else{window.location.href='tools.html';}}
 const htmlEl=document.documentElement,navLogo=document.getElementById('nav-logo');
 (function(){const t=localStorage.getItem('theme')||'dark';setTheme(t);})();
 function setTheme(t){htmlEl.setAttribute('data-theme',t);navLogo.src=t==='dark'?'logo-dark.png':'logo-light.png';localStorage.setItem('theme',t);if(ctx)redraw();}
