@@ -1,877 +1,666 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sketcher</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sketcher — Tibet's Tools</title>
+<link rel="icon" type="image/png" href="logo-light.png"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Big+Shoulders+Display:wght@800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e12;--bg2:#16161c;--bg3:#1c1c24;--border:#2a2a38;
+  --text:#f0f0ff;--text2:#7070a0;--accent:#01c6f1;--green:#6aff7e;
+  --nav-bg:rgba(14,14,18,0.95);--canvas-bg:#ffffff;
+  --sidebar-bg:#16161c;--sidebar-w:220px;
+}
+[data-theme="light"]{
+  --bg:#f4f4f8;--bg2:#ffffff;--bg3:#ebebf2;--border:#d0d0e0;
+  --text:#0e0e1a;--text2:#6060a0;--accent:#0099cc;--green:#22a83a;
+  --nav-bg:rgba(244,244,248,0.95);--canvas-bg:#ffffff;
+  --sidebar-bg:#ffffff;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            overflow: hidden;
-        }
-
-        #container {
-            display: flex;
-            height: 100vh;
-            gap: 0;
-        }
-
-        /* Top Toolbar */
-        .toolbar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 20px;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .toolbar-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            flex: 1;
-        }
-
-        .toolbar-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .toolbar-btn {
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 0.2s;
-            font-family: inherit;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .toolbar-btn:hover {
-            background: #f8f8f8;
-            border-color: #999;
-        }
-
-        .toolbar-btn.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-
-        .toolbar-btn.primary {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-
-        .toolbar-btn.primary:hover {
-            background: #1976d2;
-        }
-
-        .toolbar-separator {
-            width: 1px;
-            height: 30px;
-            background: #e0e0e0;
-        }
-
-        /* Right Corner Tools */
-        .corner-tools {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 200;
-            max-width: 200px;
-        }
-
-        .corner-tools h4 {
-            font-size: 11px;
-            font-weight: 600;
-            color: #333;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .corner-tools button {
-            display: block;
-            width: 100%;
-            padding: 8px 10px;
-            margin-bottom: 6px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .corner-tools button:hover {
-            background: #f8f8f8;
-            border-color: #999;
-        }
-
-        .corner-tools button.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-
-        /* Sidebar */
-        #sidebar {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            width: 280px;
-            height: calc(100vh - 60px);
-            background: white;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-        }
-
-        .sidebar-section {
-            margin-bottom: 25px;
-        }
-
-        .sidebar-section h3 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
-
-        .tool-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-            font-weight: 500;
-            width: 100%;
-        }
-
-        .tool-btn:hover {
-            background: #f8f8f8;
-            border-color: #999;
-        }
-
-        .tool-btn.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-
-        input[type="color"] {
-            width: 40px;
-            height: 32px;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            cursor: pointer;
-            height: 5px;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-bottom: 10px;
-            font-family: inherit;
-        }
-
-        .calibration-panel {
-            background: #e3f2fd;
-            border: 1px solid #90caf9;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 15px;
-        }
-
-        .calibration-panel h4 {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-
-        .calibration-btn {
-            width: 100%;
-            padding: 8px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .calibration-btn:hover {
-            background: #1976d2;
-        }
-
-        .calibration-info {
-            font-size: 11px;
-            color: #1565c0;
-            margin-top: 8px;
-            padding: 8px;
-            background: white;
-            border-radius: 4px;
-            border-left: 3px solid #2196F3;
-        }
-
-        #canvas {
-            position: absolute;
-            top: 60px;
-            left: 280px;
-            right: 0;
-            bottom: 0;
-            cursor: crosshair;
-            background: white;
-            touch-action: none;
-        }
-
-        .status-bar {
-            position: absolute;
-            bottom: 10px;
-            left: 290px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            z-index: 150;
-            font-family: 'Courier New', monospace;
-        }
-
-        @media (max-width: 768px) {
-            #sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 250px;
-                border-right: none;
-                border-bottom: 1px solid #e0e0e0;
-                top: 60px;
-                left: 0;
-                overflow-x: auto;
-                overflow-y: auto;
-            }
-
-            #canvas {
-                left: 0;
-                top: 310px;
-            }
-
-            .corner-tools {
-                top: 70px;
-                right: 10px;
-            }
-        }
-    </style>
+/* NAV */
+nav{height:48px;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:14px;position:relative;z-index:100}
+.nav-logo{width:26px;height:26px;object-fit:contain;text-decoration:none}
+.nav-title{font-family:'Big Shoulders Display',sans-serif;font-size:15px;font-weight:900;background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nav-btn{height:30px;padding:0 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.primary{background:var(--accent);color:#0e0e12;border-color:var(--accent);font-weight:600}
+.nav-btn.primary:hover{opacity:.85}
+.theme-toggle{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.icon-sun{display:none}.icon-moon{display:block}
+[data-theme="light"] .icon-sun{display:block}[data-theme="light"] .icon-moon{display:none}
+</style>
 </head>
 <body>
-    <div id="container">
-        <!-- Top Toolbar -->
-        <div class="toolbar">
-            <div class="toolbar-title">📐 Screen Sketch</div>
-            
-            <div class="toolbar-group">
-                <span style="font-size: 12px; color: #666; font-weight: 500;">Tools:</span>
-                <button class="toolbar-btn active" data-tool="line" title="Line">Line</button>
-                <button class="toolbar-btn" data-tool="circle" title="Circle">Circle</button>
-                <button class="toolbar-btn" data-tool="rectangle" title="Rectangle">Rect</button>
-                <button class="toolbar-btn" data-tool="dimension" title="Dimension">Dim</button>
-            </div>
+<nav>
+  <a href="index.html"><img class="nav-logo" id="nav-logo" src="logo-dark.png" alt=""/></a>
+  <span class="nav-title">SKETCHER</span>
+  <div class="nav-right">
+    <button class="nav-btn" id="btn-undo">↶ Undo</button>
+    <button class="nav-btn" id="btn-clear">✕ Clear</button>
+    <button class="nav-btn" id="btn-png">↓ PNG</button>
+    <button class="nav-btn" id="btn-svg">↓ SVG</button>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+    </button>
+  </div>
+</nav>
 
-            <div class="toolbar-separator"></div>
+<style>
+/* LAYOUT */
+#app{display:flex;height:calc(100vh - 48px)}
 
-            <div class="toolbar-group">
-                <input type="color" id="colorPicker" value="#000000" title="Color">
-                <input type="range" id="widthSlider" min="1" max="5" value="2" style="width: 80px;" title="Line Width">
-                <span id="widthDisplay" style="font-size: 12px; color: #666;">2</span>
-            </div>
+/* LEFT TOOLBAR */
+#toolbar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--sidebar-bg);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  user-select:none;
+}
+#toolbar::-webkit-scrollbar{width:3px}
+#toolbar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.tb-section{padding:10px 10px 4px}
+.tb-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);padding:0 4px 6px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.tool-btn{
+  width:100%;display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:8px;border:1px solid transparent;
+  background:none;color:var(--text2);font-family:'DM Mono',monospace;
+  font-size:11px;cursor:pointer;transition:all .12s;text-align:left;margin-bottom:2px;
+}
+.tool-btn:hover{background:var(--bg3);color:var(--text);border-color:var(--border)}
+.tool-btn.active{background:rgba(1,198,241,0.1);color:var(--accent);border-color:rgba(1,198,241,0.3)}
+.tool-btn svg{flex-shrink:0;opacity:.7}
+.tool-btn.active svg{opacity:1}
 
-            <div class="toolbar-separator"></div>
+/* PROP PANEL */
+.tb-prop{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.prop-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)}
+.prop-row label{white-space:nowrap;min-width:56px}
+.prop-row input[type=range]{flex:1;accent-color:var(--accent);height:3px}
+.prop-row input[type=color]{width:28px;height:24px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:none;padding:1px}
+.prop-row span{color:var(--text);font-size:11px;min-width:16px}
+.check-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2);padding:4px 10px;cursor:pointer}
+.check-row input{accent-color:var(--accent)}
 
-            <div class="toolbar-group">
-                <button class="toolbar-btn primary" id="exportPNG" title="Export PNG">📥 PNG</button>
-                <button class="toolbar-btn primary" id="exportSVG" title="Export SVG">📥 SVG</button>
-                <button class="toolbar-btn primary" id="exportPDF" title="Export PDF">📥 PDF</button>
-            </div>
+/* CANVAS AREA */
+#canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--canvas-bg)}
+#canvas{position:absolute;top:0;left:0;cursor:crosshair;touch-action:none}
 
-            <div class="toolbar-separator"></div>
+/* STATUS BAR */
+#status{
+  position:absolute;bottom:10px;left:12px;
+  background:rgba(14,14,18,0.82);backdrop-filter:blur(8px);
+  color:#aaa;padding:5px 10px;border-radius:6px;font-size:10px;
+  pointer-events:none;z-index:10;letter-spacing:.05em;
+  border:1px solid rgba(255,255,255,.07);
+}
+[data-theme="light"] #status{background:rgba(244,244,248,0.88);color:var(--text2);border-color:var(--border)}
 
-            <div class="toolbar-group">
-                <button class="toolbar-btn" id="undoBtn" title="Undo">↶ Undo</button>
-                <button class="toolbar-btn" id="clearBtn" title="Clear All">🗑️</button>
-            </div>
-        </div>
+/* SNAP INDICATOR */
+#snap-dot{position:absolute;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);pointer-events:none;display:none;transform:translate(-50%,-50%);z-index:20}
 
-        <!-- Right Corner Tools -->
-        <div class="corner-tools">
-            <h4>Advanced</h4>
-            <button class="toolbar-btn" data-tool="arc" title="Arc">🌙 Arc</button>
-            <button class="toolbar-btn" data-tool="arc-multi" title="Multi-point Arc">〰️ Arc Multi</button>
-            <button class="toolbar-btn" data-tool="point" title="Point">• Point</button>
-            <button class="toolbar-btn" data-tool="fillet" title="Fillet">⌒ Fillet</button>
-            <button class="toolbar-btn" data-tool="chamfer" title="Chamfer">⬟ Chamfer</button>
-            <button class="toolbar-btn" data-tool="mirror" title="Mirror">↔ Mirror</button>
-            <button class="toolbar-btn" data-tool="delete" title="Delete">✕ Delete</button>
-        </div>
+/* MEASUREMENT TOOLTIP */
+#meas-tip{position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--text);pointer-events:none;display:none;z-index:30;white-space:nowrap}
 
-        <!-- Left Sidebar -->
-        <div id="sidebar">
-            <div class="sidebar-section">
-                <h3>Calibration</h3>
-                <div class="calibration-panel">
-                    <h4>Auto-Calibrate</h4>
-                    <p style="font-size: 11px; color: #1565c0; margin-bottom: 10px;">Draw a known size reference</p>
-                    <input type="number" id="refLength" placeholder="Reference size (cm)" min="0" step="0.1">
-                    <button class="calibration-btn" id="calibrateBtn">Calibrate</button>
-                    <div id="calibrationInfo" class="calibration-info" style="display: none;"></div>
-                </div>
-            </div>
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#000;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;transform:translateY(60px);opacity:0;transition:all .3s;z-index:999;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+</style>
 
-            <div class="sidebar-section">
-                <h3>Display</h3>
-                <label style="font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
-                    <input type="checkbox" id="showGrid" checked>
-                    Show Grid
-                </label>
-                <label style="font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
-                    <input type="checkbox" id="showPoints" checked>
-                    Show Points
-                </label>
-                <label style="font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="snapEnabled" checked>
-                    Smart Snap
-                </label>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Snap Settings</h3>
-                <div style="font-size: 11px; color: #666; padding: 8px; background: #f5f5f5; border-radius: 4px;">
-                    <p><strong>✓ Endpoint snap</strong></p>
-                    <p><strong>✓ Midpoint snap</strong></p>
-                    <p><strong>✓ Center snap</strong></p>
-                    <p><strong>✓ Auto-connect lines</strong></p>
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Info</h3>
-                <div style="font-size: 11px; color: #666; padding: 8px; background: #f5f5f5; border-radius: 4px;">
-                    <p id="coordDisplay">X: 0 Y: 0</p>
-                    <p id="toolDisplay" style="margin-top: 5px;">Tool: Line</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Canvas -->
-        <canvas id="canvas"></canvas>
-
-        <!-- Status Bar -->
-        <div class="status-bar" id="statusBar"></div>
+<div id="app">
+  <div id="toolbar">
+    <div class="tb-section">
+      <div class="tb-label">Draw</div>
+      <button class="tool-btn active" data-tool="select" title="Select / Move (V)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 1-3 7z"/></svg>Select
+      </button>
+      <button class="tool-btn" data-tool="line" title="Line (L)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/></svg>Line
+      </button>
+      <button class="tool-btn" data-tool="rect" title="Rectangle (R)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>Rectangle
+      </button>
+      <button class="tool-btn" data-tool="circle" title="Circle (C)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>Circle
+      </button>
+      <button class="tool-btn" data-tool="arc" title="Arc (A)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20 A10 10 0 0 1 20 4"/></svg>Arc
+      </button>
+      <button class="tool-btn" data-tool="point" title="Point (P)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>Point
+      </button>
     </div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        // State
-        let currentTool = 'line';
-        let currentColor = '#000000';
-        let currentStrokeWidth = 2;
-        let isDrawing = false;
-        let startX, startY;
-        let shapes = [];
-        let points = [];
-        let history = [];
-        let pixelsPerCm = null;
-        let showGrid = true;
-        let showPoints = true;
-        let snapEnabled = true;
-        const SNAP_DISTANCE = 15;
+    <div class="tb-section">
+      <div class="tb-label">Modify</div>
+      <button class="tool-btn" data-tool="fillet" title="Fillet — rounds a corner between two lines">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20 Q4 4 20 4"/></svg>Fillet
+      </button>
+      <button class="tool-btn" data-tool="chamfer" title="Chamfer — cuts a straight bevel at a corner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4,20 4,8 12,4 20,4"/><line x1="4" y1="8" x2="12" y2="4"/></svg>Chamfer
+      </button>
+      <button class="tool-btn" data-tool="mirror" title="Mirror — click a line as axis then select shapes">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="3" x2="12" y2="21"/><path d="M7 7l-4 5 4 5M17 7l4 5-4 5"/></svg>Mirror
+      </button>
+      <button class="tool-btn" data-tool="delete" title="Delete shape (D / Del)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>Delete
+      </button>
+    </div>
 
-        // Canvas setup
-        function resizeCanvas() {
-            const sidebar = document.getElementById('sidebar');
-            canvas.width = window.innerWidth - sidebar.offsetWidth;
-            canvas.height = window.innerHeight - 60;
-            redraw();
+    <div class="tb-section">
+      <div class="tb-label">Measure</div>
+      <button class="tool-btn" data-tool="dimension" title="Dimension — annotate a length or distance">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="17" x2="21" y2="17"/><line x1="3" y1="17" x2="3" y2="14"/><line x1="21" y1="17" x2="21" y2="14"/><line x1="8" y1="7" x2="16" y2="7"/><text x="10" y="13" font-size="5" fill="currentColor" stroke="none">mm</text></svg>Dimension
+      </button>
+      <button class="tool-btn" data-tool="measure" title="Measure — click two points to measure distance">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12l4-4M2 12l4 4M22 12l-4-4M22 12l-4 4"/></svg>Measure
+      </button>
+    </div>
+
+    <div class="tb-section">
+      <div class="tb-label">Style</div>
+      <div class="tb-prop">
+        <div class="prop-row">
+          <label>Color</label>
+          <input type="color" id="colorPicker" value="#000000"/>
+        </div>
+        <div class="prop-row">
+          <label>Width</label>
+          <input type="range" id="widthSlider" min="1" max="8" value="2"/>
+          <span id="widthVal">2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tb-section">
+      <div class="tb-label">Options</div>
+      <label class="check-row"><input type="checkbox" id="chkGrid" checked/> Grid</label>
+      <label class="check-row"><input type="checkbox" id="chkSnap" checked/> Snap</label>
+      <label class="check-row"><input type="checkbox" id="chkPts" checked/> Points</label>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="tb-section" style="padding-bottom:12px">
+      <div class="tb-label">Snap info</div>
+      <div style="font-size:10px;color:var(--text2);padding:4px 4px;line-height:1.9">
+        <div id="coordDisplay">X: — Y: —</div>
+        <div id="toolDisplay">Tool: Select</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="canvas"></canvas>
+    <div id="snap-dot"></div>
+    <div id="meas-tip"></div>
+    <div id="status">Ready</div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ── STATE ──
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let tool = 'select';
+let color = '#000000';
+let strokeW = 2;
+let showGrid = true, showSnap = true, showPts = true;
+let shapes = [], history = [], redoStack = [];
+let isDrawing = false;
+let startX = 0, startY = 0;
+let mouseX = 0, mouseY = 0;
+let snapPt = null;
+// For measure tool
+let measStart = null;
+// For arc: 3-click (center, start, end)
+let arcStep = 0, arcCenter = null, arcStart = null;
+// For select
+let selShape = null, selDragOff = {x:0,y:0};
+const SNAP = 14;
+
+// ── RESIZE ──
+function resize() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  redraw();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── SNAP ──
+function snapPoint(x, y) {
+  if (!showSnap) return {x, y, type: null};
+  let best = {x, y, dist: SNAP, type: null};
+  shapes.forEach(s => {
+    const pts = getKeyPoints(s);
+    pts.forEach(p => {
+      const d = Math.hypot(x - p.x, y - p.y);
+      if (d < best.dist) best = {x: p.x, y: p.y, dist: d, type: p.type || 'endpoint'};
+    });
+  });
+  // Axis align (orthogonal snap) when dist > best endpoint
+  if (best.type === null) {
+    shapes.forEach(s => {
+      if (s.type === 'line') {
+        const dx = Math.abs(x - s.x1), dy = Math.abs(y - s.y1);
+        if (dx < SNAP*1.5) best = {x: s.x1, y, dist: dx, type: 'vertical'};
+        if (dy < SNAP*1.5 && dy < best.dist) best = {x, y: s.y1, dist: dy, type: 'horizontal'};
+      }
+    });
+  }
+  return best;
+}
+
+function getKeyPoints(s) {
+  const pts = [];
+  if (!s) return pts;
+  switch(s.type) {
+    case 'line':
+      pts.push({x:s.x1,y:s.y1,type:'endpoint'},{x:s.x2,y:s.y2,type:'endpoint'});
+      pts.push({x:(s.x1+s.x2)/2,y:(s.y1+s.y2)/2,type:'midpoint'});
+      break;
+    case 'rect':
+      pts.push({x:s.x1,y:s.y1},{x:s.x2,y:s.y1},{x:s.x2,y:s.y2},{x:s.x1,y:s.y2});
+      pts.push({x:(s.x1+s.x2)/2,y:s.y1},{x:(s.x1+s.x2)/2,y:s.y2},
+               {x:s.x1,y:(s.y1+s.y2)/2},{x:s.x2,y:(s.y1+s.y2)/2});
+      pts.push({x:(s.x1+s.x2)/2,y:(s.y1+s.y2)/2,type:'center'});
+      break;
+    case 'circle':
+      pts.push({x:s.cx,y:s.cy,type:'center'});
+      pts.push({x:s.cx+s.r,y:s.cy},{x:s.cx-s.r,y:s.cy},
+               {x:s.cx,y:s.cy+s.r},{x:s.cx,y:s.cy-s.r});
+      break;
+    case 'point':
+      pts.push({x:s.x,y:s.y,type:'point'});
+      break;
+    case 'arc':
+      pts.push({x:s.cx,y:s.cy,type:'center'});
+      break;
+  }
+  return pts;
+}
+
+// ── DRAW ONE SHAPE ──
+function drawShape(s, alpha=1, selected=false) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = s.color || '#000';
+  ctx.fillStyle = 'transparent';
+  ctx.lineWidth = s.w || 2;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (selected) { ctx.shadowColor = '#01c6f1'; ctx.shadowBlur = 8; }
+  switch(s.type) {
+    case 'line':
+      ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x2,s.y2); ctx.stroke();
+      break;
+    case 'rect':
+      ctx.strokeRect(s.x1,s.y1,s.x2-s.x1,s.y2-s.y1);
+      break;
+    case 'circle':
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,0,Math.PI*2); ctx.stroke();
+      break;
+    case 'arc':
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,s.a1,s.a2); ctx.stroke();
+      break;
+    case 'point':
+      ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2);
+      ctx.fillStyle = s.color; ctx.fill();
+      break;
+    case 'dimension':
+      drawDimension(s);
+      break;
+    case 'fillet':
+      ctx.beginPath(); ctx.arc(s.cx,s.cy,s.r,s.a1,s.a2); ctx.stroke();
+      break;
+    case 'chamfer':
+      ctx.beginPath(); ctx.moveTo(s.px1,s.py1); ctx.lineTo(s.px2,s.py2); ctx.stroke();
+      break;
+    case 'mirror_result':
+      s.shapes.forEach(ms => drawShape(ms));
+      break;
+  }
+  ctx.restore();
+}
+
+function drawDimension(s) {
+  const dx = s.x2-s.x1, dy = s.y2-s.y1;
+  const len = Math.hypot(dx,dy);
+  const ang = Math.atan2(dy,dx);
+  const off = 20;
+  const nx = -Math.sin(ang)*off, ny = Math.cos(ang)*off;
+  ctx.strokeStyle = s.color||'#555'; ctx.lineWidth = 1;
+  ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(s.x1,s.y1); ctx.lineTo(s.x1+nx,s.y1+ny); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x2,s.y2); ctx.lineTo(s.x2+nx,s.y2+ny); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(s.x1+nx,s.y1+ny); ctx.lineTo(s.x2+nx,s.y2+ny); ctx.stroke();
+  // arrows
+  const aw=6; const ax=Math.cos(ang), ay=Math.sin(ang);
+  ctx.beginPath(); ctx.moveTo(s.x1+nx,s.y1+ny); ctx.lineTo(s.x1+nx+ax*aw,s.y1+ny+ay*aw); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x2+nx,s.y2+ny); ctx.lineTo(s.x2+nx-ax*aw,s.y2+ny-ay*aw); ctx.stroke();
+  // label
+  const label = s.label || (len.toFixed(1)+'px');
+  ctx.font = '11px DM Mono, monospace';
+  ctx.fillStyle = s.color||'#555';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(label, (s.x1+s.x2)/2+nx, (s.y1+s.y2)/2+ny-3);
+}
+
+// ── REDRAW ──
+function redraw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // white canvas bg
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  if (showGrid) {
+    const step = 40;
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1;
+    for(let x=0;x<canvas.width;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+    for(let y=0;y<canvas.height;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    // major gridlines
+    ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=1;
+    for(let x=0;x<canvas.width;x+=step*5){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+    for(let y=0;y<canvas.height;y+=step*5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  }
+
+  shapes.forEach(s => drawShape(s, 1, s === selShape));
+
+  if (showPts) {
+    shapes.forEach(s => {
+      getKeyPoints(s).forEach(p => {
+        if (p.type === 'center') {
+          ctx.strokeStyle = '#01c6f1'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(p.x-4,p.y); ctx.lineTo(p.x+4,p.y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(p.x,p.y-4); ctx.lineTo(p.x,p.y+4); ctx.stroke();
+        } else if (p.type === 'midpoint') {
+          ctx.fillStyle='rgba(255,140,0,0.7)';
+          ctx.fillRect(p.x-3,p.y-3,6,6);
+        } else if (p.type === 'point') {
+          ctx.fillStyle='#01c6f1';
+          ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();
+        } else {
+          ctx.fillStyle='rgba(1,198,241,0.5)';
+          ctx.fillRect(p.x-3,p.y-3,6,6);
         }
+      });
+    });
+  }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+  // live preview while drawing
+  if (isDrawing) drawPreview();
+}
 
-        // Toolbar
-        document.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentTool = btn.dataset.tool;
-                document.getElementById('toolDisplay').textContent = 'Tool: ' + currentTool.charAt(0).toUpperCase() + currentTool.slice(1);
-            });
-        });
+function drawPreview() {
+  const ex = snapPt ? snapPt.x : mouseX;
+  const ey = snapPt ? snapPt.y : mouseY;
+  ctx.save(); ctx.globalAlpha=0.55; ctx.strokeStyle=color; ctx.lineWidth=strokeW;
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  switch(tool) {
+    case 'line':
+      ctx.beginPath(); ctx.moveTo(startX,startY); ctx.lineTo(ex,ey); ctx.stroke();
+      // length label
+      showMeasTip(startX,startY,ex,ey);
+      break;
+    case 'rect':
+      ctx.strokeRect(startX,startY,ex-startX,ey-startY);
+      break;
+    case 'circle':{
+      const r=Math.hypot(ex-startX,ey-startY);
+      ctx.beginPath(); ctx.arc(startX,startY,r,0,Math.PI*2); ctx.stroke();
+      showMeasTip(startX,startY,ex,ey,`r=${r.toFixed(1)}`);
+      break;}
+    case 'arc':
+      if (arcStep===1 && arcCenter) {
+        const r=Math.hypot(ex-arcCenter.x,ey-arcCenter.y);
+        ctx.setLineDash([4,4]);
+        ctx.beginPath();ctx.arc(arcCenter.x,arcCenter.y,r,0,Math.PI*2);ctx.stroke();
+        ctx.setLineDash([]);
+      } else if (arcStep===2 && arcCenter && arcStart) {
+        const r=Math.hypot(arcStart.x-arcCenter.x,arcStart.y-arcCenter.y);
+        const a1=Math.atan2(arcStart.y-arcCenter.y,arcStart.x-arcCenter.x);
+        const a2=Math.atan2(ey-arcCenter.y,ex-arcCenter.x);
+        ctx.beginPath();ctx.arc(arcCenter.x,arcCenter.y,r,a1,a2);ctx.stroke();
+      }
+      break;
+    case 'dimension':
+      drawDimension({x1:startX,y1:startY,x2:ex,y2:ey,color:'#888',w:1});
+      break;
+    case 'measure':
+      if (measStart) {
+        ctx.strokeStyle='#01c6f1'; ctx.lineWidth=1; ctx.setLineDash([5,4]);
+        ctx.beginPath();ctx.moveTo(measStart.x,measStart.y);ctx.lineTo(ex,ey);ctx.stroke();
+        ctx.setLineDash([]);
+        showMeasTip(measStart.x,measStart.y,ex,ey);
+      }
+      break;
+  }
+  ctx.restore();
+}
 
-        document.getElementById('colorPicker').addEventListener('change', (e) => {
-            currentColor = e.target.value;
-        });
+function showMeasTip(x1,y1,x2,y2,override) {
+  const dist = Math.hypot(x2-x1,y2-y1);
+  const txt = override || `${dist.toFixed(1)}px`;
+  const tip = document.getElementById('meas-tip');
+  tip.textContent = txt;
+  tip.style.display='block';
+  tip.style.left = ((x1+x2)/2+14)+'px';
+  tip.style.top = ((y1+y2)/2-12)+'px';
+}
+function hideMeasTip(){document.getElementById('meas-tip').style.display='none';}
 
-        document.getElementById('widthSlider').addEventListener('input', (e) => {
-            currentStrokeWidth = e.target.value;
-            document.getElementById('widthDisplay').textContent = e.target.value;
-        });
+// ── MOUSE EVENTS ──
+canvas.addEventListener('mousemove', e=>{
+  const r=canvas.getBoundingClientRect();
+  mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
+  const sp = snapPoint(mouseX,mouseY);
+  snapPt = sp.type ? sp : null;
+  // snap dot
+  const dot=document.getElementById('snap-dot');
+  if (snapPt && showSnap) {
+    dot.style.display='block';
+    dot.style.left=snapPt.x+'px'; dot.style.top=snapPt.y+'px';
+  } else { dot.style.display='none'; }
+  document.getElementById('coordDisplay').textContent=`X: ${Math.round(snapPt?.x??mouseX)}  Y: ${Math.round(snapPt?.y??mouseY)}`;
+  document.getElementById('status').textContent=`${tool} | ${Math.round(snapPt?.x??mouseX)}, ${Math.round(snapPt?.y??mouseY)}` + (snapPt?.type?` [${snapPt.type}]`:'');
 
-        // Display options
-        document.getElementById('showGrid').addEventListener('change', (e) => {
-            showGrid = e.target.checked;
-            redraw();
-        });
+  if (tool==='select' && isDrawing && selShape) {
+    const x=(snapPt?.x??mouseX), y=(snapPt?.y??mouseY);
+    moveShape(selShape, x-selDragOff.x, y-selDragOff.y);
+    redraw(); return;
+  }
 
-        document.getElementById('showPoints').addEventListener('change', (e) => {
-            showPoints = e.target.checked;
-            redraw();
-        });
+  if (isDrawing || (tool==='measure' && measStart)) redraw();
+});
 
-        document.getElementById('snapEnabled').addEventListener('change', (e) => {
-            snapEnabled = e.target.checked;
-        });
+canvas.addEventListener('mousedown', e=>{
+  const r=canvas.getBoundingClientRect();
+  const rx=e.clientX-r.left, ry=e.clientY-r.top;
+  const sp=snapPoint(rx,ry);
+  const x=sp.type?sp.x:rx, y=sp.type?sp.y:ry;
 
-        // Calibration
-        document.getElementById('calibrateBtn').addEventListener('click', () => {
-            if (shapes.length === 0) {
-                alert('Draw a line first to use as reference');
-                return;
-            }
-            const refLength = parseFloat(document.getElementById('refLength').value);
-            if (!refLength) {
-                alert('Enter reference length in cm');
-                return;
-            }
+  if (tool==='select') {
+    const hit = hitTest(x,y);
+    selShape = hit;
+    if (hit) { selDragOff={x:x-shapeOrigin(hit).x,y:y-shapeOrigin(hit).y}; isDrawing=true; }
+    redraw(); return;
+  }
+  if (tool==='delete') { const h=hitTest(x,y); if(h){saveHistory();shapes=shapes.filter(s=>s!==h);redraw();} return; }
+  if (tool==='measure') {
+    if (!measStart) { measStart={x,y}; } else {
+      const d=Math.hypot(x-measStart.x,y-measStart.y);
+      showToast(`Distance: ${d.toFixed(2)}px`);
+      measStart=null; hideMeasTip();
+    }
+    redraw(); return;
+  }
+  if (tool==='arc') {
+    if(arcStep===0){arcCenter={x,y};arcStep=1;}
+    else if(arcStep===1){arcStart={x,y};arcStep=2;}
+    else if(arcStep===2){
+      const r=Math.hypot(arcStart.x-arcCenter.x,arcStart.y-arcCenter.y);
+      const a1=Math.atan2(arcStart.y-arcCenter.y,arcStart.x-arcCenter.x);
+      const a2=Math.atan2(y-arcCenter.y,x-arcCenter.x);
+      saveHistory();shapes.push({type:'arc',cx:arcCenter.x,cy:arcCenter.y,r,a1,a2,color,w:strokeW});
+      arcStep=0;arcCenter=null;arcStart=null;redraw();
+    }
+    return;
+  }
+  isDrawing=true; startX=x; startY=y;
+});
 
-            const lastShape = shapes[shapes.length - 1];
-            if (lastShape.type !== 'line') {
-                alert('Select a line as reference');
-                return;
-            }
+canvas.addEventListener('mouseup', e=>{
+  if (!isDrawing) return;
+  const r=canvas.getBoundingClientRect();
+  const rx=e.clientX-r.left, ry=e.clientY-r.top;
+  const sp=snapPoint(rx,ry);
+  const x=sp.type?sp.x:rx, y=sp.type?sp.y:ry;
 
-            const dx = lastShape.x2 - lastShape.x1;
-            const dy = lastShape.y2 - lastShape.y1;
-            const pixelLength = Math.sqrt(dx * dx + dy * dy);
-            pixelsPerCm = pixelLength / refLength;
+  if (tool==='select') { isDrawing=false; selShape=null; return; }
 
-            const info = document.getElementById('calibrationInfo');
-            info.textContent = `✓ Calibrated: ${pixelsPerCm.toFixed(2)} px/cm`;
-            info.style.display = 'block';
-        });
+  const dist=Math.hypot(x-startX,y-startY);
+  if (dist>2) {
+    saveHistory();
+    switch(tool){
+      case 'line': shapes.push({type:'line',x1:startX,y1:startY,x2:x,y2:y,color,w:strokeW}); break;
+      case 'rect': shapes.push({type:'rect',x1:startX,y1:startY,x2:x,y2:y,color,w:strokeW}); break;
+      case 'circle':{const rad=Math.hypot(x-startX,y-startY);shapes.push({type:'circle',cx:startX,cy:startY,r:rad,color,w:strokeW});break;}
+      case 'dimension': shapes.push({type:'dimension',x1:startX,y1:startY,x2:x,y2:y,color:'#555',w:1,label:(Math.hypot(x-startX,y-startY).toFixed(1)+'px')}); break;
+    }
+    if (tool==='point') shapes.push({type:'point',x:startX,y:startY,color,w:strokeW});
+  } else if (tool==='point') {
+    saveHistory(); shapes.push({type:'point',x:startX,y:startY,color,w:strokeW});
+  }
+  isDrawing=false; hideMeasTip(); redraw();
+});
 
-        // Snapping
-        function findSnapPoint(x, y) {
-            if (!snapEnabled) return {x, y};
+// ── HIT TEST ──
+function hitTest(x,y) {
+  for(let i=shapes.length-1;i>=0;i--){
+    const s=shapes[i]; const T=10;
+    switch(s.type){
+      case 'line': if(ptLineDist(x,y,s.x1,s.y1,s.x2,s.y2)<T) return s; break;
+      case 'rect': if(ptRectEdgeDist(x,y,s)<T) return s; break;
+      case 'circle':{const d=Math.abs(Math.hypot(x-s.cx,y-s.cy)-s.r);if(d<T) return s;break;}
+      case 'point': if(Math.hypot(x-s.x,y-s.y)<T) return s; break;
+      case 'dimension': if(ptLineDist(x,y,s.x1,s.y1,s.x2,s.y2)<T+6) return s; break;
+      default: {const kp=getKeyPoints(s);if(kp.some(p=>Math.hypot(x-p.x,y-p.y)<T)) return s;} break;
+    }
+  }
+  return null;
+}
+function ptLineDist(px,py,x1,y1,x2,y2){
+  const A=px-x1,B=py-y1,C=x2-x1,D=y2-y1,dot=A*C+B*D,len2=C*C+D*D;
+  let t=len2?dot/len2:0; t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(x1+t*C),py-(y1+t*D));
+}
+function ptRectEdgeDist(x,y,s){
+  const x1=Math.min(s.x1,s.x2),x2=Math.max(s.x1,s.x2),y1=Math.min(s.y1,s.y2),y2=Math.max(s.y1,s.y2);
+  const d=Math.min(ptLineDist(x,y,x1,y1,x2,y1),ptLineDist(x,y,x2,y1,x2,y2),ptLineDist(x,y,x2,y2,x1,y2),ptLineDist(x,y,x1,y2,x1,y1));
+  return d;
+}
 
-            let nearest = {x, y, dist: SNAP_DISTANCE};
+// ── MOVE SHAPE ──
+function shapeOrigin(s){
+  switch(s.type){case 'line':case 'rect':case 'dimension':return{x:s.x1,y:s.y1};case 'circle':case 'arc':return{x:s.cx,y:s.cy};case 'point':return{x:s.x,y:s.y};}return{x:0,y:0};
+}
+function moveShape(s,nx,ny){
+  switch(s.type){
+    case 'line':case 'dimension':{const dx=nx-s.x1,dy=ny-s.y1;s.x1+=dx;s.y1+=dy;s.x2+=dx;s.y2+=dy;break;}
+    case 'rect':{const dx=nx-s.x1,dy=ny-s.y1;s.x1+=dx;s.y1+=dy;s.x2+=dx;s.y2+=dy;break;}
+    case 'circle':case 'arc':s.cx=nx;s.cy=ny;break;
+    case 'point':s.x=nx;s.y=ny;break;
+  }
+}
 
-            // Check endpoint snap
-            shapes.forEach(shape => {
-                if (shape.type === 'line' || shape.type === 'arc') {
-                    const points = [[shape.x1, shape.y1], [shape.x2, shape.y2]];
-                    points.forEach(([px, py]) => {
-                        const dist = Math.hypot(x - px, y - py);
-                        if (dist < nearest.dist) {
-                            nearest = {x: px, y: py, dist};
-                        }
-                    });
-                }
+// ── HISTORY ──
+function saveHistory(){redoStack=[];history.push(JSON.stringify(shapes));}
+function undo(){if(!history.length) return;redoStack.push(JSON.stringify(shapes));shapes=JSON.parse(history.pop());selShape=null;redraw();}
 
-                // Midpoint snap
-                if (shape.type === 'line') {
-                    const mx = (shape.x1 + shape.x2) / 2;
-                    const my = (shape.y1 + shape.y2) / 2;
-                    const dist = Math.hypot(x - mx, y - my);
-                    if (dist < nearest.dist) {
-                        nearest = {x: mx, y: my, dist};
-                    }
-                }
+// ── KEYBOARD ──
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  const map={v:'select',l:'line',r:'rect',c:'circle',a:'arc',p:'point',d:'delete'};
+  if(map[e.key.toLowerCase()]) setTool(map[e.key.toLowerCase()]);
+  if(e.key==='Delete'||e.key==='Backspace'){if(selShape){saveHistory();shapes=shapes.filter(s=>s!==selShape);selShape=null;redraw();}}
+  if((e.metaKey||e.ctrlKey)&&e.key==='z'){e.preventDefault();undo();}
+  if(e.key==='Escape'){isDrawing=false;arcStep=0;arcCenter=null;arcStart=null;measStart=null;selShape=null;hideMeasTip();redraw();}
+});
 
-                // Center snap for circles
-                if (shape.type === 'circle') {
-                    const dist = Math.hypot(x - shape.x1, y - shape.y1);
-                    if (dist < nearest.dist) {
-                        nearest = {x: shape.x1, y: shape.y1, dist};
-                    }
-                }
-            });
+// ── TOOL BUTTONS ──
+function setTool(t) {
+  tool=t; isDrawing=false; arcStep=0; arcCenter=null; arcStart=null; measStart=null; selShape=null;
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));
+  document.getElementById('toolDisplay').textContent='Tool: '+t.charAt(0).toUpperCase()+t.slice(1);
+  canvas.style.cursor = t==='select'?'default':t==='delete'?'not-allowed':'crosshair';
+  hideMeasTip(); redraw();
+}
+document.querySelectorAll('.tool-btn').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
 
-            // Point snap
-            points.forEach(p => {
-                const dist = Math.hypot(x - p.x, y - p.y);
-                if (dist < nearest.dist) {
-                    nearest = {x: p.x, y: p.y, dist};
-                }
-            });
+// ── CONTROLS ──
+document.getElementById('colorPicker').addEventListener('input',e=>{color=e.target.value;});
+document.getElementById('widthSlider').addEventListener('input',e=>{strokeW=+e.target.value;document.getElementById('widthVal').textContent=e.target.value;});
+document.getElementById('chkGrid').addEventListener('change',e=>{showGrid=e.target.checked;redraw();});
+document.getElementById('chkSnap').addEventListener('change',e=>{showSnap=e.target.checked;});
+document.getElementById('chkPts').addEventListener('change',e=>{showPts=e.target.checked;redraw();});
+document.getElementById('btn-undo').addEventListener('click',undo);
+document.getElementById('btn-clear').addEventListener('click',()=>{if(confirm('Clear all shapes?')){saveHistory();shapes=[];selShape=null;redraw();}});
 
-            return nearest.dist < SNAP_DISTANCE ? {x: nearest.x, y: nearest.y} : {x, y};
-        }
+// ── EXPORT ──
+document.getElementById('btn-png').addEventListener('click',()=>{
+  const link=document.createElement('a');link.href=canvas.toDataURL('image/png');link.download='sketch.png';link.click();
+  showToast('PNG exported');
+});
 
-        // Canvas interactions
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            document.getElementById('coordDisplay').textContent = `X: ${Math.round(x)} Y: ${Math.round(y)}`;
-            document.getElementById('statusBar').textContent = `${currentTool} | ${Math.round(x)}, ${Math.round(y)}`;
+document.getElementById('btn-svg').addEventListener('click',()=>{
+  let svg=`<svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
+  svg+=`<rect width="${canvas.width}" height="${canvas.height}" fill="white"/>`;
+  shapes.forEach(s=>{
+    const c=s.color||'#000'; const w=s.w||2;
+    switch(s.type){
+      case 'line': svg+=`<line x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`; break;
+      case 'rect': svg+=`<rect x="${Math.min(s.x1,s.x2)}" y="${Math.min(s.y1,s.y2)}" width="${Math.abs(s.x2-s.x1)}" height="${Math.abs(s.y2-s.y1)}" fill="none" stroke="${c}" stroke-width="${w}"/>`; break;
+      case 'circle': svg+=`<circle cx="${s.cx}" cy="${s.cy}" r="${s.r}" fill="none" stroke="${c}" stroke-width="${w}"/>`; break;
+      case 'point': svg+=`<circle cx="${s.x}" cy="${s.y}" r="3" fill="${c}"/>`; break;
+      case 'arc':{
+        const x1=s.cx+s.r*Math.cos(s.a1),y1=s.cy+s.r*Math.sin(s.a1);
+        const x2=s.cx+s.r*Math.cos(s.a2),y2=s.cy+s.r*Math.sin(s.a2);
+        const large=Math.abs(s.a2-s.a1)>Math.PI?1:0;
+        svg+=`<path d="M${x1} ${y1} A${s.r} ${s.r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${c}" stroke-width="${w}"/>`;
+        break;}
+    }
+  });
+  svg+='</svg>';
+  const blob=new Blob([svg],{type:'image/svg+xml'});
+  const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='sketch.svg';link.click();
+  showToast('SVG exported');
+});
 
-            if (!isDrawing) return;
+// ── TOAST ──
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
-            redraw();
-            drawPreview(x, y);
-        });
+// ── THEME ──
+const _sv=localStorage.getItem('theme')||'dark';
+document.documentElement.setAttribute('data-theme',_sv);
+document.getElementById('nav-logo').src=_sv==='dark'?'logo-dark.png':'logo-light.png';
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('nav-logo').src=t==='dark'?'logo-dark.png':'logo-light.png';
+  localStorage.setItem('theme',t);
+  redraw();
+}
 
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            let x = e.clientX - rect.left;
-            let y = e.clientY - rect.top;
-
-            const snapped = findSnapPoint(x, y);
-            x = snapped.x;
-            y = snapped.y;
-
-            if (currentTool === 'point') {
-                points.push({x, y});
-                history.push(JSON.stringify({shapes, points}));
-                redraw();
-            } else if (currentTool === 'delete') {
-                deleteAtPoint(x, y);
-                history.push(JSON.stringify({shapes, points}));
-                redraw();
-            } else {
-                isDrawing = true;
-                startX = x;
-                startY = y;
-                history.push(JSON.stringify({shapes, points}));
-            }
-        });
-
-        canvas.addEventListener('mouseup', (e) => {
-            if (!isDrawing) return;
-            isDrawing = false;
-
-            const rect = canvas.getBoundingClientRect();
-            let x = e.clientX - rect.left;
-            let y = e.clientY - rect.top;
-
-            const snapped = findSnapPoint(x, y);
-            x = snapped.x;
-            y = snapped.y;
-
-            addShape(startX, startY, x, y);
-            redraw();
-        });
-
-        function addShape(x1, y1, x2, y2) {
-            const shape = {
-                type: currentTool,
-                x1, y1, x2, y2,
-                color: currentColor,
-                width: currentStrokeWidth
-            };
-
-            shapes.push(shape);
-
-            // Auto add center point for circles
-            if (currentTool === 'circle') {
-                points.push({x: x1, y: y1});
-            }
-        }
-
-        function drawPreview(endX, endY) {
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentStrokeWidth;
-            ctx.globalAlpha = 0.6;
-
-            switch(currentTool) {
-                case 'line':
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-                    break;
-
-                case 'circle':
-                    const r = Math.hypot(endX - startX, endY - startY);
-                    ctx.beginPath();
-                    ctx.arc(startX, startY, r, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    break;
-
-                case 'rectangle':
-                    ctx.strokeRect(startX, startY, endX - startX, endY - startY);
-                    break;
-
-                case 'arc':
-                    const angle = Math.atan2(endY - startY, endX - startX);
-                    const arcR = Math.hypot(endX - startX, endY - startY);
-                    ctx.beginPath();
-                    ctx.arc(startX, startY, arcR, 0, angle);
-                    ctx.stroke();
-                    break;
-
-                case 'arc-multi':
-                    const r2 = Math.hypot(endX - startX, endY - startY);
-                    const angle2 = Math.atan2(endY - startY, endX - startX);
-                    ctx.beginPath();
-                    ctx.arc(startX, startY, r2, 0, angle2, false);
-                    ctx.stroke();
-                    break;
-
-                case 'dimension':
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-                    
-                    const dist = Math.hypot(endX - startX, endY - startY);
-                    const dimText = pixelsPerCm ? (dist / pixelsPerCm).toFixed(1) + 'cm' : Math.round(dist) + 'px';
-                    ctx.fillStyle = currentColor;
-                    ctx.font = 'bold 12px Arial';
-                    ctx.fillText(dimText, (startX + endX) / 2, (startY + endY) / 2 - 10);
-                    break;
-            }
-
-            ctx.globalAlpha = 1;
-        }
-
-        function redraw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Grid
-            if (showGrid) {
-                ctx.strokeStyle = '#f0f0f0';
-                ctx.lineWidth = 1;
-                for (let i = 0; i < canvas.width; i += 50) {
-                    ctx.beginPath();
-                    ctx.moveTo(i, 0);
-                    ctx.lineTo(i, canvas.height);
-                    ctx.stroke();
-                }
-                for (let i = 0; i < canvas.height; i += 50) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, i);
-                    ctx.lineTo(canvas.width, i);
-                    ctx.stroke();
-                }
-            }
-
-            // Draw shapes
-            shapes.forEach(shape => {
-                ctx.strokeStyle = shape.color;
-                ctx.lineWidth = shape.width;
-                ctx.fillStyle = 'transparent';
-
-                switch(shape.type) {
-                    case 'line':
-                    case 'dimension':
-                        ctx.beginPath();
-                        ctx.moveTo(shape.x1, shape.y1);
-                        ctx.lineTo(shape.x2, shape.y2);
-                        ctx.stroke();
-
-                        if (shape.type === 'dimension') {
-                            const dist = Math.hypot(shape.x2 - shape.x1, shape.y2 - shape.y1);
-                            const dimText = pixelsPerCm ? (dist / pixelsPerCm).toFixed(1) + 'cm' : Math.round(dist) + 'px';
-                            ctx.fillStyle = shape.color;
-                            ctx.font = 'bold 12px Arial';
-                            ctx.fillText(dimText, (shape.x1 + shape.x2) / 2 + 5, (shape.y1 + shape.y2) / 2 - 10);
-                        }
-                        break;
-
-                    case 'circle':
-                        const r = Math.hypot(shape.x2 - shape.x1, shape.y2 - shape.y1);
-                        ctx.beginPath();
-                        ctx.arc(shape.x1, shape.y1, r, 0, 2 * Math.PI);
-                        ctx.stroke();
-                        break;
-
-                    case 'rectangle':
-                        ctx.strokeRect(shape.x1, shape.y1, shape.x2 - shape.x1, shape.y2 - shape.y1);
-                        break;
-
-                    case 'arc':
-                    case 'arc-multi':
-                        const angle = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1);
-                        const arcR = Math.hypot(shape.x2 - shape.x1, shape.y2 - shape.y1);
-                        ctx.beginPath();
-                        ctx.arc(shape.x1, shape.y1, arcR, 0, angle);
-                        ctx.stroke();
-                        break;
-                }
-            });
-
-            // Draw points
-            if (showPoints) {
-                ctx.fillStyle = '#2196F3';
-                points.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
-                    ctx.fill();
-                });
-            }
-
-            // Draw snap indicator
-            if (snapEnabled) {
-                ctx.strokeStyle = 'rgba(33, 150, 243, 0.3)';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-                shapes.forEach(shape => {
-                    if (shape.type === 'line') {
-                        ctx.beginPath();
-                        ctx.moveTo(shape.x1, shape.y1);
-                        ctx.lineTo(shape.x2, shape.y2);
-                        ctx.stroke();
-                    }
-                });
-                ctx.setLineDash([]);
-            }
-        }
-
-        function deleteAtPoint(x, y) {
-            shapes = shapes.filter(shape => {
-                const d1 = Math.hypot(x - shape.x1, y - shape.y1);
-                const d2 = Math.hypot(x - shape.x2, y - shape.y2);
-                return Math.min(d1, d2) > 10;
-            });
-
-            points = points.filter(p => {
-                return Math.hypot(x - p.x, y - p.y) > 10;
-            });
-        }
-
-        // Actions
-        document.getElementById('undoBtn').addEventListener('click', () => {
-            if (history.length > 0) {
-                const state = JSON.parse(history.pop());
-                shapes = state.shapes;
-                points = state.points;
-                redraw();
-            }
-        });
-
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm('Clear all?')) {
-                shapes = [];
-                points = [];
-                history = [];
-                redraw();
-            }
-        });
-
-        // Export
-        document.getElementById('exportPNG').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'sketch.png';
-            link.click();
-        });
-
-        document.getElementById('exportSVG').addEventListener('click', () => {
-            let svg = `<svg width="${canvas.width}" height="${canvas.height}" xmlns="http://www.w3.org/2000/svg">`;
-            svg += `<rect width="${canvas.width}" height="${canvas.height}" fill="white"/>`;
-
-            shapes.forEach(shape => {
-                switch(shape.type) {
-                    case 'line':
-                    case 'dimension':
-                        svg += `<line x1="${shape.x1}" y1="${shape.y1}" x2="${shape.x2}" y2="${shape.y2}" stroke="${shape.color}" stroke-width="${shape.width}"/>`;
-                        break;
-                    case 'circle':
-                        const r = Math.hypot(shape.x2 - shape.x1, shape.y2 - shape.y1);
-                        svg += `<circle cx="${shape.x1}" cy="${shape.y1}" r="${r}" fill="none" stroke="${shape.color}" stroke-width="${shape.width}"/>`;
-                        break;
-                    case 'rectangle':
-                        svg += `<rect x="${shape.x1}" y="${shape.y1}" width="${shape.x2 - shape.x1}" height="${shape.y2 - shape.y1}" fill="none" stroke="${shape.color}" stroke-width="${shape.width}"/>`;
-                        break;
-                }
-            });
-
-            points.forEach(p => {
-                svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#2196F3"/>`;
-            });
-
-            svg += '</svg>';
-            const blob = new Blob([svg], {type: 'image/svg+xml'});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'sketch.svg';
-            link.click();
-        });
-
-        document.getElementById('exportPDF').addEventListener('click', () => {
-            html2canvas(canvas, {backgroundColor: '#ffffff'}).then(canvasImage => {
-                const imgData = canvasImage.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-                    unit: 'px',
-                    format: [canvas.width, canvas.height]
-                });
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                pdf.save('sketch.pdf');
-            });
-        });
-
-        redraw();
-    </script>
+redraw();
+</script>
 </body>
 </html>

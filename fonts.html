@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Font Picker — Tibet's Tools</title>
+<link rel="icon" type="image/png" href="logo-light.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&family=Boogaloo&family=Fredoka+One&family=Lilita+One&family=Titan+One&family=Fugaz+One&family=Luckiest+Guy&family=Black+Han+Sans&family=Russo+One&family=Alfa+Slab+One&family=Patua+One&family=Ultra&family=Permanent+Marker&family=Bangers&family=Boogaloo&family=Rubik+Mono+One&family=Bowlby+One+SC&family=Syne:wght@700;800&family=Outfit:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Nunito:wght@700;800&family=Poppins:wght@600;700&family=Raleway:wght@700;800&family=Josefin+Sans:wght@700&family=Exo+2:wght@700;800&family=Oxanium:wght@700;800&family=Orbitron:wght@700;800&family=Audiowide&family=Michroma&family=Rajdhani:wght@700&family=Chakra+Petch:wght@700&family=Syncopate:wght@700&family=DM+Sans:wght@700;800&family=Manrope:wght@700;800&family=Figtree:wght@700;800&family=Barlow:wght@700;800&family=Mulish:wght@700;800&family=Jost:wght@700;800&family=Kanit:wght@700&family=Teko:wght@700&family=Saira:wght@700;800&family=Oswald:wght@700&family=Anton&family=Fjalla+One&family=Squada+One&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@700;800&family=Fira+Sans+Condensed:wght@700&family=Francois+One&family=Bree+Serif&family=Abril+Fatface&family=Playfair+Display:wght@700;800;900&family=Libre+Baskerville:wght@700&family=Lora:wght@700&family=Merriweather:wght@700;900&family=Bitter:wght@700;800&family=Crimson+Pro:wght@700;800&family=Bodoni+Moda:wght@700;800;900&family=Cormorant+Garamond:wght@700&family=EB+Garamond:wght@700;800&family=Spectral:wght@700;800&family=DM+Serif+Display&family=Zilla+Slab:wght@700&family=Domine:wght@700&family=Arvo:wght@700&family=Noticia+Text:wght@700&family=Courier+Prime:wght@700&family=DM+Mono:wght@500&family=JetBrains+Mono:wght@700;800&family=Fira+Code:wght@700&family=Space+Mono:wght@700&family=IBM+Plex+Mono:wght@700&family=Source+Code+Pro:wght@700;800&family=Roboto+Mono:wght@700&family=Share+Tech+Mono&family=Xanh+Mono&family=VT323&family=Press+Start+2P&family=Silkscreen&family=Pixelify+Sans:wght@700&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Satisfy&family=Sacramento&family=Great+Vibes&family=Allura&family=Kaushan+Script&family=Lobster&family=Lobster+Two:wght@700&family=Courgette&family=Yellowtail&family=Cookie&family=Parisienne&family=Italianno&family=Alex+Brush&family=Cinzel:wght@700;800;900&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=UnifrakturCook:wght@700&family=Special+Elite&family=Gravitas+One&family=Rye&family=Pirata+One&family=Almendra:wght@700&family=Fondamento&family=Creepster&display=swap" rel="stylesheet"/>
 <style>
@@ -16,7 +17,8 @@
     --text: #f0f0ff;
     --text2: #7070a0;
     --accent: #01c6f1;
-    --tag-bg: #1e1e2e;
+    --tag-bg: #1c1c24;
+    --grid-color: rgba(1,198,241,0.025);
   }
 
   [data-theme="light"] {
@@ -27,21 +29,12 @@
     --text2: #6060a0;
     --accent: #0099cc;
     --tag-bg: #ebebf2;
-  }
-
-  html { transition: background 0.3s, color 0.3s; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    padding: 40px 24px 80px;
+    --grid-color: rgba(0,153,204,0.04);
   }
 
   header {
     text-align: center;
-    margin-bottom: 48px;
+    padding: 48px 0 32px;
   }
 
   header h1 {
@@ -49,23 +42,37 @@
     font-size: clamp(40px, 8vw, 80px);
     font-weight: 900;
     letter-spacing: -1px;
-    background: linear-gradient(90deg, #01c6f1, #6aff7e);
+    background: linear-gradient(90deg, var(--accent), #6aff7e);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1;
   }
 
-  header p {
-    color: var(--text2);
-    font-size: 13px;
-    margin-top: 10px;
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 0 24px 80px;
+    position: relative;
   }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(var(--grid-color,rgba(1,198,241,0.025)) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color,rgba(1,198,241,0.025)) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .page-content { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 24px 0 80px; }
 
   /* Sticky search + filters */
   .controls {
     position: sticky;
-    top: 0;
+    top: 56px;
     z-index: 100;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
@@ -272,7 +279,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #0a0a10;
+    background: var(--bg2);
     border-top: 1px solid var(--border);
     padding: 12px 24px;
     display: flex;
@@ -341,7 +348,7 @@
 </head>
 <body>
 
-<nav style="position:sticky;top:0;z-index:200;background:rgba(14,14,18,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
+<nav style="position:sticky;top:0;z-index:200;background:rgba(14,14,18,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;" id="main-nav">
   <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
     <img id="nav-logo" src="logo-dark.png" style="width:30px;height:30px;object-fit:contain;" alt="Logo"/>
   </a>
@@ -356,8 +363,9 @@
 
 <header>
   <h1>FONT PICKER</h1>
-  <p>Click to select · Multi-select supported · Copy import link when done</p>
 </header>
+
+<div class="page-content">
 
 <div class="controls">
   <div class="search-wrap">
@@ -366,7 +374,7 @@
   </div>
   <div class="preview-text-wrap">
     <label>PREVIEW TEXT</label>
-    <input type="text" id="preview-text" value="OnExport" oninput="updatePreview()"/>
+    <input type="text" id="preview-text" value="Font Picker" oninput="updatePreview()"/>
   </div>
   <div class="cat-tabs" id="cat-tabs"></div>
 </div>
@@ -512,7 +520,7 @@ const FONTS = [
 const CATS = [...new Set(FONTS.map(f => f.cat))];
 let activecat = 'All';
 let selected = new Set();
-let previewText = 'OnExport';
+let previewText = 'Font Picker';
 
 // Build category tabs
 const tabsEl = document.getElementById('cat-tabs');
@@ -627,7 +635,7 @@ function copyImport() {
 }
 
 function updatePreview() {
-  previewText = document.getElementById('preview-text').value || 'OnExport';
+  previewText = document.getElementById('preview-text').value || 'Font Picker';
   document.querySelectorAll('.font-preview').forEach((el, i) => {
     el.textContent = previewText;
   });
@@ -646,6 +654,11 @@ function showToast(msg) {
 const _saved = localStorage.getItem('theme') || 'dark';
 document.documentElement.setAttribute('data-theme', _saved);
 document.getElementById('nav-logo').src = _saved === 'dark' ? 'logo-dark.png' : 'logo-light.png';
+const _nav = document.getElementById('main-nav');
+function _updateNav(t) {
+  if (_nav) _nav.style.background = t === 'light' ? 'rgba(244,244,248,0.92)' : 'rgba(14,14,18,0.92)';
+}
+_updateNav(_saved);
 if (_saved === 'light') { document.getElementById('icon-moon').style.display='none'; document.getElementById('icon-sun').style.display='block'; }
 function toggleTheme() {
   const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -653,6 +666,7 @@ function toggleTheme() {
   document.getElementById('nav-logo').src = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
   document.getElementById('icon-moon').style.display = t === 'dark' ? 'block' : 'none';
   document.getElementById('icon-sun').style.display  = t === 'light' ? 'block' : 'none';
+  _updateNav(t);
   localStorage.setItem('theme', t);
 }
 // Init

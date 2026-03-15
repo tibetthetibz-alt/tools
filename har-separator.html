@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HAR Separator — Tibet's Tools</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo-light.png"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,6 +20,7 @@
       --text: #e8edf3;
       --muted: #6b7685;
       --danger: #ff4757;
+      --nav-bg: rgba(10,12,16,0.92);
     }
 
     [data-theme="light"] {
@@ -32,6 +34,7 @@
       --text: #0a0c10;
       --muted: #5a6270;
       --danger: #cc2233;
+      --nav-bg: rgba(244,246,248,0.92);
     }
 
     html { transition: background 0.3s, color 0.3s; }
@@ -94,7 +97,7 @@
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1;
-      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      background: linear-gradient(135deg, var(--text) 30%, var(--accent) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -649,7 +652,7 @@
   </style>
 </head>
 <body>
-  <nav style="position:sticky;top:0;z-index:200;background:rgba(10,12,16,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
+  <nav style="position:sticky;top:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
     <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
       <img id="nav-logo" src="logo-dark.png" style="width:30px;height:30px;object-fit:contain;" alt="Logo"/>
     </a>
@@ -667,7 +670,7 @@
         <span class="logo-tag">// tool</span>
         <h1>HAR Separator</h1>
       </div>
-      <div class="subtitle">Parse, filter & extract individual requests from .har network archives</div>
+      <div class="subtitle"></div>
     </header>
 
     <div id="upload-section">

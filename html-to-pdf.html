@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HTML → PDF — Tibet's Tools</title>
+<link rel="icon" type="image/png" href="logo-light.png"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -30,6 +31,7 @@
     --light: #b0aec8;
     --mono: 'JetBrains Mono', monospace;
     --sans: 'Inter', sans-serif;
+    --nav-bg: rgba(12,12,14,0.92);
   }
 
   [data-theme="light"] {
@@ -49,6 +51,7 @@
     --text: #0e0e1a;
     --muted: #5a5a7a;
     --light: #4a4a6a;
+    --nav-bg: rgba(244,244,248,0.92);
   }
 
   html { transition: background 0.3s, color 0.3s; }
@@ -122,7 +125,7 @@
     display: grid;
     grid-template-columns: 380px 1fr;
     gap: 0;
-    height: calc(100vh - 65px);
+    height: calc(100vh - 57px);
     overflow: hidden;
   }
 
@@ -643,7 +646,7 @@
 </style>
 </head>
 <body>
-<nav style="position:sticky;top:0;z-index:200;background:rgba(12,12,14,0.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
+<nav style="position:sticky;top:0;z-index:200;background:var(--nav-bg,rgba(12,12,14,0.92));backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;">
   <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
     <img id="nav-logo" src="logo-dark.png" style="width:30px;height:30px;object-fit:contain;" alt="Logo"/>
   </a>
@@ -657,21 +660,7 @@
 </nav>
 <div class="app">
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="9" y1="13" x2="15" y2="13"/>
-          <line x1="9" y1="17" x2="12" y2="17"/>
-        </svg>
-      </div>
-      <span class="logo-text">HTML <span>→</span> PDF</span>
-    </div>
-    <div class="header-badge">v1.0 · CLIENT-SIDE</div>
-  </header>
+  <!-- HEADER removed -->
 
   <main>
     <!-- LEFT PANEL -->
