@@ -602,6 +602,88 @@
     return urls;
   }
 
+  async function findSitemap(baseUrl) {
+    addDevLog('🔍 Looking for sitemap...', 'info');
+    
+    const possibleLocations = [
+      '/sitemap.xml',
+      '/sitemap-index.xml',
+      '/sitemap1.xml',
+      '/sitemap_index.xml',
+      '/sitemaps/sitemap.xml',
+      '/wp-sitemap.xml'
+    ];
+
+    for (const location of possibleLocations) {
+      try {
+        const sitemapUrl = new URL(location, baseUrl).href;
+        const response = await fetchWithTimeout(sitemapUrl, 10);
+        
+        if (response.ok) {
+          const text = await response.text();
+          if (text.includes('<urlset') || text.includes('<sitemapindex')) {
+            addDevLog(`✓ Found sitemap: ${location}`, 'success');
+            return { url: sitemapUrl, content: text };
+          }
+        }
+      } catch (err) {
+        // Try next location
+      }
+    }
+
+    // Try robots.txt
+    try {
+      const robotsUrl = new URL('/robots.txt', baseUrl).href;
+      const response = await fetchWithTimeout(robotsUrl, 10);
+      if (response.ok) {
+        const text = await response.text();
+        const sitemapMatch = text.match(/Sitemap:\s*(.+)/i);
+        if (sitemapMatch) {
+          const sitemapUrl = sitemapMatch[1].trim();
+          addDevLog(`✓ Found sitemap in robots.txt: ${sitemapUrl}`, 'success');
+          const sitemapResponse = await fetchWithTimeout(sitemapUrl, 10);
+          const sitemapContent = await sitemapResponse.text();
+          return { url: sitemapUrl, content: sitemapContent };
+        }
+      }
+    } catch (err) {
+      // No robots.txt
+    }
+
+    addDevLog('✗ No sitemap found', 'warn');
+    return null;
+  }
+
+  function extractUrlsFromSitemap(sitemapContent) {
+    const urls = new Set();
+    
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(sitemapContent, 'text/xml');
+      
+      // Check for parse errors
+      if (xmlDoc.documentElement.nodeName === 'parsererror') {
+        addDevLog('✗ Error parsing sitemap XML', 'error');
+        return urls;
+      }
+
+      // Extract URLs from sitemap entries
+      const locElements = xmlDoc.getElementsByTagName('loc');
+      for (let i = 0; i < locElements.length; i++) {
+        const url = locElements[i].textContent.trim();
+        if (url) {
+          urls.add(url);
+        }
+      }
+
+      addDevLog(`🔗 Extracted ${urls.size} URLs from sitemap`, 'debug');
+    } catch (err) {
+      addDevLog(`✗ Sitemap parsing error: ${err.message.substring(0, 40)}`, 'error');
+    }
+
+    return urls;
+  }
+
   async function crawl() {
     const startUrl = urlInput.value.trim();
     if (!startUrl) {
@@ -636,6 +718,23 @@
 
       addDevLog(`Base domain: ${baseDomain}`, 'debug');
       addDevLog(`Follow external: ${followExternalCheckbox.checked}`, 'debug');
+
+      // Try to find and parse sitemap
+      const sitemap = await findSitemap(startUrl);
+      if (sitemap) {
+        const sitemapUrls = extractUrlsFromSitemap(sitemap.content);
+        if (sitemapUrls.size > 0) {
+          log(`✓ Found sitemap with ${sitemapUrls.size} URLs`, 'success');
+          addDevLog(`📋 Adding ${sitemapUrls.size} URLs from sitemap to queue`, 'info');
+          
+          // Add sitemap URLs to queue
+          for (const url of sitemapUrls) {
+            if (!crawlerState.visited.has(url)) {
+              crawlerState.queue.push(url);
+            }
+          }
+        }
+      }
 
       let maxPages = parseInt(maxPagesInput.value);
       let processed = 0;
