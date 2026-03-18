@@ -188,9 +188,7 @@
 
   <div class="crawler-container">
     <div class="info-box">
-      <strong>🕷️ Download entire websites in your browser:</strong> No installation needed! Just enter a URL and download all pages, assets, and content as a zip file labeled "Downloaded Websites".
-      <br><br>
-      <strong>⚠️ CORS Note:</strong> Some websites block browser requests for security reasons. If you get "Failed to fetch" errors, try a different site or use the Node.js/Python crawlers from <code>crawler-files/</code> for unrestricted access.
+      <strong>🕷️ Download entire websites in your browser:</strong> No installation needed! Loads websites in a hidden iframe in the background and saves everything. Works with most sites including those with CORS restrictions. Exports to "Downloaded Websites.zip".
     </div>
 
     <form id="crawlerForm">
@@ -278,6 +276,9 @@
 
   <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></footer>
 </div>
+
+<!-- Hidden iframe for loading websites -->
+<iframe id="crawler-iframe" style="display:none; position:fixed; top:0; left:0; width:1px; height:1px; pointer-events:none; z-index:-9999;" sandbox="allow-same-origin allow-scripts"></iframe>
 
 <!-- Status Bar (Bottom Right) -->
 <div class="status-bar">
@@ -452,28 +453,88 @@
 
     try {
       updateStatus(url);
-      const response = await fetchWithTimeout(url, parseInt(timeoutInput.value));
-      if (!response.ok) {
-        addDevLog(`✗ HTTP ${response.status}: ${url.substring(0, 40)}`, 'error');
-        return null;
-      }
+      
+      // Try fetch first (for CORS-enabled sites)
+      try {
+        const response = await fetchWithTimeout(url, parseInt(timeoutInput.value));
+        if (!response.ok) {
+          addDevLog(`✗ HTTP ${response.status}: ${url.substring(0, 40)}`, 'error');
+          return downloadViaIframe(url);
+        }
 
-      const blob = await response.blob();
-      const path = sanitizePath(url);
-      
-      crawlerState.files[path] = blob;
-      crawlerState.stats.files++;
-      crawlerState.stats.bytes += blob.size;
-      
-      addDevLog(`✓ Downloaded: ${path}`, 'success');
-      log(`✓ ${url.substring(0, 60)}...`, 'success');
-      return blob;
+        const blob = await response.blob();
+        const path = sanitizePath(url);
+        
+        crawlerState.files[path] = blob;
+        crawlerState.stats.files++;
+        crawlerState.stats.bytes += blob.size;
+        
+        addDevLog(`✓ Downloaded: ${path}`, 'success');
+        log(`✓ ${url.substring(0, 60)}...`, 'success');
+        return blob;
+      } catch (fetchErr) {
+        // Fetch failed, try iframe method
+        addDevLog(`⚠ Fetch failed, trying iframe...`, 'warn');
+        return await downloadViaIframe(url);
+      }
     } catch (err) {
       addDevLog(`✗ Error: ${err.message.substring(0, 40)}`, 'error');
       log(`✗ ${url.substring(0, 60)}...`, 'error');
       crawlerState.stats.errors++;
       return null;
     }
+  }
+
+  async function downloadViaIframe(url) {
+    return new Promise((resolve) => {
+      const iframe = document.getElementById('crawler-iframe');
+      const timeout = parseInt(timeoutInput.value) * 1000;
+      
+      const timeoutId = setTimeout(() => {
+        addDevLog(`✗ Iframe timeout: ${url.substring(0, 40)}`, 'error');
+        iframe.src = 'about:blank';
+        resolve(null);
+      }, timeout);
+
+      iframe.onload = () => {
+        clearTimeout(timeoutId);
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          if (!iframeDoc) {
+            addDevLog(`✗ Cannot access iframe: ${url.substring(0, 40)}`, 'error');
+            iframe.src = 'about:blank';
+            resolve(null);
+            return;
+          }
+
+          const html = new XMLSerializer().serializeToString(iframeDoc.documentElement);
+          const blob = new Blob([html], { type: 'text/html' });
+          const path = sanitizePath(url);
+          
+          crawlerState.files[path] = blob;
+          crawlerState.stats.files++;
+          crawlerState.stats.bytes += blob.size;
+          
+          addDevLog(`✓ Downloaded (iframe): ${path}`, 'success');
+          log(`✓ ${url.substring(0, 60)}...`, 'success');
+          iframe.src = 'about:blank';
+          resolve(blob);
+        } catch (err) {
+          addDevLog(`✗ Iframe error: ${err.message.substring(0, 30)}`, 'error');
+          iframe.src = 'about:blank';
+          resolve(null);
+        }
+      };
+
+      iframe.onerror = () => {
+        clearTimeout(timeoutId);
+        addDevLog(`✗ Iframe error: ${url.substring(0, 40)}`, 'error');
+        iframe.src = 'about:blank';
+        resolve(null);
+      };
+
+      iframe.src = url;
+    });
   }
 
   function extractUrls(html, baseUrl) {
