@@ -188,7 +188,7 @@
 
   <div class="crawler-container">
     <div class="info-box">
-      <strong>🕷️ Download entire websites in your browser:</strong> No installation needed! Loads websites in a hidden iframe in the background and saves everything. Works with most sites including those with CORS restrictions. Exports to "Downloaded Websites.zip".
+      <strong>🕷️ Download entire websites in your browser:</strong> Loads websites in a hidden iframe and crawls only pages on the same domain. Finds sitemap automatically. Exports to "Downloaded Websites.zip".
     </div>
 
     <form id="crawlerForm">
@@ -211,10 +211,6 @@
       <div class="form-group">
         <label>Options</label>
         <div class="checkbox-group">
-          <div class="checkbox-item">
-            <input type="checkbox" id="followExternal" checked/>
-            <label for="followExternal">Follow external links</label>
-          </div>
           <div class="checkbox-item">
             <input type="checkbox" id="includeAssets" checked/>
             <label for="includeAssets">Download assets (CSS, JS, images)</label>
@@ -532,16 +528,17 @@
           addDevLog(`✓ Downloaded (iframe): ${path}`, 'success');
           log(`✓ ${url.substring(0, 60)}...`, 'success');
           
-          // Add found links to queue
+          // Add found links to queue (SAME DOMAIN ONLY)
           for (const link of iframeLinks) {
             if (!crawlerState.visited.has(link)) {
               try {
                 const u = new URL(link);
-                crawlerState.stats.domains.add(u.hostname);
+                // Get base domain from start URL
+                const startUrlObj = new URL(crawlerState.queue[0] || link);
+                const baseDomain = startUrlObj.hostname;
                 
-                const shouldFollow = followExternalCheckbox.checked || u.hostname === url.split('/')[2];
-                
-                if (shouldFollow && crawlerState.queue.length < 200) {
+                // Only add if SAME domain
+                if (u.hostname === baseDomain && crawlerState.queue.length < 200) {
                   crawlerState.queue.push(link);
                 }
               } catch {}
@@ -710,11 +707,17 @@
           log(`✓ Found sitemap with ${sitemapUrls.size} URLs`, 'success');
           addDevLog(`📋 Adding ${sitemapUrls.size} URLs from sitemap to queue`, 'info');
           
-          // Add sitemap URLs to queue
+      // Add sitemap URLs to queue
           for (const url of sitemapUrls) {
-            if (!crawlerState.visited.has(url)) {
-              crawlerState.queue.push(url);
-            }
+            try {
+              const sitemapUrlObj = new URL(url);
+              // Only add if same domain
+              if (sitemapUrlObj.hostname === baseDomain) {
+                if (!crawlerState.visited.has(url)) {
+                  crawlerState.queue.push(url);
+                }
+              }
+            } catch {}
           }
         }
       }
@@ -756,11 +759,9 @@
             if (!crawlerState.visited.has(newUrl)) {
               try {
                 const u = new URL(newUrl);
-                crawlerState.stats.domains.add(u.hostname);
                 
-                const shouldFollow = followExternalCheckbox.checked || u.hostname === baseDomain;
-                
-                if (shouldFollow && crawlerState.queue.length < 200) {
+                // ONLY follow if SAME domain as base domain
+                if (u.hostname === baseDomain && crawlerState.queue.length < 200) {
                   crawlerState.queue.push(newUrl);
                 }
               } catch {}
