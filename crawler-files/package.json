@@ -1,0 +1,30 @@
+{
+  "name": "website-crawler",
+  "version": "1.0.0",
+  "description": "Complete website crawler that downloads all pages and assets to local disk",
+  "main": "crawler.js",
+  "bin": {
+    "website-crawler": "crawler.js"
+  },
+  "scripts": {
+    "start": "node crawler.js",
+    "crawl": "node crawler.js"
+  },
+  "keywords": [
+    "crawler",
+    "scraper",
+    "website",
+    "download",
+    "archiver"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "p-limit": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

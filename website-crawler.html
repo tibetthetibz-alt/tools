@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Crawler - Tibet's Tools</title>
+  <link rel="icon" type="image/png" href="logo-light.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0e0e12; --bg2:#16161c; --bg3:#1c1c24; --border:#2a2a38;
+      --text:#f0f0ff; --text2:#7070a0;
+      --accent:#01c6f1; --accent2:#1BD3D6; --accent3:#27DEC4; --green:#6AFF7E; --teal:#46EDA5;
+      --nav-bg:rgba(14,14,18,0.92); --grid-color:rgba(1,198,241,0.025);
+    }
+    [data-theme="light"] {
+      --bg:#f4f4f8; --bg2:#ffffff; --bg3:#ebebf2; --border:#d0d0e0;
+      --text:#0e0e1a; --text2:#6060a0;
+      --accent:#0099cc; --accent2:#1aacb0; --accent3:#1dbfa0; --green:#22a83a; --teal:#2db87a;
+      --nav-bg:rgba(244,244,248,0.92); --grid-color:rgba(0,153,204,0.04);
+    }
+    html,body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; overflow-x:hidden; transition:background .3s,color .3s; }
+    body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; z-index:0; }
+    .wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 24px 100px; }
+    nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; justify-content:space-between; transition:background .3s,border-color .3s; }
+    .nav-left { display:flex; align-items:center; gap:12px; text-decoration:none; }
+    .nav-logo-img { width:32px; height:32px; object-fit:contain; }
+    .nav-right { display:flex; align-items:center; gap:14px; }
+    .nav-tag { font-size:10px; letter-spacing:.2em; color:var(--text2); text-transform:uppercase; }
+    .theme-toggle { width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+    .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
+    .icon-sun{display:none} .icon-moon{display:block}
+    [data-theme="light"] .icon-sun{display:block} [data-theme="light"] .icon-moon{display:none}
+    
+    .hero { padding:80px 0 64px; text-align:center; }
+    .hero-logo, .nav-logo-img { visibility:hidden; }
+    .hero-logo { width:72px; height:72px; margin:0 auto 24px; display:block; object-fit:contain; }
+    .hero h1 {
+      font-family:'Big Shoulders Display',sans-serif;
+      font-size:clamp(56px,12vw,120px); font-weight:900; line-height:.9; letter-spacing:-2px;
+      background:linear-gradient(135deg, #6AFF7E 0%, #27DEC4 35%, #01c6f1 65%, #00007E 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      margin-bottom:24px;
+    }
+    [data-theme="light"] .hero h1 {
+      background:linear-gradient(135deg, #22a83a 0%, #1dbfa0 35%, #0099cc 65%, #000066 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    
+    .crawler-container { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:32px; margin:32px 0; }
+    .form-group { margin-bottom:24px; }
+    .form-group label { display:block; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text2); margin-bottom:8px; }
+    .form-group input, .form-group select { width:100%; padding:10px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:14px; transition:border-color .2s; }
+    .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--accent); }
+    .form-group input::placeholder { color:var(--text2); }
+    
+    .checkbox-group { display:flex; gap:16px; flex-wrap:wrap; }
+    .checkbox-item { display:flex; align-items:center; gap:8px; }
+    .checkbox-item input[type="checkbox"] { width:16px; height:16px; cursor:pointer; accent-color:var(--accent); }
+    .checkbox-item label { margin:0; cursor:pointer; }
+    
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width:640px) { .form-row { grid-template-columns:1fr; } }
+    
+    .button-group { display:flex; gap:12px; }
+    .btn { padding:10px 20px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text); cursor:pointer; font-family:inherit; font-size:12px; letter-spacing:.1em; text-transform:uppercase; transition:all .2s; flex:1; }
+    .btn:hover { border-color:var(--accent); color:var(--accent); }
+    .btn-primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+    .btn-primary:hover { background:var(--accent2); border-color:var(--accent2); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    
+    .output-section { margin-top:32px; }
+    .output-title { font-family:'Big Shoulders Display',sans-serif; font-size:18px; font-weight:800; margin-bottom:12px; }
+    .terminal { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:16px; max-height:400px; overflow-y:auto; font-size:11px; line-height:1.6; color:var(--text2); font-family:monospace; }
+    .terminal-line { margin-bottom:4px; }
+    .terminal-success { color:var(--green); }
+    .terminal-error { color:#ff6b6b; }
+    .terminal-info { color:var(--accent); }
+    
+    .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:16px; }
+    .summary-item { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+    .summary-label { font-size:10px; color:var(--text2); letter-spacing:.1em; text-transform:uppercase; }
+    .summary-value { font-family:'Big Shoulders Display',sans-serif; font-size:24px; font-weight:900; color:var(--accent); margin-top:4px; }
+    
+    footer { margin-top:80px; padding-top:28px; border-top:1px solid var(--border); text-align:center; font-size:11px; color:var(--text2); }
+    footer a { color:var(--accent); text-decoration:none; }
+    footer a:hover { text-decoration:underline; }
+    
+    .info-box { background:rgba(1,198,241,0.1); border:1px solid var(--accent); border-radius:8px; padding:16px; margin-bottom:16px; font-size:12px; line-height:1.6; }
+    .info-box strong { color:var(--accent); }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-left" href="tools.html">
+    <img class="nav-logo-img" id="nav-logo" src="" alt="Logo"/>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag">dev utilities</span>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <img class="hero-logo" id="hero-logo" src="" alt="Tibet's Tools Logo"/>
+    <h1>WEBSITE CRAWLER</h1>
+  </section>
+
+  <div class="crawler-container">
+    <div class="info-box">
+      <strong>🕷️ Download entire websites:</strong> This tool downloads all pages, assets (CSS, JS, images, fonts, PDFs), and external links from any website to your local disk. Get the Node.js/Python crawlers from the <code>crawler-files/</code> folder in the repo.
+    </div>
+
+    <form id="crawlerForm">
+      <div class="form-group">
+        <label for="url">Website URL</label>
+        <input type="url" id="url" placeholder="https://example.com" required/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="output">Output Directory</label>
+          <input type="text" id="output" placeholder="website_crawl" value="website_crawl"/>
+        </div>
+        <div class="form-group">
+          <label for="concurrent">Max Concurrent Downloads</label>
+          <select id="concurrent">
+            <option value="2">2 (Safe)</option>
+            <option value="5" selected>5 (Recommended)</option>
+            <option value="10">10 (Fast)</option>
+            <option value="15">15 (Very Fast)</option>
+            <option value="20">20 (Aggressive)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Download Options</label>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="followExternal" checked/>
+            <label for="followExternal">Follow external links</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="includeAssets" checked/>
+            <label for="includeAssets">Download assets (CSS, JS, images)</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="maxPages">Max Pages (leave empty for unlimited)</label>
+        <input type="number" id="maxPages" placeholder="e.g., 100" min="1"/>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn" onclick="downloadCrawler('node')">📥 Download Node.js Crawler</button>
+        <button type="button" class="btn" onclick="downloadCrawler('python')">📥 Download Python Crawler</button>
+        <button type="submit" class="btn btn-primary">🚀 Start Crawl Instructions</button>
+      </div>
+    </form>
+
+    <div id="output-section" class="output-section" style="display:none;">
+      <div class="output-title">📋 Instructions</div>
+      <div class="info-box">
+        <strong>Ready to crawl!</strong> Copy and run these commands:
+      </div>
+      <div class="terminal" id="instructions"></div>
+
+      <div class="summary-grid" id="summary-grid"></div>
+    </div>
+  </div>
+
+  <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></footer>
+</div>
+
+<script>
+  const html = document.documentElement;
+  const navLogo = document.getElementById('nav-logo');
+  const heroLogo = document.getElementById('hero-logo');
+
+  // Apply theme
+  const saved = localStorage.getItem('theme') || 'dark';
+  setTheme(saved);
+
+  function setTheme(t) {
+    html.setAttribute('data-theme', t);
+    const src = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
+    navLogo.src = heroLogo.src = src;
+    navLogo.style.visibility = 'visible';
+    heroLogo.style.visibility = 'visible';
+    localStorage.setItem('theme', t);
+  }
+
+  function toggleTheme() {
+    setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+
+  // Crawler form
+  const form = document.getElementById('crawlerForm');
+  const urlInput = document.getElementById('url');
+  const outputInput = document.getElementById('output');
+  const concurrentInput = document.getElementById('concurrent');
+  const followExternalCheckbox = document.getElementById('followExternal');
+  const maxPagesInput = document.getElementById('maxPages');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const url = urlInput.value;
+    const output = outputInput.value || 'website_crawl';
+    const concurrent = concurrentInput.value;
+    const followExternal = followExternalCheckbox.checked;
+    const maxPages = maxPagesInput.value;
+
+    const instructions = document.getElementById('instructions');
+    const outputSection = document.getElementById('output-section');
+
+    let nodeCmd = `node crawl.js ${url}`;
+    let pythonCmd = `python crawl.py ${url}`;
+
+    // If custom output
+    if (output !== 'website_crawl') {
+      nodeCmd += ` --output ${output}`;
+      pythonCmd += ` # (enter when prompted: ${output})`;
+    }
+
+    // If custom concurrency
+    if (concurrent !== '5') {
+      nodeCmd += ` --concurrent ${concurrent}`;
+    }
+
+    // External links
+    if (!followExternal) {
+      nodeCmd += ` --stay-on-domain`;
+    }
+
+    // Max pages
+    if (maxPages) {
+      nodeCmd += ` --max-pages ${maxPages}`;
+    }
+
+    const lines = [
+      '<span class="terminal-info">🚀 WEBSITE CRAWLER COMMANDS</span>',
+      '',
+      '<span class="terminal-info">━━ NODE.JS (Recommended - Fastest)</span>',
+      '<span class="terminal-line">cd crawler-files</span>',
+      '<span class="terminal-line">npm install</span>',
+      `<span class="terminal-line">${nodeCmd}</span>`,
+      '',
+      '<span class="terminal-info">━━ PYTHON (Simple Setup)</span>',
+      '<span class="terminal-line">cd crawler-files</span>',
+      '<span class="terminal-line">pip install requests beautifulsoup4</span>',
+      `<span class="terminal-line">${pythonCmd}</span>`,
+      '',
+      '<span class="terminal-success">✓ Configuration:</span>',
+      `<span class="terminal-line">  URL: ${url}</span>`,
+      `<span class="terminal-line">  Output: ${output}</span>`,
+      `<span class="terminal-line">  Concurrency: ${concurrent}</span>`,
+      `<span class="terminal-line">  External links: ${followExternal ? 'Yes' : 'No'}</span>`,
+      `<span class="terminal-line">  Max pages: ${maxPages || 'Unlimited'}</span>`,
+    ];
+
+    instructions.innerHTML = lines.map(line => `<div class="terminal-line">${line}</div>`).join('');
+    outputSection.style.display = 'block';
+    outputSection.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  function downloadCrawler(type) {
+    const files = {
+      'node': ['crawl.js', 'crawler.js', 'package.json', 'QUICKSTART.md'],
+      'python': ['crawl.py', 'website_crawler.py', 'QUICKSTART.md', 'CRAWLER_README.md']
+    };
+
+    const basePath = './crawler-files/';
+    const fileList = files[type];
+
+    let message = type === 'node' 
+      ? '📥 Node.js Files:\n\n' 
+      : '📥 Python Files:\n\n';
+
+    fileList.forEach(file => {
+      message += `• ${file}\n`;
+    });
+
+    message += `\n✅ All files are in: crawler-files/`;
+
+    alert(message);
+  }
+</script>
+</body>
+</html>
