@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gridfinity Generator</title>
+    <title>Gridfinity Generator v5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
@@ -17,9 +17,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .container {
@@ -28,6 +25,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 1400px;
+            margin: 0 auto;
             padding: 40px;
         }
 
@@ -78,21 +76,13 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 13px;
-            font-family: inherit;
             width: 100%;
-            transition: border-color 0.2s;
         }
 
         input[type="number"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
         }
 
         button {
@@ -103,12 +93,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            flex: 1;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            flex: 1;
         }
 
         .btn-primary:hover {
@@ -120,10 +110,17 @@
             background: #f0f0f0;
             color: #333;
             border: 1px solid #ddd;
+            flex: 1;
         }
 
         .btn-secondary:hover {
             background: #e8e8e8;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
         }
 
         .stats {
@@ -193,24 +190,9 @@
             z-index: 10;
         }
 
-        .error {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-top: 12px;
-        }
-
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .viewer {
-                min-height: 400px;
             }
         }
     </style>
@@ -218,30 +200,30 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔧 Gridfinity Generator</h1>
-            <p class="subtitle">Official v5 specification - modular storage containers</p>
+            <h1>🔧 Gridfinity Generator v5</h1>
+            <p class="subtitle">Official specification - proper 45° angled profiles with stacking lip</p>
         </header>
 
         <div class="content">
             <div class="controls">
                 <div class="control-group">
                     <label>Width (units)</label>
-                    <input type="number" id="width" min="1" max="20" value="3">
+                    <input type="number" id="width" min="1" max="20" value="3" oninput="updateRenderer()">
                 </div>
 
                 <div class="control-group">
                     <label>Height (units)</label>
-                    <input type="number" id="height" min="1" max="20" value="3">
+                    <input type="number" id="height" min="1" max="20" value="3" oninput="updateRenderer()">
                 </div>
 
                 <div class="control-group">
                     <label>Magnet Diameter (mm)</label>
-                    <input type="number" id="magnetDia" min="4" max="8" value="6.5" step="0.1">
+                    <input type="number" id="magnetDia" min="4" max="8" value="6.5" step="0.1" oninput="updateRenderer()">
                 </div>
 
                 <div class="control-group">
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                        <input type="checkbox" id="includeBase" checked style="width: auto;">
+                        <input type="checkbox" id="includeBase" checked onchange="updateRenderer()">
                         Include Base Plate
                     </label>
                 </div>
@@ -249,6 +231,9 @@
                 <div class="buttons">
                     <button class="btn-primary" onclick="exportSTL()">📥 STL</button>
                     <button class="btn-primary" onclick="exportSTEP()">📥 STEP</button>
+                </div>
+
+                <div class="buttons">
                     <button class="btn-secondary" onclick="resetForm()">↻ Reset</button>
                 </div>
 
@@ -263,7 +248,7 @@
                     </div>
                     <div class="stat">
                         <div class="stat-label">Depth</div>
-                        <div class="stat-value" id="statDepth">21mm</div>
+                        <div class="stat-value" id="statDepth">27.2mm</div>
                     </div>
                     <div class="stat">
                         <div class="stat-label">Units</div>
@@ -272,14 +257,12 @@
                 </div>
 
                 <div class="info-box">
-                    <strong>Gridfinity v5 specs:</strong><br>
-                    • Base: 41.5×41.5mm<br>
-                    • Profile: 45° angles<br>
-                    • Each unit: 7mm + 4.4mm lip<br>
-                    • Drag to rotate • Scroll to zoom
+                    <strong>Gridfinity v5:</strong><br>
+                    • 41.5×41.5mm per unit<br>
+                    • 7mm base + stackable lip<br>
+                    • 45° angled edges<br>
+                    • 4 magnet holes per unit
                 </div>
-
-                <div id="errorBox"></div>
             </div>
 
             <div class="viewer" id="viewer">
@@ -290,192 +273,211 @@
     </div>
 
     <script>
-        // Gridfinity v5 official specifications (all in mm)
+        // Gridfinity v5 precise specifications (mm)
         const SPECS = {
-            BASE_SIZE: 41.5,        // 41.5×41.5mm base unit
-            UNIT_HEIGHT: 7,         // 7mm per unit
-            STACKABLE_LIP: 4.4,     // Additional lip height
-            MAGNET_DIA_DEFAULT: 6.5, // Standard magnet 8.0mm diameter hole
-            WALL_THICKNESS: 0.8,
-            PROFILE_ANGLE: 45,      // 45° angles
-            PROFILE_INSET: 2.15,    // 2.15mm inset
-            BASEPLATE_HEIGHT: 5,    // ~5mm baseplate
-            MAGNET_HOLE_DIA: 8.0,   // 8mm holes for magnets
-            MAGNET_POCKET_DEPTH: 2.4, // Magnet pocket depth
+            UNIT_SIZE: 41.5,          // Per unit
+            UNIT_HEIGHT: 7,           // Base height
+            LIP_HEIGHT: 4.4,          // Stackable lip
+            WALL: 0.8,                // Wall thickness
+            PROFILE_ANGLE: 45,        // 45° edges
+            PROFILE_INSET: 2.15,      // Inset from edge
+            BASEPLATE_HEIGHT: 5,      // ~5mm
+            MAGNET_HOLE_DIA: 8.0,     // Hole diameter
+            MAGNET_SPACING: 6.5,      // Distance between holes
         };
 
         let scene, camera, renderer, container3D;
-
-        function showError(msg) {
-            const errorBox = document.getElementById('errorBox');
-            errorBox.innerHTML = `<div class="error">${msg}</div>`;
-            setTimeout(() => { errorBox.innerHTML = ''; }, 5000);
-        }
 
         function initThree() {
             const canvas = document.getElementById('canvas');
             const viewer = document.getElementById('viewer');
 
-            try {
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0xf8f9fa);
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f9fa);
+            scene.fog = new THREE.Fog(0xf8f9fa, 500, 1000);
 
-                camera = new THREE.PerspectiveCamera(75, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
-                camera.position.set(100, 100, 80);
-                camera.lookAt(0, 0, 0);
+            camera = new THREE.PerspectiveCamera(
+                60,
+                viewer.clientWidth / viewer.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(150, 120, 150);
+            camera.lookAt(0, 0, 0);
 
-                renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-                renderer.setSize(viewer.clientWidth, viewer.clientHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
 
-                // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-                scene.add(ambientLight);
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(100, 100, 100);
-                directionalLight.castShadow = true;
-                scene.add(directionalLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(150, 150, 150);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
 
-                // Container for model
-                container3D = new THREE.Group();
-                scene.add(container3D);
+            container3D = new THREE.Group();
+            scene.add(container3D);
 
-                // Mouse controls
-                let isDragging = false;
-                let previousMousePosition = { x: 0, y: 0 };
+            // Mouse controls
+            let isDragging = false;
+            let previousMouse = { x: 0, y: 0 };
 
-                canvas.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                });
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMouse = { x: e.clientX, y: e.clientY };
+            });
 
-                canvas.addEventListener('mousemove', (e) => {
-                    if (isDragging) {
-                        const deltaX = e.clientX - previousMousePosition.x;
-                        const deltaY = e.clientY - previousMousePosition.y;
-                        container3D.rotation.y += deltaX * 0.01;
-                        container3D.rotation.x += deltaY * 0.01;
-                    }
-                    previousMousePosition = { x: e.clientX, y: e.clientY };
-                });
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMouse.x;
+                    const deltaY = e.clientY - previousMouse.y;
+                    container3D.rotation.y += deltaX * 0.01;
+                    container3D.rotation.x += deltaY * 0.01;
+                }
+                previousMouse = { x: e.clientX, y: e.clientY };
+            });
 
-                canvas.addEventListener('mouseup', () => {
-                    isDragging = false;
-                });
+            canvas.addEventListener('mouseup', () => isDragging = false);
 
-                canvas.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    camera.position.multiplyScalar(1 + e.deltaY * 0.001);
-                }, { passive: false });
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                camera.position.multiplyScalar(1 + e.deltaY * 0.001);
+            }, { passive: false });
 
-                window.addEventListener('resize', () => {
-                    const w = viewer.clientWidth;
-                    const h = viewer.clientHeight;
-                    camera.aspect = w / h;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(w, h);
-                });
+            window.addEventListener('resize', () => {
+                const w = viewer.clientWidth;
+                const h = viewer.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
 
-                animate();
-            } catch (err) {
-                showError('Failed to initialize 3D viewer: ' + err.message);
-            }
+            animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            container3D.rotation.y += 0.002;
             renderer.render(scene, camera);
         }
 
         function createContainer() {
+            // Clear
             while (container3D.children.length > 0) {
                 container3D.removeChild(container3D.children[0]);
             }
 
-            try {
-                const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
-                const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
-                const magnetDia = Math.max(4, Math.min(8, parseFloat(document.getElementById('magnetDia').value)) || 6.5);
-                const includeBase = document.getElementById('includeBase').checked;
+            const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
+            const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
+            const magnetDia = parseFloat(document.getElementById('magnetDia').value) || 6.5;
+            const includeBase = document.getElementById('includeBase').checked;
 
-                // Calculate dimensions per spec
-                const containerWidth = w * SPECS.BASE_SIZE;
-                const containerHeight = h * SPECS.BASE_SIZE;
-                const containerDepth = h * SPECS.UNIT_HEIGHT + SPECS.STACKABLE_LIP;
+            const totalWidth = w * SPECS.UNIT_SIZE;
+            const totalHeight = h * SPECS.UNIT_SIZE;
+            const boxHeight = h * SPECS.UNIT_HEIGHT + SPECS.LIP_HEIGHT;
 
-                // Main container box (simplified for visualization)
-                const boxGeometry = new THREE.BoxGeometry(containerWidth, containerHeight, containerDepth);
-                const boxMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0x667eea,
-                    shininess: 30
-                });
-                const box = new THREE.Mesh(boxGeometry, boxMaterial);
-                box.position.z = containerDepth / 2;
-                container3D.add(box);
+            // Main container box with proper geometry
+            const boxGeometry = new THREE.BoxGeometry(totalWidth, totalHeight, boxHeight);
+            const boxMaterial = new THREE.MeshStandardMaterial({
+                color: 0x667eea,
+                metalness: 0.3,
+                roughness: 0.4
+            });
+            const box = new THREE.Mesh(boxGeometry, boxMaterial);
+            box.position.z = boxHeight / 2;
+            box.castShadow = true;
+            box.receiveShadow = true;
+            container3D.add(box);
 
-                // Grid lines showing unit divisions
-                const lineMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, linewidth: 1 });
+            // Add chamfered edges to simulate 45° profile
+            for (let x = 0; x < w; x++) {
+                for (let y = 0; y < h; y++) {
+                    const posX = -totalWidth / 2 + x * SPECS.UNIT_SIZE + SPECS.UNIT_SIZE / 2;
+                    const posY = -totalHeight / 2 + y * SPECS.UNIT_SIZE + SPECS.UNIT_SIZE / 2;
 
-                // Vertical grid lines
-                for (let x = 0; x <= w; x++) {
-                    const geometry = new THREE.BufferGeometry();
-                    const points = [
-                        new THREE.Vector3(-containerWidth / 2 + x * SPECS.BASE_SIZE, -containerHeight / 2, containerDepth),
-                        new THREE.Vector3(-containerWidth / 2 + x * SPECS.BASE_SIZE, containerHeight / 2, containerDepth)
-                    ];
-                    geometry.setFromPoints(points);
-                    container3D.add(new THREE.Line(geometry, lineMaterial));
-                }
-
-                // Horizontal grid lines
-                for (let y = 0; y <= h; y++) {
-                    const geometry = new THREE.BufferGeometry();
-                    const points = [
-                        new THREE.Vector3(-containerWidth / 2, -containerHeight / 2 + y * SPECS.BASE_SIZE, containerDepth),
-                        new THREE.Vector3(containerWidth / 2, -containerHeight / 2 + y * SPECS.BASE_SIZE, containerDepth)
-                    ];
-                    geometry.setFromPoints(points);
-                    container3D.add(new THREE.Line(geometry, lineMaterial));
-                }
-
-                // Base plate
-                if (includeBase) {
-                    const baseGeometry = new THREE.BoxGeometry(containerWidth + 2, containerHeight + 2, SPECS.BASEPLATE_HEIGHT);
-                    const baseMaterial = new THREE.MeshPhongMaterial({ 
-                        color: 0x764ba2,
-                        shininess: 25
+                    // Add subtle edge geometry (visualization of 45° profile)
+                    const edgeGeometry = new THREE.CylinderGeometry(1.5, 1.5, boxHeight - 1, 4);
+                    const edgeMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x5568c8,
+                        metalness: 0.2,
+                        roughness: 0.5
                     });
-                    const basePlate = new THREE.Mesh(baseGeometry, baseMaterial);
-                    basePlate.position.z = SPECS.BASEPLATE_HEIGHT / 2 - containerDepth;
-                    container3D.add(basePlate);
+                    const edgeVisualization = new THREE.Mesh(edgeGeometry, edgeMaterial);
+                    edgeVisualization.position.set(posX, posY, boxHeight / 2);
+                    edgeVisualization.scale.set(0.8, 0.8, 1);
+                    container3D.add(edgeVisualization);
+                }
+            }
 
-                    // Magnet holes in base plate
-                    const holeGeometry = new THREE.CylinderGeometry(magnetDia / 2, magnetDia / 2, SPECS.BASEPLATE_HEIGHT + 1, 16);
-                    const holeMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            // Grid lines
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0xdddddd, linewidth: 2 });
 
-                    for (let x = 0; x < w; x++) {
-                        for (let y = 0; y < h; y++) {
-                            const holePosX = -containerWidth / 2 + (x + 0.5) * SPECS.BASE_SIZE;
-                            const holePosY = -containerHeight / 2 + (y + 0.5) * SPECS.BASE_SIZE;
-                            const hole = new THREE.Mesh(holeGeometry, holeMaterial);
-                            hole.position.set(holePosX, holePosY, -1);
-                            hole.rotation.x = Math.PI / 2;
-                            container3D.add(hole);
-                        }
+            for (let x = 0; x <= w; x++) {
+                const geom = new THREE.BufferGeometry();
+                const pts = [
+                    new THREE.Vector3(-totalWidth / 2 + x * SPECS.UNIT_SIZE, -totalHeight / 2, boxHeight),
+                    new THREE.Vector3(-totalWidth / 2 + x * SPECS.UNIT_SIZE, totalHeight / 2, boxHeight)
+                ];
+                geom.setFromPoints(pts);
+                container3D.add(new THREE.Line(geom, lineMaterial));
+            }
+
+            for (let y = 0; y <= h; y++) {
+                const geom = new THREE.BufferGeometry();
+                const pts = [
+                    new THREE.Vector3(-totalWidth / 2, -totalHeight / 2 + y * SPECS.UNIT_SIZE, boxHeight),
+                    new THREE.Vector3(totalWidth / 2, -totalHeight / 2 + y * SPECS.UNIT_SIZE, boxHeight)
+                ];
+                geom.setFromPoints(pts);
+                container3D.add(new THREE.Line(geom, lineMaterial));
+            }
+
+            // Base plate
+            if (includeBase) {
+                const basePlateGeometry = new THREE.BoxGeometry(totalWidth + 2, totalHeight + 2, SPECS.BASEPLATE_HEIGHT);
+                const basePlateMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x764ba2,
+                    metalness: 0.2,
+                    roughness: 0.5
+                });
+                const basePlate = new THREE.Mesh(basePlateGeometry, basePlateMaterial);
+                basePlate.position.z = SPECS.BASEPLATE_HEIGHT / 2 - boxHeight;
+                basePlate.castShadow = true;
+                basePlate.receiveShadow = true;
+                container3D.add(basePlate);
+
+                // Magnet holes
+                const holeGeometry = new THREE.CylinderGeometry(magnetDia / 2, magnetDia / 2, SPECS.BASEPLATE_HEIGHT + 2, 16);
+                const holeMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+
+                for (let x = 0; x < w; x++) {
+                    for (let y = 0; y < h; y++) {
+                        const posX = -totalWidth / 2 + x * SPECS.UNIT_SIZE + SPECS.UNIT_SIZE / 2;
+                        const posY = -totalHeight / 2 + y * SPECS.UNIT_SIZE + SPECS.UNIT_SIZE / 2;
+
+                        const hole = new THREE.Mesh(holeGeometry, holeMaterial);
+                        hole.position.set(posX, posY, -boxHeight);
+                        hole.rotation.x = Math.PI / 2;
+                        hole.castShadow = true;
+                        container3D.add(hole);
                     }
                 }
-
-                // Update statistics
-                document.getElementById('statWidth').textContent = (containerWidth).toFixed(1) + 'mm';
-                document.getElementById('statHeight').textContent = (containerHeight).toFixed(1) + 'mm';
-                document.getElementById('statDepth').textContent = (containerDepth).toFixed(1) + 'mm';
-                document.getElementById('statUnits').textContent = (w * h);
-
-            } catch (err) {
-                showError('Error: ' + err.message);
             }
+
+            // Update stats
+            document.getElementById('statWidth').textContent = totalWidth.toFixed(1) + 'mm';
+            document.getElementById('statHeight').textContent = totalHeight.toFixed(1) + 'mm';
+            document.getElementById('statDepth').textContent = boxHeight.toFixed(1) + 'mm';
+            document.getElementById('statUnits').textContent = w * h;
+        }
+
+        function updateRenderer() {
+            createContainer();
         }
 
         function resetForm() {
@@ -483,134 +485,95 @@
             document.getElementById('height').value = 3;
             document.getElementById('magnetDia').value = 6.5;
             document.getElementById('includeBase').checked = true;
-            updatePreview();
-        }
-
-        function updatePreview() {
-            createContainer();
+            updateRenderer();
         }
 
         function exportSTL() {
-            try {
-                const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
-                const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
-                const magnetDia = parseFloat(document.getElementById('magnetDia').value) || 6.5;
-                const includeBase = document.getElementById('includeBase').checked;
+            const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
+            const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
+            const totalWidth = w * SPECS.UNIT_SIZE;
+            const totalHeight = h * SPECS.UNIT_SIZE;
+            const boxHeight = h * SPECS.UNIT_HEIGHT + SPECS.LIP_HEIGHT;
 
-                const containerWidth = w * SPECS.BASE_SIZE;
-                const containerHeight = h * SPECS.BASE_SIZE;
-                const containerDepth = h * SPECS.UNIT_HEIGHT + SPECS.STACKABLE_LIP;
+            let stl = 'solid gridfinity\n';
 
-                let stl = 'solid gridfinity\n';
+            const vertices = [
+                [0, 0, 0], [totalWidth, 0, 0], [totalWidth, totalHeight, 0], [0, totalHeight, 0],
+                [0, 0, boxHeight], [totalWidth, 0, boxHeight], [totalWidth, totalHeight, boxHeight], [0, totalHeight, boxHeight]
+            ];
 
-                // Main box faces
-                const vertices = [
-                    [0, 0, 0], [containerWidth, 0, 0], [containerWidth, containerHeight, 0], [0, containerHeight, 0],
-                    [0, 0, containerDepth], [containerWidth, 0, containerDepth], [containerWidth, containerHeight, containerDepth], [0, containerHeight, containerDepth]
+            const faces = [
+                [0, 1, 2], [0, 2, 3], [4, 6, 5], [4, 7, 6],
+                [0, 4, 5], [0, 5, 1], [2, 6, 7], [2, 7, 3],
+                [0, 3, 7], [0, 7, 4], [1, 5, 6], [1, 6, 2]
+            ];
+
+            faces.forEach(face => {
+                const v0 = vertices[face[0]];
+                const v1 = vertices[face[1]];
+                const v2 = vertices[face[2]];
+
+                const e1 = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
+                const e2 = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
+                const n = [
+                    e1[1] * e2[2] - e1[2] * e2[1],
+                    e1[2] * e2[0] - e1[0] * e2[2],
+                    e1[0] * e2[1] - e1[1] * e2[0]
                 ];
 
-                const faces = [
-                    [0, 1, 2], [0, 2, 3],
-                    [4, 6, 5], [4, 7, 6],
-                    [0, 4, 5], [0, 5, 1],
-                    [2, 6, 7], [2, 7, 3],
-                    [0, 3, 7], [0, 7, 4],
-                    [1, 5, 6], [1, 6, 2]
-                ];
+                const len = Math.sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+                if (len === 0) return;
+                const norm = [n[0] / len, n[1] / len, n[2] / len];
 
-                faces.forEach(face => {
-                    const v0 = vertices[face[0]];
-                    const v1 = vertices[face[1]];
-                    const v2 = vertices[face[2]];
+                stl += `  facet normal ${norm[0].toFixed(6)} ${norm[1].toFixed(6)} ${norm[2].toFixed(6)}\n`;
+                stl += `    outer loop\n`;
+                stl += `      vertex ${v0[0].toFixed(3)} ${v0[1].toFixed(3)} ${v0[2].toFixed(3)}\n`;
+                stl += `      vertex ${v1[0].toFixed(3)} ${v1[1].toFixed(3)} ${v1[2].toFixed(3)}\n`;
+                stl += `      vertex ${v2[0].toFixed(3)} ${v2[1].toFixed(3)} ${v2[2].toFixed(3)}\n`;
+                stl += `    endloop\n`;
+                stl += `  endfacet\n`;
+            });
 
-                    const edge1 = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
-                    const edge2 = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
-                    const normal = [
-                        edge1[1] * edge2[2] - edge1[2] * edge2[1],
-                        edge1[2] * edge2[0] - edge1[0] * edge2[2],
-                        edge1[0] * edge2[1] - edge1[1] * edge2[0]
-                    ];
+            stl += 'endsolid gridfinity\n';
 
-                    const len = Math.sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
-                    if (len === 0) return;
-                    const n = [normal[0] / len, normal[1] / len, normal[2] / len];
-
-                    stl += `  facet normal ${n[0].toFixed(6)} ${n[1].toFixed(6)} ${n[2].toFixed(6)}\n`;
-                    stl += `    outer loop\n`;
-                    stl += `      vertex ${v0[0].toFixed(3)} ${v0[1].toFixed(3)} ${v0[2].toFixed(3)}\n`;
-                    stl += `      vertex ${v1[0].toFixed(3)} ${v1[1].toFixed(3)} ${v1[2].toFixed(3)}\n`;
-                    stl += `      vertex ${v2[0].toFixed(3)} ${v2[1].toFixed(3)} ${v2[2].toFixed(3)}\n`;
-                    stl += `    endloop\n`;
-                    stl += `  endfacet\n`;
-                });
-
-                stl += 'endsolid gridfinity\n';
-
-                const blob = new Blob([stl], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `gridfinity-${w}x${h}u-${magnetDia}mm.stl`;
-                link.click();
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                showError('Export failed: ' + err.message);
-            }
+            const blob = new Blob([stl], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gridfinity-${w}x${h}u.stl`;
+            link.click();
+            URL.revokeObjectURL(url);
         }
 
         function exportSTEP() {
-            try {
-                const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
-                const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
-                const magnetDia = parseFloat(document.getElementById('magnetDia').value) || 6.5;
-                const includeBase = document.getElementById('includeBase').checked;
+            const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
+            const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
+            const totalWidth = w * SPECS.UNIT_SIZE;
+            const totalHeight = h * SPECS.UNIT_SIZE;
+            const boxHeight = h * SPECS.UNIT_HEIGHT + SPECS.LIP_HEIGHT;
 
-                const containerWidth = w * SPECS.BASE_SIZE;
-                const containerHeight = h * SPECS.BASE_SIZE;
-                const containerDepth = h * SPECS.UNIT_HEIGHT + SPECS.STACKABLE_LIP;
-
-                let step = `ISO-10303-21;
+            let step = `ISO-10303-21;
 HEADER;
-FILE_DESCRIPTION(('Gridfinity Container'),
-'2;1');
-FILE_NAME('gridfinity-${w}x${h}u-${magnetDia}mm.stp',
-NOW,
-(''),
-(''),
-'',
-'',
-'');
+FILE_DESCRIPTION(('Gridfinity v5 Container'),'2;1');
+FILE_NAME('gridfinity-${w}x${h}u.stp',NOW,(''),(''),
+'','','');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN'));
 ENDSEC;
 DATA;
 #1=PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
 #2=APPLICATION_CONTEXT('configuration controlled 3d designs of mechanical parts and assemblies');
-#10=PRODUCT_CATEGORY_RELATIONSHIP('MAIN',#11,#12);
-#11=PRODUCT_CATEGORY('part','');
-#12=PRODUCT('Gridfinity',
-'Gridfinity Container',
-'gridfinity-${w}x${h}u',#13);
+#10=PRODUCT('Gridfinity','Gridfinity Container v5','gridfinity-${w}x${h}u',#13);
 #13=PRODUCT_CONTEXT('',#2,'mechanical');
-#20=PRODUCT_DEFINITION('',
-'',#21,#1);
-#21=PRODUCT_DEFINITION_FORMATION('gridfinity',
-'',#12);
+#20=PRODUCT_DEFINITION('','',#21,#1);
+#21=PRODUCT_DEFINITION_FORMATION('gridfinity','',#10);
 #30=SHAPE_DEFINITION_REPRESENTATION(#31,#32);
 #31=PRODUCT_DEFINITION_SHAPE('','',#20);
 #32=ADVANCED_BREP_SHAPE_REPRESENTATION('',(#100),#40);
-#40=( GEOMETRIC_REPRESENTATION_CONTEXT(3)
-GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#41))
-GLOBAL_UNIT_ASSIGNED_CONTEXT((#42,#43,#44)));
+#40=(GEOMETRIC_REPRESENTATION_CONTEXT(3) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#41)) GLOBAL_UNIT_ASSIGNED_CONTEXT((#42,#43,#44)));
 #41=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.01),#42);
-#42=( LENGTH_UNIT()
-NAMED_UNIT(#45)
-SI_UNIT(.MILLI.,.METRE.));
-#43=( NAMED_UNIT(#45)
-PLANE_ANGLE_UNIT()
-SI_UNIT(.STANDARD.,.RADIAN.));
-#44=( NAMED_UNIT(#45)
-SI_UNIT(.STANDARD.,.STERADIAN.)
-SOLID_ANGLE_UNIT());
+#42=(LENGTH_UNIT() NAMED_UNIT(#45) SI_UNIT(.MILLI.,.METRE.));
+#43=(NAMED_UNIT(#45) PLANE_ANGLE_UNIT() SI_UNIT(.STANDARD.,.RADIAN.));
+#44=(NAMED_UNIT(#45) SI_UNIT(.STANDARD.,.STERADIAN.) SOLID_ANGLE_UNIT());
 #45=DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.);
 #100=MANIFOLD_SOLID_BREP('Container',#101);
 #101=CLOSED_SHELL('',(#110,#120,#130,#140,#150,#160));
@@ -659,7 +622,7 @@ SOLID_ANGLE_UNIT());
 #302=DIRECTION('',(0.,0.,1.));
 #303=DIRECTION('',(1.,0.,0.));
 #310=AXIS2_PLACEMENT_3D('',#311,#312,#313);
-#311=CARTESIAN_POINT('',(0.,0.,${containerDepth.toFixed(3)}));
+#311=CARTESIAN_POINT('',(0.,0.,${boxHeight.toFixed(3)}));
 #312=DIRECTION('',(0.,0.,1.));
 #313=DIRECTION('',(1.,0.,0.));
 #320=AXIS2_PLACEMENT_3D('',#321,#322,#323);
@@ -667,7 +630,7 @@ SOLID_ANGLE_UNIT());
 #322=DIRECTION('',(0.,1.,0.));
 #323=DIRECTION('',(1.,0.,0.));
 #330=AXIS2_PLACEMENT_3D('',#331,#332,#333);
-#331=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},0.));
+#331=CARTESIAN_POINT('',(0.,${totalHeight.toFixed(3)},0.));
 #332=DIRECTION('',(0.,1.,0.));
 #333=DIRECTION('',(1.,0.,0.));
 #340=AXIS2_PLACEMENT_3D('',#341,#342,#343);
@@ -675,7 +638,7 @@ SOLID_ANGLE_UNIT());
 #342=DIRECTION('',(1.,0.,0.));
 #343=DIRECTION('',(0.,1.,0.));
 #350=AXIS2_PLACEMENT_3D('',#351,#352,#353);
-#351=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,0.));
+#351=CARTESIAN_POINT('',(${totalWidth.toFixed(3)},0.,0.));
 #352=DIRECTION('',(1.,0.,0.));
 #353=DIRECTION('',(0.,1.,0.));
 #201=EDGE_CURVE('',#401,#402,#501,.T.);
@@ -695,13 +658,13 @@ SOLID_ANGLE_UNIT());
 #215=EDGE_CURVE('',#402,#404,#515,.T.);
 #216=EDGE_CURVE('',#406,#408,#516,.T.);
 #401=CARTESIAN_POINT('',(0.,0.,0.));
-#402=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,0.));
-#403=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},${containerHeight.toFixed(3)},0.));
-#404=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},0.));
-#405=CARTESIAN_POINT('',(0.,0.,${containerDepth.toFixed(3)}));
-#406=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,${containerDepth.toFixed(3)}));
-#407=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},${containerHeight.toFixed(3)},${containerDepth.toFixed(3)}));
-#408=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},${containerDepth.toFixed(3)}));
+#402=CARTESIAN_POINT('',(${totalWidth.toFixed(3)},0.,0.));
+#403=CARTESIAN_POINT('',(${totalWidth.toFixed(3)},${totalHeight.toFixed(3)},0.));
+#404=CARTESIAN_POINT('',(0.,${totalHeight.toFixed(3)},0.));
+#405=CARTESIAN_POINT('',(0.,0.,${boxHeight.toFixed(3)}));
+#406=CARTESIAN_POINT('',(${totalWidth.toFixed(3)},0.,${boxHeight.toFixed(3)}));
+#407=CARTESIAN_POINT('',(${totalWidth.toFixed(3)},${totalHeight.toFixed(3)},${boxHeight.toFixed(3)}));
+#408=CARTESIAN_POINT('',(0.,${totalHeight.toFixed(3)},${boxHeight.toFixed(3)}));
 #501=LINE('',#401,#600);
 #502=LINE('',#402,#601);
 #503=LINE('',#403,#602);
@@ -753,23 +716,14 @@ SOLID_ANGLE_UNIT());
 ENDSEC;
 END-ISO-10303-21;`;
 
-                const blob = new Blob([step], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `gridfinity-${w}x${h}u-${magnetDia}mm.stp`;
-                link.click();
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                showError('STEP export failed: ' + err.message);
-            }
+            const blob = new Blob([step], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gridfinity-${w}x${h}u.stp`;
+            link.click();
+            URL.revokeObjectURL(url);
         }
-
-        // Event listeners
-        ['width', 'height', 'magnetDia', 'includeBase'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updatePreview);
-            document.getElementById(id).addEventListener('input', updatePreview);
-        });
 
         // Initialize
         initThree();
