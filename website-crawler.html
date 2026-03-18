@@ -7,6 +7,12 @@
   <link rel="icon" type="image/png" href="logo-light.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  
+  <!-- JSZip for creating zip files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- FileSaver for downloading zip files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -66,30 +72,46 @@
     
     .button-group { display:flex; gap:12px; }
     .btn { padding:10px 20px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text); cursor:pointer; font-family:inherit; font-size:12px; letter-spacing:.1em; text-transform:uppercase; transition:all .2s; flex:1; }
-    .btn:hover { border-color:var(--accent); color:var(--accent); }
+    .btn:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
     .btn-primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
-    .btn-primary:hover { background:var(--accent2); border-color:var(--accent2); }
-    .btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-primary:hover:not(:disabled) { background:var(--accent2); border-color:var(--accent2); }
+    .btn-primary:disabled, .btn:disabled { opacity:.5; cursor:not-allowed; }
     
     .output-section { margin-top:32px; }
     .output-title { font-family:'Big Shoulders Display',sans-serif; font-size:18px; font-weight:800; margin-bottom:12px; }
-    .terminal { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:16px; max-height:400px; overflow-y:auto; font-size:11px; line-height:1.6; color:var(--text2); font-family:monospace; }
+    
+    .progress-container { margin:24px 0; }
+    .progress-bar { width:100%; height:8px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg, var(--accent), var(--accent2)); width:0%; transition:width .3s; }
+    .progress-text { font-size:11px; color:var(--text2); margin-top:8px; display:flex; justify-content:space-between; }
+    
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:16px 0; }
+    .stat-item { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+    .stat-label { font-size:10px; color:var(--text2); letter-spacing:.1em; text-transform:uppercase; }
+    .stat-value { font-family:'Big Shoulders Display',sans-serif; font-size:20px; font-weight:900; color:var(--accent); margin-top:4px; }
+    
+    .terminal { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:16px; max-height:300px; overflow-y:auto; font-size:11px; line-height:1.6; color:var(--text2); font-family:monospace; }
     .terminal-line { margin-bottom:4px; }
     .terminal-success { color:var(--green); }
     .terminal-error { color:#ff6b6b; }
     .terminal-info { color:var(--accent); }
+    .terminal-warn { color:#ffb84d; }
     
-    .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:16px; }
-    .summary-item { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
-    .summary-label { font-size:10px; color:var(--text2); letter-spacing:.1em; text-transform:uppercase; }
-    .summary-value { font-family:'Big Shoulders Display',sans-serif; font-size:24px; font-weight:900; color:var(--accent); margin-top:4px; }
+    .info-box { background:rgba(1,198,241,0.1); border:1px solid var(--accent); border-radius:8px; padding:16px; margin-bottom:16px; font-size:12px; line-height:1.6; }
+    .info-box strong { color:var(--accent); }
+    
+    .download-section { background:rgba(106,255,126,0.1); border:2px solid var(--green); border-radius:8px; padding:20px; margin:24px 0; text-align:center; }
+    .download-section h3 { color:var(--green); margin-bottom:8px; font-size:16px; font-family:'Big Shoulders Display',sans-serif; font-weight:900; }
+    .download-section p { color:var(--text2); margin-bottom:16px; font-size:12px; }
+    .download-btn { background:var(--green); color:var(--bg); padding:14px 28px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:13px; transition:opacity .2s; }
+    .download-btn:hover { opacity:0.9; }
+    .download-btn:disabled { opacity:0.5; cursor:not-allowed; }
     
     footer { margin-top:80px; padding-top:28px; border-top:1px solid var(--border); text-align:center; font-size:11px; color:var(--text2); }
     footer a { color:var(--accent); text-decoration:none; }
     footer a:hover { text-decoration:underline; }
     
-    .info-box { background:rgba(1,198,241,0.1); border:1px solid var(--accent); border-radius:8px; padding:16px; margin-bottom:16px; font-size:12px; line-height:1.6; }
-    .info-box strong { color:var(--accent); }
+    .hidden { display:none; }
   </style>
 </head>
 <body>
@@ -114,7 +136,7 @@
 
   <div class="crawler-container">
     <div class="info-box">
-      <strong>🕷️ Download entire websites:</strong> This tool downloads all pages, assets (CSS, JS, images, fonts, PDFs), and external links from any website to your local disk. Get the Node.js/Python crawlers from the <code>crawler-files/</code> folder in the repo.
+      <strong>🕷️ Download entire websites in your browser:</strong> No installation needed! Just enter a URL and download all pages, assets, and content as a zip file labeled "Downloaded Websites".
     </div>
 
     <form id="crawlerForm">
@@ -125,23 +147,17 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="output">Output Directory</label>
-          <input type="text" id="output" placeholder="website_crawl" value="website_crawl"/>
+          <label for="maxPages">Max Pages</label>
+          <input type="number" id="maxPages" placeholder="50" value="50" min="1" max="500"/>
         </div>
         <div class="form-group">
-          <label for="concurrent">Max Concurrent Downloads</label>
-          <select id="concurrent">
-            <option value="2">2 (Safe)</option>
-            <option value="5" selected>5 (Recommended)</option>
-            <option value="10">10 (Fast)</option>
-            <option value="15">15 (Very Fast)</option>
-            <option value="20">20 (Aggressive)</option>
-          </select>
+          <label for="timeout">Timeout (seconds)</label>
+          <input type="number" id="timeout" placeholder="10" value="10" min="5" max="60"/>
         </div>
       </div>
 
       <div class="form-group">
-        <label>Download Options</label>
+        <label>Options</label>
         <div class="checkbox-group">
           <div class="checkbox-item">
             <input type="checkbox" id="followExternal" checked/>
@@ -154,26 +170,55 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="maxPages">Max Pages (leave empty for unlimited)</label>
-        <input type="number" id="maxPages" placeholder="e.g., 100" min="1"/>
-      </div>
-
       <div class="button-group">
-        <button type="button" class="btn" onclick="downloadCrawler('node')">📥 Download Node.js Crawler</button>
-        <button type="button" class="btn" onclick="downloadCrawler('python')">📥 Download Python Crawler</button>
-        <button type="submit" class="btn btn-primary">🚀 Start Crawl Instructions</button>
+        <button type="submit" class="btn btn-primary" id="startBtn">🚀 Start Crawling</button>
+        <button type="button" class="btn" onclick="resetForm()">Reset</button>
       </div>
     </form>
 
-    <div id="output-section" class="output-section" style="display:none;">
-      <div class="output-title">📋 Instructions</div>
-      <div class="info-box">
-        <strong>Ready to crawl!</strong> Copy and run these commands:
+    <!-- Progress Section -->
+    <div id="progressSection" class="output-section hidden">
+      <div class="output-title">📊 Crawling Progress</div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progressLabel">0%</span>
+          <span id="progressInfo">0 files</span>
+        </div>
       </div>
-      <div class="terminal" id="instructions"></div>
 
-      <div class="summary-grid" id="summary-grid"></div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Pages</div>
+          <div class="stat-value" id="statPages">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Files</div>
+          <div class="stat-value" id="statFiles">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Size (MB)</div>
+          <div class="stat-value" id="statSize">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Domains</div>
+          <div class="stat-value" id="statDomains">1</div>
+        </div>
+      </div>
+
+      <div class="output-title" style="margin-top:24px;">📝 Log</div>
+      <div class="terminal" id="terminal"></div>
+
+      <div id="downloadSection" class="download-section hidden">
+        <h3>✅ Crawl Complete!</h3>
+        <p>Your website has been downloaded successfully. All files are ready to be packaged into a zip file.</p>
+        <button class="download-btn" id="downloadBtn" onclick="downloadZip()">
+          📦 Download "Downloaded Websites"
+        </button>
+      </div>
     </div>
   </div>
 
@@ -185,7 +230,6 @@
   const navLogo = document.getElementById('nav-logo');
   const heroLogo = document.getElementById('hero-logo');
 
-  // Apply theme
   const saved = localStorage.getItem('theme') || 'dark';
   setTheme(saved);
 
@@ -202,96 +246,281 @@
     setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   }
 
-  // Crawler form
+  let crawlerState = {
+    zip: null,
+    files: {},
+    stats: { pages: 0, files: 0, bytes: 0, domains: new Set(), errors: 0 },
+    visited: new Set(),
+    queue: [],
+    active: false
+  };
+
   const form = document.getElementById('crawlerForm');
   const urlInput = document.getElementById('url');
-  const outputInput = document.getElementById('output');
-  const concurrentInput = document.getElementById('concurrent');
-  const followExternalCheckbox = document.getElementById('followExternal');
   const maxPagesInput = document.getElementById('maxPages');
+  const followExternalCheckbox = document.getElementById('followExternal');
+  const includeAssetsCheckbox = document.getElementById('includeAssets');
+  const timeoutInput = document.getElementById('timeout');
+  const progressSection = document.getElementById('progressSection');
+  const downloadSection = document.getElementById('downloadSection');
+  const terminal = document.getElementById('terminal');
+
+  function log(msg, type = 'info') {
+    const line = document.createElement('div');
+    line.className = `terminal-line terminal-${type}`;
+    line.textContent = msg;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function updateStats() {
+    const maxPages = parseInt(maxPagesInput.value);
+    const percent = Math.min((crawlerState.stats.files / maxPages) * 100, 100);
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressLabel').textContent = Math.round(percent) + '%';
+    document.getElementById('progressInfo').textContent = crawlerState.stats.files + ' files';
+    document.getElementById('statPages').textContent = crawlerState.stats.pages;
+    document.getElementById('statFiles').textContent = crawlerState.stats.files;
+    document.getElementById('statSize').textContent = (crawlerState.stats.bytes / 1024 / 1024).toFixed(2);
+    document.getElementById('statDomains').textContent = crawlerState.stats.domains.size;
+  }
+
+  async function fetchWithTimeout(url, timeout) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout * 1000);
+    try {
+      const response = await fetch(url, { 
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  }
+
+  function sanitizePath(url) {
+    try {
+      const u = new URL(url);
+      let path = u.pathname.replace(/^\//, '');
+      
+      if (!path || path.endsWith('/')) {
+        path = path + 'index.html';
+      }
+      
+      if (!path.includes('.')) {
+        path += '.html';
+      }
+      
+      if (u.search) {
+        const base = path.split('.').slice(0, -1).join('.');
+        const ext = path.split('.').pop();
+        path = base + '_' + u.search.slice(1).substring(0, 20) + '.' + ext;
+      }
+      
+      return path;
+    } catch {
+      return 'index.html';
+    }
+  }
+
+  function isAssetUrl(url) {
+    const assets = ['.css', '.js', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', 
+                     '.woff', '.woff2', '.ttf', '.pdf', '.ico'];
+    try {
+      const u = new URL(url);
+      return assets.some(ext => u.pathname.toLowerCase().endsWith(ext));
+    } catch {
+      return false;
+    }
+  }
+
+  async function downloadFile(url) {
+    if (crawlerState.visited.has(url)) return null;
+    crawlerState.visited.add(url);
+
+    try {
+      const response = await fetchWithTimeout(url, parseInt(timeoutInput.value));
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      const path = sanitizePath(url);
+      
+      crawlerState.files[path] = blob;
+      crawlerState.stats.files++;
+      crawlerState.stats.bytes += blob.size;
+      
+      log(`✓ ${url.substring(0, 60)}...`, 'success');
+      return blob;
+    } catch (err) {
+      log(`✗ ${url.substring(0, 60)}...`, 'error');
+      crawlerState.stats.errors++;
+      return null;
+    }
+  }
+
+  function extractUrls(html, baseUrl) {
+    const urls = new Set();
+    const parser = new DOMParser();
+    
+    try {
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      doc.querySelectorAll('a[href]').forEach(el => {
+        let href = el.getAttribute('href');
+        if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+          try {
+            const abs = new URL(href, baseUrl).href.split('#')[0];
+            urls.add(abs);
+          } catch {}
+        }
+      });
+      
+      if (includeAssetsCheckbox.checked) {
+        doc.querySelectorAll('script[src], link[href], img[src], source[src]').forEach(el => {
+          let src = el.getAttribute('src') || el.getAttribute('href');
+          if (src) {
+            try {
+              urls.add(new URL(src, baseUrl).href);
+            } catch {}
+          }
+        });
+      }
+    } catch (err) {
+      log(`⚠ Error parsing HTML`, 'warn');
+    }
+    
+    return urls;
+  }
+
+  async function crawl() {
+    const startUrl = urlInput.value.trim();
+    if (!startUrl) {
+      alert('Please enter a URL');
+      return;
+    }
+
+    crawlerState = {
+      zip: new JSZip(),
+      files: {},
+      stats: { pages: 0, files: 0, bytes: 0, domains: new Set(), errors: 0 },
+      visited: new Set(),
+      queue: [startUrl],
+      active: true
+    };
+
+    terminal.innerHTML = '';
+    progressSection.classList.remove('hidden');
+    downloadSection.classList.add('hidden');
+    document.getElementById('startBtn').disabled = true;
+
+    try {
+      const baseUrl = new URL(startUrl);
+      const baseDomain = baseUrl.hostname;
+      
+      log(`🚀 Starting crawl of ${startUrl}`, 'info');
+      log(`Max pages: ${maxPagesInput.value}`, 'info');
+      log('');
+
+      let maxPages = parseInt(maxPagesInput.value);
+      let processed = 0;
+
+      while (crawlerState.queue.length > 0 && processed < maxPages) {
+        const url = crawlerState.queue.shift();
+        
+        if (crawlerState.visited.has(url)) continue;
+        
+        const response = await downloadFile(url);
+        if (!response) continue;
+
+        const contentType = response.type;
+        if (!contentType.includes('text/html')) {
+          updateStats();
+          continue;
+        }
+
+        processed++;
+        crawlerState.stats.pages++;
+
+        try {
+          const html = await response.text();
+          const newUrls = extractUrls(html, url);
+
+          for (const newUrl of newUrls) {
+            if (!crawlerState.visited.has(newUrl)) {
+              try {
+                const u = new URL(newUrl);
+                crawlerState.stats.domains.add(u.hostname);
+                
+                const shouldFollow = followExternalCheckbox.checked || u.hostname === baseDomain;
+                
+                if (shouldFollow && crawlerState.queue.length < maxPages * 2) {
+                  crawlerState.queue.push(newUrl);
+                }
+              } catch {}
+            }
+          }
+        } catch (err) {
+          log(`⚠ Error processing HTML`, 'warn');
+        }
+
+        updateStats();
+      }
+
+      log('', 'info');
+      log(`✅ Crawl complete!`, 'success');
+      log(`Pages: ${crawlerState.stats.pages} | Files: ${crawlerState.stats.files} | Size: ${(crawlerState.stats.bytes / 1024 / 1024).toFixed(2)} MB`, 'info');
+      
+      downloadSection.classList.remove('hidden');
+    } catch (err) {
+      log(`❌ Error: ${err.message}`, 'error');
+    } finally {
+      crawlerState.active = false;
+      document.getElementById('startBtn').disabled = false;
+    }
+  }
+
+  async function downloadZip() {
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = '📦 Creating zip...';
+
+    try {
+      const promises = Object.entries(crawlerState.files).map(([path, blob]) => {
+        return blob.arrayBuffer().then(buffer => {
+          crawlerState.zip.file(path, buffer);
+        });
+      });
+
+      await Promise.all(promises);
+
+      const content = await crawlerState.zip.generateAsync({ type: 'blob' });
+      saveAs(content, 'Downloaded Websites.zip');
+
+      downloadBtn.textContent = '✅ Downloaded!';
+      log('📦 Zip file downloaded: "Downloaded Websites.zip"', 'success');
+    } catch (err) {
+      log(`❌ Error creating zip: ${err.message}`, 'error');
+      downloadBtn.textContent = '📦 Download "Downloaded Websites"';
+    } finally {
+      downloadBtn.disabled = false;
+    }
+  }
+
+  function resetForm() {
+    form.reset();
+    progressSection.classList.add('hidden');
+    downloadSection.classList.add('hidden');
+    terminal.innerHTML = '';
+    document.getElementById('startBtn').disabled = false;
+  }
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const url = urlInput.value;
-    const output = outputInput.value || 'website_crawl';
-    const concurrent = concurrentInput.value;
-    const followExternal = followExternalCheckbox.checked;
-    const maxPages = maxPagesInput.value;
-
-    const instructions = document.getElementById('instructions');
-    const outputSection = document.getElementById('output-section');
-
-    let nodeCmd = `node crawl.js ${url}`;
-    let pythonCmd = `python crawl.py ${url}`;
-
-    // If custom output
-    if (output !== 'website_crawl') {
-      nodeCmd += ` --output ${output}`;
-      pythonCmd += ` # (enter when prompted: ${output})`;
-    }
-
-    // If custom concurrency
-    if (concurrent !== '5') {
-      nodeCmd += ` --concurrent ${concurrent}`;
-    }
-
-    // External links
-    if (!followExternal) {
-      nodeCmd += ` --stay-on-domain`;
-    }
-
-    // Max pages
-    if (maxPages) {
-      nodeCmd += ` --max-pages ${maxPages}`;
-    }
-
-    const lines = [
-      '<span class="terminal-info">🚀 WEBSITE CRAWLER COMMANDS</span>',
-      '',
-      '<span class="terminal-info">━━ NODE.JS (Recommended - Fastest)</span>',
-      '<span class="terminal-line">cd crawler-files</span>',
-      '<span class="terminal-line">npm install</span>',
-      `<span class="terminal-line">${nodeCmd}</span>`,
-      '',
-      '<span class="terminal-info">━━ PYTHON (Simple Setup)</span>',
-      '<span class="terminal-line">cd crawler-files</span>',
-      '<span class="terminal-line">pip install requests beautifulsoup4</span>',
-      `<span class="terminal-line">${pythonCmd}</span>`,
-      '',
-      '<span class="terminal-success">✓ Configuration:</span>',
-      `<span class="terminal-line">  URL: ${url}</span>`,
-      `<span class="terminal-line">  Output: ${output}</span>`,
-      `<span class="terminal-line">  Concurrency: ${concurrent}</span>`,
-      `<span class="terminal-line">  External links: ${followExternal ? 'Yes' : 'No'}</span>`,
-      `<span class="terminal-line">  Max pages: ${maxPages || 'Unlimited'}</span>`,
-    ];
-
-    instructions.innerHTML = lines.map(line => `<div class="terminal-line">${line}</div>`).join('');
-    outputSection.style.display = 'block';
-    outputSection.scrollIntoView({ behavior: 'smooth' });
+    crawl();
   });
-
-  function downloadCrawler(type) {
-    const files = {
-      'node': ['crawl.js', 'crawler.js', 'package.json', 'QUICKSTART.md'],
-      'python': ['crawl.py', 'website_crawler.py', 'QUICKSTART.md', 'CRAWLER_README.md']
-    };
-
-    const basePath = './crawler-files/';
-    const fileList = files[type];
-
-    let message = type === 'node' 
-      ? '📥 Node.js Files:\n\n' 
-      : '📥 Python Files:\n\n';
-
-    fileList.forEach(file => {
-      message += `• ${file}\n`;
-    });
-
-    message += `\n✅ All files are in: crawler-files/`;
-
-    alert(message);
-  }
 </script>
 </body>
 </html>
