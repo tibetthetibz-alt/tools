@@ -13,6 +13,9 @@
   <!-- FileSaver for downloading zip files -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   
+  <!-- Three.js for 3D visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -112,6 +115,17 @@
     footer a:hover { text-decoration:underline; }
     
     .hidden { display:none; }
+    
+    /* 3D Viewer Styles - Like Gridfinity */
+    .viewer { 
+      background:#f8f9fa; border-radius:12px; overflow:hidden; position:relative;
+      aspect-ratio:1; min-height:500px; margin-top:32px;
+    }
+    #canvas { width:100%; height:100%; display:block; }
+    .controls-hint { 
+      position:absolute; bottom:16px; left:16px; background:rgba(0,0,0,0.7);
+      color:white; padding:8px 12px; border-radius:6px; font-size:11px; z-index:10;
+    }
     
     /* Status Bar - Corner */
     .status-bar { 
@@ -223,6 +237,21 @@
         <button type="button" class="btn" onclick="resetForm()">Reset</button>
       </div>
     </form>
+
+    <!-- 3D Site Structure Visualization -->
+    <div id="viewer3D" class="output-section hidden">
+      <div class="output-title">🗺️ Site Structure (3D)</div>
+      <div class="viewer">
+        <canvas id="crawler-canvas"></canvas>
+        <div class="controls-hint">Drag to rotate • Scroll to zoom</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">3D Nodes</div>
+          <div class="stat-value" id="stat3DCount">0</div>
+        </div>
+      </div>
+    </div>
 
     <!-- Progress Section -->
     <div id="progressSection" class="output-section hidden">
@@ -386,6 +415,11 @@
     document.getElementById('statFiles').textContent = crawlerState.stats.files;
     document.getElementById('statSize').textContent = (crawlerState.stats.bytes / 1024 / 1024).toFixed(2);
     document.getElementById('statDomains').textContent = crawlerState.stats.domains.size;
+    
+    // Update 3D visualization
+    if (renderer && crawlerState.stats.files % 5 === 0) {
+      create3DVisualization();
+    }
   }
 
   async function fetchWithTimeout(url, timeout) {
@@ -684,8 +718,16 @@
 
     terminal.innerHTML = '';
     progressSection.classList.remove('hidden');
+    document.getElementById('viewer3D').classList.remove('hidden');
     downloadSection.classList.add('hidden');
     document.getElementById('startBtn').disabled = true;
+    
+    // Initialize 3D viewer
+    setTimeout(() => {
+      if (!renderer) {
+        initThree();
+      }
+    }, 100);
 
     try {
       const baseUrl = new URL(startUrl);
@@ -835,10 +877,152 @@
     addDevLog('🔄 Form reset', 'info');
   }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    crawl();
-  });
+  // 3D Site Structure Visualization (Like Gridfinity)
+  let scene, camera, renderer, container3D;
+  const nodeMap = {};
+  
+  function initThree() {
+    const canvas = document.getElementById('crawler-canvas');
+    if (!canvas) return;
+    
+    const viewer = canvas.parentElement;
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8f9fa);
+    scene.fog = new THREE.Fog(0xf8f9fa, 500, 1000);
+
+    camera = new THREE.PerspectiveCamera(
+      60,
+      viewer.clientWidth / viewer.clientHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(150, 120, 150);
+    camera.lookAt(0, 0, 0);
+
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(viewer.clientWidth, viewer.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+
+    // Lighting - Like Gridfinity
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(150, 150, 150);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
+
+    container3D = new THREE.Group();
+    scene.add(container3D);
+
+    // Mouse controls - Like Gridfinity
+    let isDragging = false;
+    let previousMouse = { x: 0, y: 0 };
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      previousMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - previousMouse.x;
+        const deltaY = e.clientY - previousMouse.y;
+        container3D.rotation.y += deltaX * 0.01;
+        container3D.rotation.x += deltaY * 0.01;
+      }
+      previousMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    canvas.addEventListener('mouseup', () => isDragging = false);
+    
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      camera.position.multiplyScalar(1 + e.deltaY * 0.001);
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      const w = viewer.clientWidth;
+      const h = viewer.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    animate();
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+
+  function addPageNode(url) {
+    // Create a box for each page - Like Gridfinity geometry
+    const width = 30;
+    const height = 30;
+    const depth = 20;
+    
+    const geometry = new THREE.BoxGeometry(width, height, depth);
+    const hue = Math.random();
+    const material = new THREE.MeshStandardMaterial({
+      color: new THREE.Color().setHSL(hue, 0.7, 0.6),
+      metalness: 0.3,
+      roughness: 0.4
+    });
+    
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    
+    // Position nodes in a grid/spiral pattern
+    const count = Object.keys(nodeMap).length;
+    const gridSize = Math.ceil(Math.sqrt(crawlerState.stats.pages));
+    const x = (count % gridSize) * 50 - (gridSize * 50) / 2;
+    const y = Math.floor(count / gridSize) * 50;
+    const z = Math.sin(count * 0.5) * 30;
+    
+    mesh.position.set(x, y, z);
+    
+    container3D.add(mesh);
+    nodeMap[url] = mesh;
+    
+    // Add grid lines like Gridfinity
+    if (count > 0) {
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xdddddd, linewidth: 1 });
+      const prevUrl = Object.keys(nodeMap)[count - 1];
+      const prevMesh = nodeMap[prevUrl];
+      
+      const geometry = new THREE.BufferGeometry();
+      const points = [mesh.position, prevMesh.position];
+      geometry.setFromPoints(points);
+      const line = new THREE.Line(geometry, lineMaterial);
+      container3D.add(line);
+    }
+  }
+
+  function create3DVisualization() {
+    // Clear existing geometry
+    while (container3D.children.length > 0) {
+      container3D.removeChild(container3D.children[0]);
+    }
+    nodeMap = {};
+    
+    // Add nodes for each downloaded page
+    const pages = Object.keys(crawlerState.files).slice(0, 50); // Limit to 50 for performance
+    pages.forEach(path => {
+      addPageNode(path);
+    });
+    
+    // Update stats display
+    const statCount = Object.keys(nodeMap).length;
+    if (document.getElementById('stat3DCount')) {
+      document.getElementById('stat3DCount').textContent = statCount;
+    }
+  }
 </script>
 </body>
 </html>
