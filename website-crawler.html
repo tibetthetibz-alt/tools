@@ -631,25 +631,8 @@
       }
     }
 
-    // Try robots.txt
-    try {
-      const robotsUrl = new URL('/robots.txt', baseUrl).href;
-      const response = await fetchWithTimeout(robotsUrl, 10);
-      if (response.ok) {
-        const text = await response.text();
-        const sitemapMatch = text.match(/Sitemap:\s*(.+)/i);
-        if (sitemapMatch) {
-          const sitemapUrl = sitemapMatch[1].trim();
-          addDevLog(`✓ Found sitemap in robots.txt: ${sitemapUrl}`, 'success');
-          const sitemapResponse = await fetchWithTimeout(sitemapUrl, 10);
-          const sitemapContent = await sitemapResponse.text();
-          return { url: sitemapUrl, content: sitemapContent };
-        }
-      }
-    } catch (err) {
-      // No robots.txt
-    }
-
+    // Only check robots.txt if no sitemap found
+    addDevLog('⏭ No sitemap found in common locations, skipping robots.txt check', 'info');
     addDevLog('✗ No sitemap found', 'warn');
     return null;
   }
