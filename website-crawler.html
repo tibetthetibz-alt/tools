@@ -507,6 +507,20 @@
             return;
           }
 
+          // Get all links from iframe for crawling
+          const iframeLinks = new Set();
+          iframeDoc.querySelectorAll('a[href]').forEach(el => {
+            let href = el.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+              try {
+                const abs = new URL(href, url).href.split('#')[0];
+                iframeLinks.add(abs);
+              } catch {}
+            }
+          });
+          
+          addDevLog(`🔗 Found ${iframeLinks.size} links`, 'debug');
+
           const html = new XMLSerializer().serializeToString(iframeDoc.documentElement);
           const blob = new Blob([html], { type: 'text/html' });
           const path = sanitizePath(url);
@@ -517,6 +531,23 @@
           
           addDevLog(`✓ Downloaded (iframe): ${path}`, 'success');
           log(`✓ ${url.substring(0, 60)}...`, 'success');
+          
+          // Add found links to queue
+          for (const link of iframeLinks) {
+            if (!crawlerState.visited.has(link)) {
+              try {
+                const u = new URL(link);
+                crawlerState.stats.domains.add(u.hostname);
+                
+                const shouldFollow = followExternalCheckbox.checked || u.hostname === url.split('/')[2];
+                
+                if (shouldFollow && crawlerState.queue.length < 200) {
+                  crawlerState.queue.push(link);
+                }
+              } catch {}
+            }
+          }
+          
           iframe.src = 'about:blank';
           resolve(blob);
         } catch (err) {
@@ -615,7 +646,14 @@
         if (crawlerState.visited.has(url)) continue;
         
         const response = await downloadFile(url);
-        if (!response) continue;
+        if (!response) {
+          // Add delay even on failure
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+
+        // Add 1 second delay between downloads
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const contentType = response.type;
         if (!contentType.includes('text/html')) {
@@ -631,7 +669,6 @@
         try {
           const html = await response.text();
           const newUrls = extractUrls(html, url);
-          addDevLog(`🔗 Found ${newUrls.size} links`, 'debug');
 
           for (const newUrl of newUrls) {
             if (!crawlerState.visited.has(newUrl)) {
@@ -641,7 +678,7 @@
                 
                 const shouldFollow = followExternalCheckbox.checked || u.hostname === baseDomain;
                 
-                if (shouldFollow && crawlerState.queue.length < maxPages * 2) {
+                if (shouldFollow && crawlerState.queue.length < 200) {
                   crawlerState.queue.push(newUrl);
                 }
               } catch {}
