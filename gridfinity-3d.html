@@ -247,7 +247,8 @@
                 </div>
 
                 <div class="buttons">
-                    <button class="btn-primary" onclick="exportSTL()">📥 Export STL</button>
+                    <button class="btn-primary" onclick="exportSTL()">📥 STL</button>
+                    <button class="btn-primary" onclick="exportSTEP()">📥 STEP</button>
                     <button class="btn-secondary" onclick="resetForm()">↻ Reset</button>
                 </div>
 
@@ -554,6 +555,213 @@
                 URL.revokeObjectURL(url);
             } catch (err) {
                 showError('Export failed: ' + err.message);
+            }
+        }
+
+        function exportSTEP() {
+            try {
+                const w = Math.max(1, Math.floor(parseFloat(document.getElementById('width').value)) || 3);
+                const h = Math.max(1, Math.floor(parseFloat(document.getElementById('height').value)) || 3);
+                const magnetDia = parseFloat(document.getElementById('magnetDia').value) || 6.5;
+                const includeBase = document.getElementById('includeBase').checked;
+
+                const containerWidth = w * SPECS.BASE_SIZE;
+                const containerHeight = h * SPECS.BASE_SIZE;
+                const containerDepth = h * SPECS.UNIT_HEIGHT + SPECS.STACKABLE_LIP;
+
+                let step = `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Gridfinity Container'),
+'2;1');
+FILE_NAME('gridfinity-${w}x${h}u-${magnetDia}mm.stp',
+NOW,
+(''),
+(''),
+'',
+'',
+'');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN'));
+ENDSEC;
+DATA;
+#1=PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
+#2=APPLICATION_CONTEXT('configuration controlled 3d designs of mechanical parts and assemblies');
+#10=PRODUCT_CATEGORY_RELATIONSHIP('MAIN',#11,#12);
+#11=PRODUCT_CATEGORY('part','');
+#12=PRODUCT('Gridfinity',
+'Gridfinity Container',
+'gridfinity-${w}x${h}u',#13);
+#13=PRODUCT_CONTEXT('',#2,'mechanical');
+#20=PRODUCT_DEFINITION('',
+'',#21,#1);
+#21=PRODUCT_DEFINITION_FORMATION('gridfinity',
+'',#12);
+#30=SHAPE_DEFINITION_REPRESENTATION(#31,#32);
+#31=PRODUCT_DEFINITION_SHAPE('','',#20);
+#32=ADVANCED_BREP_SHAPE_REPRESENTATION('',(#100),#40);
+#40=( GEOMETRIC_REPRESENTATION_CONTEXT(3)
+GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#41))
+GLOBAL_UNIT_ASSIGNED_CONTEXT((#42,#43,#44)));
+#41=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.01),#42);
+#42=( LENGTH_UNIT()
+NAMED_UNIT(#45)
+SI_UNIT(.MILLI.,.METRE.));
+#43=( NAMED_UNIT(#45)
+PLANE_ANGLE_UNIT()
+SI_UNIT(.STANDARD.,.RADIAN.));
+#44=( NAMED_UNIT(#45)
+SI_UNIT(.STANDARD.,.STERADIAN.)
+SOLID_ANGLE_UNIT());
+#45=DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.);
+#100=MANIFOLD_SOLID_BREP('Container',#101);
+#101=CLOSED_SHELL('',(#110,#120,#130,#140,#150,#160));
+#110=ADVANCED_FACE('',(#111),#200,.T.);
+#111=FACE_BOUND('',#112,.T.);
+#112=EDGE_LOOP('',(#113,#114,#115,#116));
+#113=ORIENTED_EDGE('',*,*,#201,.T.);
+#114=ORIENTED_EDGE('',*,*,#202,.T.);
+#115=ORIENTED_EDGE('',*,*,#203,.T.);
+#116=ORIENTED_EDGE('',*,*,#204,.T.);
+#120=ADVANCED_FACE('',(#121),#210,.T.);
+#121=FACE_BOUND('',#122,.T.);
+#122=EDGE_LOOP('',(#123,#124,#125,#126));
+#123=ORIENTED_EDGE('',*,*,#205,.T.);
+#124=ORIENTED_EDGE('',*,*,#206,.T.);
+#125=ORIENTED_EDGE('',*,*,#207,.T.);
+#126=ORIENTED_EDGE('',*,*,#208,.T.);
+#130=ADVANCED_FACE('',(#131),#220,.T.);
+#131=FACE_BOUND('',#132,.T.);
+#132=EDGE_LOOP('',(#133,#134));
+#133=ORIENTED_EDGE('',*,*,#209,.T.);
+#134=ORIENTED_EDGE('',*,*,#210,.F.);
+#140=ADVANCED_FACE('',(#141),#230,.T.);
+#141=FACE_BOUND('',#142,.T.);
+#142=EDGE_LOOP('',(#143,#144));
+#143=ORIENTED_EDGE('',*,*,#211,.T.);
+#144=ORIENTED_EDGE('',*,*,#212,.F.);
+#150=ADVANCED_FACE('',(#151),#240,.T.);
+#151=FACE_BOUND('',#152,.T.);
+#152=EDGE_LOOP('',(#153,#154));
+#153=ORIENTED_EDGE('',*,*,#213,.T.);
+#154=ORIENTED_EDGE('',*,*,#214,.F.);
+#160=ADVANCED_FACE('',(#161),#250,.T.);
+#161=FACE_BOUND('',#162,.T.);
+#162=EDGE_LOOP('',(#163,#164));
+#163=ORIENTED_EDGE('',*,*,#215,.T.);
+#164=ORIENTED_EDGE('',*,*,#216,.F.);
+#200=PLANE('Bottom',#300);
+#210=PLANE('Top',#310);
+#220=PLANE('Front',#320);
+#230=PLANE('Back',#330);
+#240=PLANE('Left',#340);
+#250=PLANE('Right',#350);
+#300=AXIS2_PLACEMENT_3D('',#301,#302,#303);
+#301=CARTESIAN_POINT('',(0.,0.,0.));
+#302=DIRECTION('',(0.,0.,1.));
+#303=DIRECTION('',(1.,0.,0.));
+#310=AXIS2_PLACEMENT_3D('',#311,#312,#313);
+#311=CARTESIAN_POINT('',(0.,0.,${containerDepth.toFixed(3)}));
+#312=DIRECTION('',(0.,0.,1.));
+#313=DIRECTION('',(1.,0.,0.));
+#320=AXIS2_PLACEMENT_3D('',#321,#322,#323);
+#321=CARTESIAN_POINT('',(0.,0.,0.));
+#322=DIRECTION('',(0.,1.,0.));
+#323=DIRECTION('',(1.,0.,0.));
+#330=AXIS2_PLACEMENT_3D('',#331,#332,#333);
+#331=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},0.));
+#332=DIRECTION('',(0.,1.,0.));
+#333=DIRECTION('',(1.,0.,0.));
+#340=AXIS2_PLACEMENT_3D('',#341,#342,#343);
+#341=CARTESIAN_POINT('',(0.,0.,0.));
+#342=DIRECTION('',(1.,0.,0.));
+#343=DIRECTION('',(0.,1.,0.));
+#350=AXIS2_PLACEMENT_3D('',#351,#352,#353);
+#351=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,0.));
+#352=DIRECTION('',(1.,0.,0.));
+#353=DIRECTION('',(0.,1.,0.));
+#201=EDGE_CURVE('',#401,#402,#501,.T.);
+#202=EDGE_CURVE('',#402,#403,#502,.T.);
+#203=EDGE_CURVE('',#403,#404,#503,.T.);
+#204=EDGE_CURVE('',#404,#401,#504,.T.);
+#205=EDGE_CURVE('',#405,#406,#505,.T.);
+#206=EDGE_CURVE('',#406,#407,#506,.T.);
+#207=EDGE_CURVE('',#407,#408,#507,.T.);
+#208=EDGE_CURVE('',#408,#405,#508,.T.);
+#209=EDGE_CURVE('',#401,#405,#509,.T.);
+#210=EDGE_CURVE('',#402,#406,#510,.T.);
+#211=EDGE_CURVE('',#403,#407,#511,.T.);
+#212=EDGE_CURVE('',#404,#408,#512,.T.);
+#213=EDGE_CURVE('',#401,#403,#513,.T.);
+#214=EDGE_CURVE('',#405,#407,#514,.T.);
+#215=EDGE_CURVE('',#402,#404,#515,.T.);
+#216=EDGE_CURVE('',#406,#408,#516,.T.);
+#401=CARTESIAN_POINT('',(0.,0.,0.));
+#402=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,0.));
+#403=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},${containerHeight.toFixed(3)},0.));
+#404=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},0.));
+#405=CARTESIAN_POINT('',(0.,0.,${containerDepth.toFixed(3)}));
+#406=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},0.,${containerDepth.toFixed(3)}));
+#407=CARTESIAN_POINT('',(${containerWidth.toFixed(3)},${containerHeight.toFixed(3)},${containerDepth.toFixed(3)}));
+#408=CARTESIAN_POINT('',(0.,${containerHeight.toFixed(3)},${containerDepth.toFixed(3)}));
+#501=LINE('',#401,#600);
+#502=LINE('',#402,#601);
+#503=LINE('',#403,#602);
+#504=LINE('',#404,#603);
+#505=LINE('',#405,#604);
+#506=LINE('',#406,#605);
+#507=LINE('',#407,#606);
+#508=LINE('',#408,#607);
+#509=LINE('',#401,#608);
+#510=LINE('',#402,#609);
+#511=LINE('',#403,#610);
+#512=LINE('',#404,#611);
+#513=LINE('',#401,#612);
+#514=LINE('',#405,#613);
+#515=LINE('',#402,#614);
+#516=LINE('',#406,#615);
+#600=VECTOR('',#620,1.0);
+#601=VECTOR('',#621,1.0);
+#602=VECTOR('',#622,1.0);
+#603=VECTOR('',#623,1.0);
+#604=VECTOR('',#624,1.0);
+#605=VECTOR('',#625,1.0);
+#606=VECTOR('',#626,1.0);
+#607=VECTOR('',#627,1.0);
+#608=VECTOR('',#628,1.0);
+#609=VECTOR('',#629,1.0);
+#610=VECTOR('',#630,1.0);
+#611=VECTOR('',#631,1.0);
+#612=VECTOR('',#632,1.0);
+#613=VECTOR('',#633,1.0);
+#614=VECTOR('',#634,1.0);
+#615=VECTOR('',#635,1.0);
+#620=DIRECTION('',(1.,0.,0.));
+#621=DIRECTION('',(0.,1.,0.));
+#622=DIRECTION('',(-1.,0.,0.));
+#623=DIRECTION('',(0.,-1.,0.));
+#624=DIRECTION('',(0.,0.,1.));
+#625=DIRECTION('',(1.,0.,0.));
+#626=DIRECTION('',(0.,1.,0.));
+#627=DIRECTION('',(-1.,0.,0.));
+#628=DIRECTION('',(0.,0.,1.));
+#629=DIRECTION('',(1.,0.,0.));
+#630=DIRECTION('',(0.,1.,0.));
+#631=DIRECTION('',(0.,0.,1.));
+#632=DIRECTION('',(1.,0.,0.));
+#633=DIRECTION('',(0.,0.,1.));
+#634=DIRECTION('',(1.,0.,0.));
+#635=DIRECTION('',(0.,0.,1.));
+ENDSEC;
+END-ISO-10303-21;`;
+
+                const blob = new Blob([step], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `gridfinity-${w}x${h}u-${magnetDia}mm.stp`;
+                link.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showError('STEP export failed: ' + err.message);
             }
         }
 
