@@ -189,6 +189,8 @@
   <div class="crawler-container">
     <div class="info-box">
       <strong>🕷️ Download entire websites in your browser:</strong> No installation needed! Just enter a URL and download all pages, assets, and content as a zip file labeled "Downloaded Websites".
+      <br><br>
+      <strong>⚠️ CORS Note:</strong> Some websites block browser requests for security reasons. If you get "Failed to fetch" errors, try a different site or use the Node.js/Python crawlers from <code>crawler-files/</code> for unrestricted access.
     </div>
 
     <form id="crawlerForm">
@@ -396,7 +398,9 @@
     try {
       const response = await fetch(url, { 
         signal: controller.signal,
-        headers: { 'User-Agent': 'Mozilla/5.0' }
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        mode: 'cors',
+        credentials: 'omit'
       });
       clearTimeout(timeoutId);
       return response;
