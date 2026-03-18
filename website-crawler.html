@@ -362,7 +362,6 @@
   const form = document.getElementById('crawlerForm');
   const urlInput = document.getElementById('url');
   const maxPagesInput = document.getElementById('maxPages');
-  const followExternalCheckbox = document.getElementById('followExternal');
   const includeAssetsCheckbox = document.getElementById('includeAssets');
   const timeoutInput = document.getElementById('timeout');
   const progressSection = document.getElementById('progressSection');
@@ -697,7 +696,6 @@
       log('');
 
       addDevLog(`Base domain: ${baseDomain}`, 'debug');
-      addDevLog(`Follow external: ${followExternalCheckbox.checked}`, 'debug');
 
       // Try to find and parse sitemap
       const sitemap = await findSitemap(startUrl);
