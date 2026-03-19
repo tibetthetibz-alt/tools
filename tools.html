@@ -34,7 +34,6 @@
   .icon-sun{display:none} .icon-moon{display:block}
   [data-theme="light"] .icon-sun{display:block} [data-theme="light"] .icon-moon{display:none}
   .hero { padding:80px 0 64px; text-align:center; }
-  /* Fix flash: hide logos until JS applies correct theme src */
   .hero-logo, .nav-logo-img { visibility:hidden; }
   .hero-logo { width:72px; height:72px; margin:0 auto 24px; display:block; object-fit:contain; }
   .hero h1 {
@@ -170,6 +169,16 @@
       <div class="tool-tags"><span class="tag">crawler</span><span class="tag">scraper</span><span class="tag">download</span></div>
     </a>
 
+    <a class="tool-card" href="html-editor.html">
+      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c8bff" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="3 3"/></svg></div>
+      <div class="tool-info">
+        <div class="tool-name">HTML Editor</div>
+        <div class="tool-desc">Live split-pane editor with syntax highlighting. Click any element in the preview to jump to its source line, or click a line to highlight it in the preview.</div>
+      </div>
+      <div class="tool-tags"><span class="tag">html</span><span class="tag">editor</span><span class="tag">devtools</span></div>
+    </a>
+
   </div>
   <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></footer>
 </div>
@@ -183,11 +192,8 @@
   const html=document.documentElement;
   const navLogo=document.getElementById('nav-logo');
   const heroLogo=document.getElementById('hero-logo');
-
-  // Apply theme immediately — logos start src="" and visibility:hidden to avoid flash
   const saved=localStorage.getItem('theme')||'dark';
   setTheme(saved);
-
   function setTheme(t){
     html.setAttribute('data-theme',t);
     const src=t==='dark'?'logo-dark.png':'logo-light.png';
@@ -197,9 +203,6 @@
     localStorage.setItem('theme',t);
   }
   function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
-
-  // Clean URLs — cards use real .html hrefs, browser sees clean paths via replaceState on each page
-
   function openSketcher(){
     const p=document.getElementById('sketcher-panel');
     const f=document.getElementById('sketcher-iframe');

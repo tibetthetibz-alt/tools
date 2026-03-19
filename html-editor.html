@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Editor — Tibet's Tools</title>
+<link rel="icon" type="image/png" href="logo-light.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0e11;
+    --surface: #13141a;
+    --surface2: #1c1e27;
+    --border: #252733;
+    --border2: #2f3244;
+    --accent: #5b6af0;
+    --accent2: #7c8bff;
+    --highlight: rgba(91,106,240,0.18);
+    --highlight-border: rgba(91,106,240,0.6);
+    --text: #e2e4f0;
+    --text2: #8890b0;
+    --text3: #555d80;
+    --green: #3ecf8e;
+    --yellow: #f0c040;
+    --red: #f06070;
+    --orange: #f09050;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    overflow: hidden;
+  }
+
+  /* ── TOPBAR ── */
+  #topbar {
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  #logo {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none;
+  }
+  #logo span { color: var(--accent2); }
+
+  .tb-btn {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tb-btn:hover { border-color: var(--accent); color: var(--accent2); background: var(--highlight); }
+  .tb-btn.danger:hover { border-color: var(--red); color: var(--red); background: rgba(240,96,112,.12); }
+  .tb-btn.back { color: var(--text2); }
+  .tb-btn.back:hover { border-color: var(--accent); color: var(--accent2); }
+
+  .tb-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+  .tb-spacer { flex: 1; }
+
+  #link-indicator {
+    font-size: 11px;
+    color: var(--green);
+    display: flex; align-items: center; gap: 6px;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  #link-indicator.show { opacity: 1; }
+  #link-indicator::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── LAYOUT ── */
+  #workspace {
+    display: flex;
+    height: calc(100vh - 48px);
+    overflow: hidden;
+  }
+
+  /* ── EDITOR PANE ── */
+  #editor-pane {
+    width: 50%;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .pane-header {
+    height: 36px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .pane-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .pane-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot-editor { background: var(--accent2); }
+  .dot-preview { background: var(--green); }
+
+  #editor-wrap {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* Line numbers */
+  #line-nums {
+    width: 44px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+    padding-top: 12px;
+    user-select: none;
+  }
+  .ln {
+    height: 21px;
+    line-height: 21px;
+    font-size: 11.5px;
+    color: var(--text3);
+    text-align: right;
+    padding-right: 10px;
+    transition: color .15s;
+  }
+  .ln.active { color: var(--accent2); }
+
+  /* Code textarea + overlay */
+  #editor-inner {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+  }
+
+  #code-highlight {
+    position: absolute;
+    top: 0; left: 0;
+    min-width: 100%;
+    padding: 12px 12px 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 21px;
+    white-space: pre;
+    pointer-events: none;
+    color: transparent;
+  }
+
+  #code-input {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    padding: 12px 12px 12px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 21px;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    caret-color: var(--accent2);
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+    tab-size: 2;
+    -moz-tab-size: 2;
+    z-index: 1;
+    spellcheck: false;
+  }
+
+  /* Highlighted line in editor */
+  .hl-line {
+    display: block;
+    background: var(--highlight);
+    border-left: 2px solid var(--highlight-border);
+    margin-left: -2px;
+    border-radius: 2px;
+  }
+
+  /* ── DIVIDER ── */
+  #divider {
+    width: 5px;
+    background: var(--border);
+    cursor: col-resize;
+    flex-shrink: 0;
+    position: relative;
+    transition: background .15s;
+    z-index: 10;
+  }
+  #divider:hover, #divider.dragging { background: var(--accent); }
+  #divider::after {
+    content: '⋮';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    color: var(--text3);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  /* ── PREVIEW PANE ── */
+  #preview-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #preview-iframe {
+    flex: 1;
+    border: none;
+    background: #fff;
+  }
+
+  /* ── STATUSBAR ── */
+  #statusbar {
+    height: 26px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 16px;
+    font-size: 10.5px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+  .sb-item { display: flex; align-items: center; gap: 5px; }
+  .sb-val { color: var(--text2); }
+  #cursor-pos { color: var(--accent2); }
+
+  /* ── SYNTAX COLORS ── */
+  .tok-tag    { color: #f06070; }
+  .tok-attr   { color: #f09050; }
+  .tok-val    { color: #3ecf8e; }
+  .tok-eq     { color: #8890b0; }
+  .tok-text   { color: #e2e4f0; }
+  .tok-comment{ color: #4a5070; font-style: italic; }
+  .tok-doctype{ color: #5b6af0; }
+  .tok-entity { color: #f0c040; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <a id="logo" href="tools.html">⟨<span>/</span>⟩ <span style="color:var(--text)">HTML</span><span>Editor</span></a>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="formatCode()">⇄ Format</button>
+  <button class="tb-btn" onclick="copyCode()">⎘ Copy</button>
+  <button class="tb-btn" onclick="downloadHTML()">↓ Export</button>
+  <button class="tb-btn danger" onclick="clearEditor()">✕ Clear</button>
+  <div class="tb-spacer"></div>
+  <div id="link-indicator">Linked — click either side</div>
+</div>
+
+<!-- WORKSPACE -->
+<div id="workspace">
+
+  <!-- EDITOR -->
+  <div id="editor-pane">
+    <div class="pane-header">
+      <div class="pane-dot dot-editor"></div>
+      <div class="pane-label">HTML Source</div>
+    </div>
+    <div id="editor-wrap">
+      <div id="line-nums"></div>
+      <div id="editor-inner">
+        <div id="code-highlight" aria-hidden="true"></div>
+        <textarea id="code-input" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+      </div>
+    </div>
+    <div id="statusbar">
+      <div class="sb-item">Cursor <span class="sb-val" id="cursor-pos">1:1</span></div>
+      <div class="sb-item">Lines <span class="sb-val" id="line-count">1</span></div>
+      <div class="sb-item">Chars <span class="sb-val" id="char-count">0</span></div>
+      <div class="tb-spacer"></div>
+      <div class="sb-item">HTML</div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div id="divider"></div>
+
+  <!-- PREVIEW -->
+  <div id="preview-pane">
+    <div class="pane-header">
+      <div class="pane-dot dot-preview"></div>
+      <div class="pane-label">Preview</div>
+    </div>
+    <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+</div>
+
+<script>
+const input    = document.getElementById('code-input');
+const hlDiv    = document.getElementById('code-highlight');
+const iframe   = document.getElementById('preview-iframe');
+const lineNums = document.getElementById('line-nums');
+const indicator= document.getElementById('link-indicator');
+
+let previewDoc       = null;
+let highlightedEl    = null;
+let highlightTimeout = null;
+let updateTimeout    = null;
+let isLinked         = false;
+
+const DEFAULT = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Page</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 640px;
+      margin: 60px auto;
+      padding: 0 24px;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+    h1 { color: #5b6af0; font-size: 2em; margin-bottom: .3em; }
+    p  { color: #444; }
+    .card {
+      background: #f4f5ff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 24px;
+      border-left: 4px solid #5b6af0;
+    }
+    button {
+      margin-top: 16px;
+      padding: 10px 22px;
+      background: #5b6af0;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:hover { background: #7c8bff; }
+  </style>
+</head>
+<body>
+  <h1>Welcome \uD83D\uDC4B</h1>
+  <p>Click anything in the <strong>preview</strong> to jump to that element in the editor.</p>
+  <p>Click any line in the <strong>editor</strong> to highlight that element in the preview.</p>
+  <div class="card">
+    <p>This is a card component. Try clicking it!</p>
+    <button onclick="alert('Hello!')">Click me</button>
+  </div>
+</body>
+</html>`;
+
+input.value = DEFAULT;
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function tokenize(code) {
+  let result = ''; let i = 0;
+  while (i < code.length) {
+    if (code.startsWith('<!--', i)) {
+      const end = code.indexOf('-->', i);
+      const chunk = end === -1 ? code.slice(i) : code.slice(i, end + 3);
+      result += `<span class="tok-comment">${escapeHtml(chunk)}</span>`;
+      i += chunk.length; continue;
+    }
+    if (code.startsWith('<!DOCTYPE', i) || code.startsWith('<!doctype', i)) {
+      const end = code.indexOf('>', i);
+      const chunk = end === -1 ? code.slice(i) : code.slice(i, end + 1);
+      result += `<span class="tok-doctype">${escapeHtml(chunk)}</span>`;
+      i += chunk.length; continue;
+    }
+    if (code[i] === '<') {
+      const end = code.indexOf('>', i);
+      if (end === -1) { result += escapeHtml(code.slice(i)); break; }
+      const tag = code.slice(i, end + 1);
+      result += colorTag(tag); i = end + 1; continue;
+    }
+    let next = code.indexOf('<', i);
+    if (next === -1) next = code.length;
+    const text = code.slice(i, next);
+    result += `<span class="tok-text">${escapeHtml(text)}</span>`;
+    i = next;
+  }
+  return result;
+}
+
+function colorTag(tag) {
+  if (/^\//.test(tag)) return `<span class="tok-tag">${escapeHtml(tag)}</span>`;
+  const m = tag.match(/^(<\/?+)([\w:-]*)(.*)(\ *\/?>)$/s);
+  if (!m) return `<span class="tok-tag">${escapeHtml(tag)}</span>`;
+  const [, open, name, attrs, close] = m;
+  return `<span class="tok-tag">${escapeHtml(open)}${escapeHtml(name)}</span>${colorAttrs(attrs)}<span class="tok-tag">${escapeHtml(close)}</span>`;
+}
+
+function colorAttrs(attrs) {
+  return attrs.replace(/([\w:-]+)(=)("([^"]*)")/, (_, name, eq, val) =>
+    `<span class="tok-attr"> ${escapeHtml(name)}</span><span class="tok-eq">${eq}</span><span class="tok-val">${escapeHtml(val)}</span>`
+  ).replace(/([\w:-]+)(?!=)/g, (m, p) =>
+    p.trim() ? `<span class="tok-attr"> ${escapeHtml(p)}</span>` : escapeHtml(m)
+  );
+}
+
+function renderHighlight(highlightLine = -1) {
+  const lines = input.value.split('\n');
+  const html = lines.map((line, idx) => {
+    const content = tokenize(line + '\n');
+    if (idx === highlightLine) return `<span class="hl-line">${content}</span>`;
+    return content;
+  }).join('');
+  hlDiv.innerHTML = html;
+}
+
+function updateLineNums(count, activeLine = -1) {
+  const existing = lineNums.children;
+  while (existing.length > count) lineNums.removeChild(lineNums.lastChild);
+  while (existing.length < count) {
+    const d = document.createElement('div');
+    d.className = 'ln';
+    d.textContent = existing.length + 1;
+    lineNums.appendChild(d);
+  }
+  Array.from(existing).forEach((el, i) => {
+    el.className = i === activeLine ? 'ln active' : 'ln';
+  });
+}
+
+function updateStatus() {
+  const val  = input.value;
+  const lines = val.split('\n');
+  const pos   = input.selectionStart;
+  let row = 0, col = 0, counted = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (counted + lines[i].length + 1 > pos) { row = i; col = pos - counted; break; }
+    counted += lines[i].length + 1;
+  }
+  document.getElementById('cursor-pos').textContent = `${row+1}:${col+1}`;
+  document.getElementById('line-count').textContent  = lines.length;
+  document.getElementById('char-count').textContent  = val.length;
+  updateLineNums(lines.length, row);
+  renderHighlight();
+}
+
+function updatePreview() {
+  const code = input.value;
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(code); doc.close();
+  previewDoc = doc;
+  setupPreviewListeners();
+  isLinked = true;
+  indicator.classList.add('show');
+}
+
+function schedulePreview() {
+  clearTimeout(updateTimeout);
+  updateTimeout = setTimeout(updatePreview, 500);
+}
+
+function setupPreviewListeners() {
+  const doc = iframe.contentDocument;
+  if (!doc || !doc.body) return;
+  doc.addEventListener('click', onPreviewClick, true);
+  doc.addEventListener('mouseover', onPreviewHover, true);
+  doc.addEventListener('mouseout', onPreviewOut, true);
+  const style = doc.createElement('style');
+  style.id = '__editor-hl';
+  style.textContent = `
+    .__hl-hover { outline: 2px solid rgba(91,106,240,0.7) !important; outline-offset: 2px !important; cursor: crosshair !important; }
+    .__hl-selected { outline: 2px solid #5b6af0 !important; outline-offset: 2px !important; background: rgba(91,106,240,0.08) !important; }
+  `;
+  doc.head.appendChild(style);
+}
+
+function onPreviewHover(e) { e.target.classList.add('__hl-hover'); }
+function onPreviewOut(e)   { e.target.classList.remove('__hl-hover'); }
+
+function onPreviewClick(e) {
+  e.preventDefault(); e.stopPropagation();
+  if (highlightedEl) highlightedEl.classList.remove('__hl-selected');
+  highlightedEl = e.target;
+  highlightedEl.classList.add('__hl-selected');
+  const tagName = e.target.tagName.toLowerCase();
+  const lineIdx = findLineForTag(tagName, e.target);
+  if (lineIdx !== -1) {
+    scrollEditorToLine(lineIdx);
+    renderHighlight(lineIdx);
+    updateLineNums(input.value.split('\n').length, lineIdx);
+    flashIndicator();
+  }
+}
+
+function findLineForTag(tagName, el) {
+  const lines = input.value.split('\n');
+  const path = [];
+  let node = el;
+  while (node && node.tagName) {
+    const parent = node.parentElement;
+    if (!parent) break;
+    const siblings = Array.from(parent.children).filter(c => c.tagName === node.tagName);
+    const idx = siblings.indexOf(node);
+    path.unshift({ tag: node.tagName.toLowerCase(), idx });
+    node = parent;
+  }
+  const target = path[path.length - 1];
+  if (!target) return -1;
+  let count = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trimStart().toLowerCase();
+    if (line.startsWith('<'+target.tag) || line.startsWith('<'+target.tag+' ') || line.startsWith('<'+target.tag+'>')) {
+      if (count === target.idx) return i;
+      count++;
+    }
+  }
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].toLowerCase().includes('<'+target.tag)) return i;
+  }
+  return -1;
+}
+
+function scrollEditorToLine(lineIdx) {
+  const lineHeight = 21;
+  const targetY = lineIdx * lineHeight;
+  const editorInner = document.getElementById('editor-inner');
+  editorInner.scrollTop = Math.max(0, targetY - editorInner.clientHeight / 2);
+  const lines = input.value.split('\n');
+  let pos = 0;
+  for (let i = 0; i < lineIdx && i < lines.length; i++) pos += lines[i].length + 1;
+  input.focus();
+  input.setSelectionRange(pos, pos + (lines[lineIdx] || '').length);
+}
+
+input.addEventListener('click', onEditorClick);
+input.addEventListener('keyup', onEditorClick);
+
+function onEditorClick() {
+  updateStatus();
+  const pos   = input.selectionStart;
+  const lines  = input.value.slice(0, pos).split('\n');
+  const lineIdx = lines.length - 1;
+  const line    = input.value.split('\n')[lineIdx] || '';
+  const tagMatch = line.match(/<\/?([a-zA-Z][\w:-]*)/);
+  if (!tagMatch || !previewDoc) return;
+  const tagName = tagMatch[1].toLowerCase();
+  const allTags = Array.from(previewDoc.querySelectorAll('*'));
+  const matching = allTags.filter(el => el.tagName.toLowerCase() === tagName);
+  const lines_code = input.value.split('\n');
+  let occurrence = 0;
+  for (let i = 0; i < lineIdx; i++) {
+    const l = lines_code[i].trimStart().toLowerCase();
+    if ((l.startsWith('<'+tagName) || l.startsWith('<'+tagName+' ') || l.startsWith('<'+tagName+'>')) && !l.startsWith('</')) occurrence++;
+  }
+  const targetEl = matching[occurrence] || matching[0];
+  if (!targetEl) return;
+  allTags.forEach(el => el.classList.remove('__hl-selected'));
+  targetEl.classList.add('__hl-selected');
+  targetEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  renderHighlight(lineIdx);
+  flashIndicator();
+}
+
+function flashIndicator() {
+  indicator.classList.add('show');
+  clearTimeout(highlightTimeout);
+  highlightTimeout = setTimeout(() => {}, 2000);
+}
+
+input.addEventListener('input', () => { updateStatus(); schedulePreview(); });
+
+input.addEventListener('scroll', () => {
+  const editorInner = document.getElementById('editor-inner');
+  hlDiv.style.top    = -editorInner.scrollTop + 'px';
+  hlDiv.style.left   = -editorInner.scrollLeft + 'px';
+  lineNums.scrollTop = editorInner.scrollTop;
+});
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = input.selectionStart, end = input.selectionEnd;
+    input.value = input.value.slice(0,start) + '  ' + input.value.slice(end);
+    input.selectionStart = input.selectionEnd = start + 2;
+    updateStatus(); schedulePreview();
+  }
+});
+
+const divider    = document.getElementById('divider');
+const editorPane = document.getElementById('editor-pane');
+const workspace  = document.getElementById('workspace');
+let dragging = false, startX = 0, startW = 0;
+
+divider.addEventListener('mousedown', (e) => {
+  dragging = true; startX = e.clientX; startW = editorPane.offsetWidth;
+  divider.classList.add('dragging');
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - startX;
+  const total = workspace.offsetWidth;
+  const newW = Math.min(Math.max(startW + dx, 200), total - 200);
+  editorPane.style.width = newW + 'px';
+});
+document.addEventListener('mouseup', () => {
+  if (dragging) { dragging = false; divider.classList.remove('dragging'); document.body.style.cursor = ''; document.body.style.userSelect = ''; }
+});
+
+function formatCode() {
+  try {
+    let indent = 0;
+    const VOID = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+    const lines = input.value.split('\n').map(l => l.trim()).filter(l => l);
+    const out = [];
+    for (const line of lines) {
+      const isClose = /^\//.test(line);
+      const isOpen  = /^<[^/!]/.test(line) && !(/\/>$/.test(line));
+      const tag     = (line.match(/^<([a-zA-Z][\w:-]*)/) || [])[1];
+      const isVoid  = tag && VOID.has(tag.toLowerCase());
+      if (isClose) indent = Math.max(0, indent - 1);
+      out.push('  '.repeat(indent) + line);
+      if (isOpen && !isVoid && !isClose) indent++;
+    }
+    input.value = out.join('\n');
+    updateStatus(); schedulePreview();
+  } catch(e) {}
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = [...document.querySelectorAll('.tb-btn')].find(b => b.textContent.includes('Copy'));
+    if (btn) { btn.textContent = '\u2713 Copied'; setTimeout(() => btn.textContent = '\u2358 Copy', 1500); }
+  });
+}
+
+function downloadHTML() {
+  const blob = new Blob([input.value], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+}
+
+function clearEditor() {
+  if (confirm('Clear editor?')) { input.value = ''; updateStatus(); updatePreview(); }
+}
+
+updateStatus();
+iframe.addEventListener('load', () => {
+  previewDoc = iframe.contentDocument;
+  setupPreviewListeners();
+  isLinked = true;
+  indicator.classList.add('show');
+});
+updatePreview();
+</script>
+</body>
+</html>
