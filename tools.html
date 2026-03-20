@@ -8,182 +8,215 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:#0e0e12; --bg2:#16161c; --bg3:#1c1c24; --border:#2a2a38;
-    --text:#f0f0ff; --text2:#7070a0;
-    --accent:#01c6f1; --accent2:#1BD3D6; --accent3:#27DEC4; --green:#6AFF7E; --teal:#46EDA5;
-    --nav-bg:rgba(14,14,18,0.92); --grid-color:rgba(1,198,241,0.025);
-  }
-  [data-theme="light"] {
-    --bg:#f4f4f8; --bg2:#ffffff; --bg3:#ebebf2; --border:#d0d0e0;
-    --text:#0e0e1a; --text2:#6060a0;
-    --accent:#0099cc; --accent2:#1aacb0; --accent3:#1dbfa0; --green:#22a83a; --teal:#2db87a;
-    --nav-bg:rgba(244,244,248,0.92); --grid-color:rgba(0,153,204,0.04);
-  }
-  html,body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; overflow-x:hidden; transition:background .3s,color .3s; }
-  body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; z-index:0; }
-  .wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 24px 100px; }
-  nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; justify-content:space-between; transition:background .3s,border-color .3s; }
-  .nav-left { display:flex; align-items:center; gap:12px; text-decoration:none; }
-  .nav-logo-img { width:32px; height:32px; object-fit:contain; }
-  .nav-right { display:flex; align-items:center; gap:14px; }
-  .nav-tag { font-size:10px; letter-spacing:.2em; color:var(--text2); text-transform:uppercase; }
-  .theme-toggle { width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
-  .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
-  .icon-sun{display:none} .icon-moon{display:block}
-  [data-theme="light"] .icon-sun{display:block} [data-theme="light"] .icon-moon{display:none}
-  .hero { padding:80px 0 64px; text-align:center; }
-  .hero-logo, .nav-logo-img { visibility:hidden; }
-  .hero-logo { width:72px; height:72px; margin:0 auto 24px; display:block; object-fit:contain; }
-  .hero h1 {
-    font-family:'Big Shoulders Display',sans-serif;
-    font-size:clamp(56px,12vw,120px); font-weight:900; line-height:.9; letter-spacing:-2px;
-    background:linear-gradient(135deg, #6AFF7E 0%, #27DEC4 35%, #01c6f1 65%, #00007E 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-    margin-bottom:24px;
-  }
-  [data-theme="light"] .hero h1 {
-    background:linear-gradient(135deg, #22a83a 0%, #1dbfa0 35%, #0099cc 65%, #000066 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  }
-  .section-hdr { display:flex; align-items:center; gap:16px; margin-bottom:28px; }
-  .section-hdr span { font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--text2); white-space:nowrap; }
-  .section-hdr::after { content:''; flex:1; height:1px; background:var(--border); }
-  .tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; }
-  .tool-card { background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:28px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:16px; transition:border-color .2s,transform .15s,box-shadow .2s; cursor:pointer; position:relative; overflow:hidden; }
-  .tool-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 50% -10%,rgba(1,198,241,0.07),transparent); opacity:0; transition:opacity .3s; }
-  .tool-card:hover { border-color:var(--accent); transform:translateY(-3px); box-shadow:0 12px 40px rgba(1,198,241,0.12); }
-  .tool-card:hover::before { opacity:1; }
-  .tool-icon { width:44px; height:44px; background:var(--bg3); border:1px solid var(--border); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-  .tool-info { flex:1; }
-  .tool-name { font-family:'Big Shoulders Display',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:6px; line-height:1; }
-  .tool-desc { font-size:11px; color:var(--text2); line-height:1.7; }
-  .tool-tags { display:flex; gap:6px; flex-wrap:wrap; }
-  .tag { font-size:10px; padding:3px 9px; border-radius:20px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); }
-  .tool-arrow { position:absolute; top:28px; right:28px; color:var(--border); transition:color .2s,transform .2s; }
-  .tool-card:hover .tool-arrow { color:var(--accent); transform:translate(2px,-2px); }
-  footer { margin-top:80px; padding-top:28px; border-top:1px solid var(--border); text-align:center; font-size:11px; color:var(--text2); }
-  footer a { color:var(--accent); text-decoration:none; }
-  footer a:hover { text-decoration:underline; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#0e0e12; --bg2:#16161c; --bg3:#1c1c24; --border:#2a2a38;
+  --text:#f0f0ff; --text2:#7070a0; --text3:#4a4a70;
+  --accent:#01c6f1; --accent2:#1BD3D6; --accent3:#27DEC4; --green:#6AFF7E; --teal:#46EDA5;
+  --nav-bg:rgba(14,14,18,0.92); --grid-color:rgba(1,198,241,0.025);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border);
+  --shadow-hover: 0 16px 48px rgba(1,198,241,0.14), 0 0 0 1px rgba(1,198,241,0.35);
+  --card-glow: rgba(1,198,241,0.10);
+}
+[data-theme="light"] {
+  --bg:#f0f4fa; --bg2:#ffffff; --bg3:#e8edf5; --border:#d0d4e8;
+  --text:#0a0a20; --text2:#5a5a90; --text3:#9090b8;
+  --accent:#0088cc; --accent2:#1aacb0; --accent3:#1dbfa0; --green:#22a83a; --teal:#2db87a;
+  --nav-bg:rgba(240,244,250,0.92); --grid-color:rgba(0,136,204,0.05);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
+  --shadow-hover: 0 16px 48px rgba(0,136,204,0.12), 0 0 0 1px rgba(0,136,204,0.3);
+  --card-glow: rgba(0,136,204,0.08);
+}
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Mono',monospace; overflow-x:hidden; transition:background .3s,color .3s; }
+body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; z-index:0; }
+body::after { content:''; position:fixed; top:-200px; left:50%; transform:translateX(-50%); width:800px; height:600px; background:radial-gradient(ellipse,rgba(1,198,241,0.06) 0%,transparent 70%); pointer-events:none; z-index:0; }
+.wrap { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 24px 100px; }
+nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 32px; height:58px; display:flex; align-items:center; justify-content:space-between; transition:background .3s,border-color .3s; }
+.nav-left { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo-img { width:28px; height:28px; object-fit:contain; visibility:hidden; }
+.nav-wordmark { font-family:'Big Shoulders Display',sans-serif; font-weight:900; font-size:1.1rem; letter-spacing:.04em; color:var(--text); }
+.nav-right { display:flex; align-items:center; gap:12px; }
+.nav-tag { font-size:9px; letter-spacing:.25em; text-transform:uppercase; color:var(--text3); }
+.theme-toggle { width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+.theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
+.icon-sun{display:none} .icon-moon{display:block}
+[data-theme="light"] .icon-sun{display:block} [data-theme="light"] .icon-moon{display:none}
+.hero { padding:72px 0 56px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:20px; }
+.hero-logo { width:64px; height:64px; object-fit:contain; visibility:hidden; animation:fadeUp .5s .1s ease forwards; opacity:0; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.hero-badge { display:inline-flex; align-items:center; gap:7px; padding:5px 13px; border-radius:999px; border:1px solid rgba(1,198,241,.25); background:rgba(1,198,241,.06); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent2); animation:fadeUp .5s .15s ease forwards; opacity:0; }
+.badge-dot { width:6px; height:6px; border-radius:50%; background:var(--accent3); box-shadow:0 0 8px var(--accent3); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+.hero h1 { font-family:'Big Shoulders Display',sans-serif; font-size:clamp(60px,13vw,128px); font-weight:900; line-height:.88; letter-spacing:-2px; background:linear-gradient(135deg,#6AFF7E 0%,#27DEC4 35%,#01c6f1 65%,#7c8bff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:fadeUp .5s .2s ease forwards; opacity:0; }
+[data-theme="light"] .hero h1 { background:linear-gradient(135deg,#22a83a 0%,#1dbfa0 35%,#0099cc 65%,#5060cc 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub { font-size:12px; color:var(--text2); letter-spacing:.08em; animation:fadeUp .5s .25s ease forwards; opacity:0; }
+.search-wrap { position:relative; width:100%; max-width:560px; margin:0 auto; animation:fadeUp .5s .3s ease forwards; opacity:0; }
+.search-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--text3); pointer-events:none; }
+.search-input { width:100%; background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:14px 48px 14px 46px; font-family:'DM Mono',monospace; font-size:13px; color:var(--text); outline:none; transition:border-color .2s,box-shadow .2s; }
+.search-input::placeholder { color:var(--text3); }
+.search-input:focus { border-color:var(--accent2); box-shadow:0 0 0 3px rgba(1,198,241,.1); }
+.search-count { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text3); letter-spacing:.1em; }
+.filters { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:20px; animation:fadeUp .5s .35s ease forwards; opacity:0; }
+.filter-btn { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; transition:all .18s; }
+.filter-btn:hover { border-color:var(--accent); color:var(--accent); }
+.filter-btn.active { background:rgba(1,198,241,.12); border-color:var(--accent2); color:var(--accent2); }
+.section-hdr { display:flex; align-items:center; gap:16px; margin:52px 0 24px; }
+.section-hdr-label { font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--text3); white-space:nowrap; }
+.section-hdr-line { flex:1; height:1px; background:var(--border); }
+.section-hdr-count { font-size:9px; letter-spacing:.1em; color:var(--text3); }
+.tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+.tool-card { background:var(--bg2); box-shadow:var(--shadow-card); border-radius:18px; padding:26px 26px 22px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:14px; cursor:pointer; position:relative; overflow:hidden; transition:transform .2s ease,box-shadow .2s ease; animation:fadeUp .4s ease forwards; opacity:0; }
+.tool-card:nth-child(1){animation-delay:.05s} .tool-card:nth-child(2){animation-delay:.10s} .tool-card:nth-child(3){animation-delay:.15s} .tool-card:nth-child(4){animation-delay:.20s} .tool-card:nth-child(5){animation-delay:.25s} .tool-card:nth-child(6){animation-delay:.30s} .tool-card:nth-child(7){animation-delay:.35s} .tool-card:nth-child(8){animation-delay:.40s} .tool-card:nth-child(9){animation-delay:.45s}
+.tool-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% -5%,var(--card-glow),transparent); opacity:0; transition:opacity .3s; }
+.tool-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-hover); }
+.tool-card:hover::before { opacity:1; }
+.card-top { display:flex; align-items:flex-start; justify-content:space-between; }
+.tool-icon { width:46px; height:46px; background:var(--bg3); border:1px solid var(--border); border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; transition:border-color .2s; }
+.tool-card:hover .tool-icon { border-color:var(--accent); }
+.tool-arrow { color:var(--border); transition:color .2s,transform .2s; flex-shrink:0; margin-top:2px; }
+.tool-card:hover .tool-arrow { color:var(--accent); transform:translate(3px,-3px); }
+.tool-name { font-family:'Big Shoulders Display',sans-serif; font-size:21px; font-weight:800; line-height:1; color:var(--text); margin-bottom:6px; }
+.tool-desc { font-size:11px; color:var(--text2); line-height:1.75; }
+.tool-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.tag { font-size:9px; padding:3px 8px; border-radius:6px; border:1px solid var(--border); background:var(--bg3); color:var(--text3); letter-spacing:.08em; text-transform:uppercase; }
+.tag.server { color:var(--green); border-color:rgba(106,255,126,.3); background:rgba(106,255,126,.06); }
+.no-results { grid-column:1/-1; text-align:center; padding:64px 0; color:var(--text3); font-size:12px; letter-spacing:.1em; display:none; }
+footer { margin-top:80px; padding-top:24px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:10px; color:var(--text3); letter-spacing:.08em; }
+footer a { color:var(--accent); text-decoration:none; }
+footer a:hover { text-decoration:underline; }
+.footer-right { display:flex; gap:20px; }
 </style>
 </head>
 <body>
 <nav>
   <a class="nav-left" href="tools.html">
     <img class="nav-logo-img" id="nav-logo" src="" alt="Logo"/>
+    <span class="nav-wordmark">Tibet's Tools</span>
   </a>
   <div class="nav-right">
     <span class="nav-tag">dev utilities</span>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
   </div>
 </nav>
 <div class="wrap">
   <section class="hero">
     <img class="hero-logo" id="hero-logo" src="" alt="Tibet's Tools Logo"/>
+    <div class="hero-badge"><span class="badge-dot"></span>9 tools available</div>
     <h1>TOOLS</h1>
+    <p class="hero-sub">browser-based &middot; no install &middot; open source</p>
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="search" type="text" placeholder="Search tools…" autocomplete="off" spellcheck="false"/>
+      <span class="search-count" id="search-count"></span>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="devtools">Dev</button>
+      <button class="filter-btn" data-filter="design">Design</button>
+      <button class="filter-btn" data-filter="3d printing">3D</button>
+      <button class="filter-btn" data-filter="converter">Convert</button>
+      <button class="filter-btn" data-filter="network">Network</button>
+    </div>
   </section>
-  <div class="section-hdr"><span>all tools</span></div>
-  <div class="tools-grid">
+  <div class="section-hdr">
+    <span class="section-hdr-label">all tools</span>
+    <div class="section-hdr-line"></div>
+    <span class="section-hdr-count" id="visible-count">9 tools</span>
+  </div>
+  <div class="tools-grid" id="grid">
 
-    <a class="tool-card" href="gridfinity-3d.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Gridfinity</div>
-        <div class="tool-desc">Official v5 3D generator — design containers with custom dimensions, base plates, and magnet holes. Export STL & STEP.</div>
+    <a class="tool-card" href="gridfinity-3d.html" data-tags="3d printing gridfinity cad design">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><rect x="2" y="2" width="9" height="9"/><rect x="13" y="2" width="9" height="9"/><rect x="2" y="13" width="9" height="9"/><rect x="13" y="13" width="9" height="9"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">Gridfinity</div><div class="tool-desc">Official v5 3D generator — design containers with custom dimensions, base plates, and magnet holes. Export STL & STEP.</div></div>
       <div class="tool-tags"><span class="tag">3d printing</span><span class="tag">gridfinity</span><span class="tag">cad</span></div>
     </a>
 
-    <a class="tool-card" href="fonts.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon" style="color:#46EDA5;font-size:20px;">𝐀</div>
-      <div class="tool-info">
-        <div class="tool-name">Font Picker</div>
-        <div class="tool-desc">Browse 100+ Google Fonts by category, preview them live, multi-select and copy @import links instantly.</div>
+    <a class="tool-card" href="fonts.html" data-tags="typography google fonts css design">
+      <div class="card-top">
+        <div class="tool-icon" style="color:#46EDA5;font-size:22px;font-family:'Big Shoulders Display',sans-serif;font-weight:900;">&#120000;</div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">Font Picker</div><div class="tool-desc">Browse 100+ Google Fonts by category, preview them live, multi-select and copy @import links instantly.</div></div>
       <div class="tool-tags"><span class="tag">typography</span><span class="tag">google fonts</span><span class="tag">css</span></div>
     </a>
 
-    <a class="tool-card" href="har-separator.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">HAR Separator</div>
-        <div class="tool-desc">Drop a .har file, filter by domain or method, inspect request/response details, and export cURL commands.</div>
+    <a class="tool-card" href="har-separator.html" data-tags="network devtools har">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">HAR Separator</div><div class="tool-desc">Drop a .har file, filter by domain or method, inspect request/response details, and export cURL commands.</div></div>
       <div class="tool-tags"><span class="tag">network</span><span class="tag">devtools</span><span class="tag">har</span></div>
     </a>
 
-    <a class="tool-card" href="html-to-pdf.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27DEC4" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2l2 4 2-8 2 6h2"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">HTML → PDF</div>
-        <div class="tool-desc">Paste or write HTML and convert it to a downloadable PDF in-browser using html2canvas and jsPDF.</div>
+    <a class="tool-card" href="html-to-pdf.html" data-tags="pdf html converter devtools">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#27DEC4" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2l2 4 2-8 2 6h2"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">HTML &rarr; PDF</div><div class="tool-desc">Paste or write HTML and convert it to a downloadable PDF in-browser using html2canvas and jsPDF.</div></div>
       <div class="tool-tags"><span class="tag">pdf</span><span class="tag">html</span><span class="tag">converter</span></div>
     </a>
 
-    <a class="tool-card" href="calculator.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1BD3D6" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Scientific Calculator</div>
-        <div class="tool-desc">Full-featured scientific calculator with trig, logarithms, exponents, history panel, and keyboard support.</div>
+    <a class="tool-card" href="calculator.html" data-tags="calculator scientific maths devtools">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1BD3D6" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">Scientific Calc</div><div class="tool-desc">Full-featured scientific calculator with trig, logarithms, exponents, history panel, and keyboard support.</div></div>
       <div class="tool-tags"><span class="tag">calculator</span><span class="tag">scientific</span><span class="tag">maths</span></div>
     </a>
 
-    <a class="tool-card" href="https://gmail-automator.onrender.com" target="_blank">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#46EDA5" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Gmail Automator</div>
-        <div class="tool-desc">Schedule and automate Gmail sends via OAuth. Daily times, repeating intervals, or bulk-import from a .txt file.</div>
+    <a class="tool-card" href="https://gmail-automator.onrender.com" target="_blank" data-tags="gmail scheduler oauth devtools">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#46EDA5" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
-      <div class="tool-tags"><span class="tag">gmail</span><span class="tag">scheduler</span><span class="tag">oauth</span><span class="tag" style="color:var(--green);border-color:var(--green)">server-side</span></div>
+      <div><div class="tool-name">Gmail Automator</div><div class="tool-desc">Schedule and automate Gmail sends via OAuth. Daily times, repeating intervals, or bulk-import from a .txt file.</div></div>
+      <div class="tool-tags"><span class="tag">gmail</span><span class="tag">scheduler</span><span class="tag">oauth</span><span class="tag server">server-side</span></div>
     </a>
 
-    <div class="tool-card" onclick="openSketcher()">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Sketcher</div>
-        <div class="tool-desc">CAD-style canvas drawing tool with snap, constraints, dimensions, and export to PNG/SVG.</div>
+    <div class="tool-card" onclick="openSketcher()" data-tags="drawing cad design">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6AFF7E" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">Sketcher</div><div class="tool-desc">CAD-style canvas drawing tool with snap, constraints, dimensions, and export to PNG/SVG.</div></div>
       <div class="tool-tags"><span class="tag">drawing</span><span class="tag">cad</span><span class="tag">design</span></div>
     </div>
 
-    <a class="tool-card" href="website-crawler.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><circle cx="16" cy="11" r="2" fill="none" stroke-dasharray="0"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">Website Crawler</div>
-        <div class="tool-desc">Download entire websites — all pages, assets, and external links to your disk. Node.js & Python crawlers included.</div>
+    <a class="tool-card" href="website-crawler.html" data-tags="crawler scraper download network devtools">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01c6f1" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
-      <div class="tool-tags"><span class="tag">crawler</span><span class="tag">scraper</span><span class="tag">download</span></div>
+      <div><div class="tool-name">Website Crawler</div><div class="tool-desc">Download entire websites — all pages, assets, and external links to your disk. Node.js & Python crawlers included.</div></div>
+      <div class="tool-tags"><span class="tag">crawler</span><span class="tag">scraper</span><span class="tag">network</span></div>
     </a>
 
-    <a class="tool-card" href="html-editor.html">
-      <svg class="tool-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
-      <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c8bff" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="3 3"/></svg></div>
-      <div class="tool-info">
-        <div class="tool-name">HTML Editor</div>
-        <div class="tool-desc">Live split-pane editor with syntax highlighting. Click any element in the preview to jump to its source line, or click a line to highlight it in the preview.</div>
+    <a class="tool-card" href="html-editor.html" data-tags="html editor devtools">
+      <div class="card-top">
+        <div class="tool-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c8bff" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="3 3"/></svg></div>
+        <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
+      <div><div class="tool-name">HTML Editor</div><div class="tool-desc">Live split-pane editor with syntax highlighting. Click any element in the preview to jump to its source line.</div></div>
       <div class="tool-tags"><span class="tag">html</span><span class="tag">editor</span><span class="tag">devtools</span></div>
     </a>
 
+    <div class="no-results" id="no-results">No tools match your search.</div>
   </div>
-  <footer>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></footer>
+  <footer>
+    <span>Built by <a href="https://github.com/tibetthetibz-alt" target="_blank">Tibet</a></span>
+    <div class="footer-right"><a href="https://github.com/tibetthetibz-alt/tools" target="_blank">GitHub</a></div>
+  </footer>
 </div>
 
-<!-- Sketcher Panel -->
 <div id="sketcher-panel" style="display:none;position:fixed;inset:0;z-index:200;background:var(--bg);flex-direction:column;">
   <iframe id="sketcher-iframe" src="" style="flex:1;border:none;width:100%;height:100%;"></iframe>
 </div>
@@ -198,11 +231,42 @@
     html.setAttribute('data-theme',t);
     const src=t==='dark'?'logo-dark.png':'logo-light.png';
     navLogo.src=heroLogo.src=src;
-    navLogo.style.visibility='visible';
-    heroLogo.style.visibility='visible';
+    navLogo.style.visibility=heroLogo.style.visibility='visible';
     localStorage.setItem('theme',t);
   }
   function toggleTheme(){setTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');}
+  const searchEl=document.getElementById('search');
+  const countEl=document.getElementById('search-count');
+  const visEl=document.getElementById('visible-count');
+  const noRes=document.getElementById('no-results');
+  const cards=Array.from(document.querySelectorAll('.tool-card'));
+  let activeFilter='all';
+  function applyFilter(){
+    const q=searchEl.value.trim().toLowerCase();
+    let visible=0;
+    cards.forEach(c=>{
+      const tags=c.dataset.tags||'';
+      const name=c.querySelector('.tool-name').textContent.toLowerCase();
+      const desc=c.querySelector('.tool-desc').textContent.toLowerCase();
+      const matchSearch=!q||name.includes(q)||desc.includes(q)||tags.includes(q);
+      const matchFilter=activeFilter==='all'||tags.includes(activeFilter);
+      const show=matchSearch&&matchFilter;
+      c.style.display=show?'':'none';
+      if(show)visible++;
+    });
+    countEl.textContent=q?`${visible} found`:'';
+    visEl.textContent=`${visible} tool${visible!==1?'s':''}`;
+    noRes.style.display=visible===0?'block':'none';
+  }
+  searchEl.addEventListener('input',applyFilter);
+  document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter=btn.dataset.filter;
+      applyFilter();
+    });
+  });
   function openSketcher(){
     const p=document.getElementById('sketcher-panel');
     const f=document.getElementById('sketcher-iframe');
