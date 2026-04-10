@@ -6,8 +6,20 @@
 <title>Tibet's Tools</title>
 <link rel="icon" type="image/png" href="logo-light.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
+@font-face {
+  font-family: 'CreatoDisplay';
+  src: url('fonts/CreatoDisplay-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'HeadingNow';
+  src: url('fonts/HeadingNowTrial-68Heavy.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#0e0e12; --bg2:#16161c; --bg3:#1c1c24; --border:#2a2a38;
@@ -34,7 +46,7 @@ body::after { content:''; position:fixed; top:-200px; left:50%; transform:transl
 nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:0 32px; height:58px; display:flex; align-items:center; justify-content:space-between; transition:background .3s,border-color .3s; }
 .nav-left { display:flex; align-items:center; gap:12px; text-decoration:none; }
 .nav-logo-img { width:28px; height:28px; object-fit:contain; visibility:hidden; }
-.nav-wordmark { font-family:'Big Shoulders Display',sans-serif; font-weight:900; font-size:1.1rem; letter-spacing:.04em; color:var(--text); }
+.nav-wordmark { font-family:'CreatoDisplay',sans-serif; font-weight:900; font-size:1.1rem; letter-spacing:.04em; color:var(--text); }
 .nav-right { display:flex; align-items:center; gap:12px; }
 .nav-tag { font-size:9px; letter-spacing:.25em; text-transform:uppercase; color:var(--text3); }
 .theme-toggle { width:34px; height:34px; border-radius:9px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
@@ -47,7 +59,7 @@ nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-fil
 .hero-badge { display:inline-flex; align-items:center; gap:7px; padding:5px 13px; border-radius:999px; border:1px solid rgba(1,198,241,.25); background:rgba(1,198,241,.06); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent2); animation:fadeUp .5s .15s ease forwards; opacity:0; }
 .badge-dot { width:6px; height:6px; border-radius:50%; background:var(--accent3); box-shadow:0 0 8px var(--accent3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
-.hero h1 { font-family:'Big Shoulders Display',sans-serif; font-size:clamp(60px,13vw,128px); font-weight:900; line-height:.88; letter-spacing:-2px; background:linear-gradient(135deg,#6AFF7E 0%,#27DEC4 35%,#01c6f1 65%,#7c8bff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:fadeUp .5s .2s ease forwards; opacity:0; }
+.hero h1 { font-family:'CreatoDisplay',sans-serif; font-size:clamp(60px,13vw,128px); font-weight:900; line-height:.88; letter-spacing:-2px; background:linear-gradient(135deg,#6AFF7E 0%,#27DEC4 35%,#01c6f1 65%,#7c8bff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:fadeUp .5s .2s ease forwards; opacity:0; }
 [data-theme="light"] .hero h1 { background:linear-gradient(135deg,#22a83a 0%,#1dbfa0 35%,#0099cc 65%,#5060cc 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .hero-sub { font-size:12px; color:var(--text2); letter-spacing:.08em; animation:fadeUp .5s .25s ease forwards; opacity:0; }
 .search-wrap { position:relative; width:100%; max-width:560px; margin:0 auto; animation:fadeUp .5s .3s ease forwards; opacity:0; }
@@ -75,7 +87,7 @@ nav { position:sticky; top:0; z-index:50; background:var(--nav-bg); backdrop-fil
 .tool-card:hover .tool-icon { border-color:var(--accent); }
 .tool-arrow { color:var(--border); transition:color .2s,transform .2s; flex-shrink:0; margin-top:2px; }
 .tool-card:hover .tool-arrow { color:var(--accent); transform:translate(3px,-3px); }
-.tool-name { font-family:'Big Shoulders Display',sans-serif; font-size:21px; font-weight:800; line-height:1; color:var(--text); margin-bottom:6px; }
+.tool-name { font-family:'CreatoDisplay',sans-serif; font-size:21px; font-weight:900; line-height:1; color:var(--text); margin-bottom:6px; }
 .tool-desc { font-size:11px; color:var(--text2); line-height:1.75; }
 .tool-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
 .tag { font-size:9px; padding:3px 8px; border-radius:6px; border:1px solid var(--border); background:var(--bg3); color:var(--text3); letter-spacing:.08em; text-transform:uppercase; }
@@ -139,7 +151,7 @@ footer a:hover { text-decoration:underline; }
 
     <a class="tool-card" href="fonts.html" data-tags="typography google fonts css design">
       <div class="card-top">
-        <div class="tool-icon" style="color:#46EDA5;font-size:22px;font-family:'Big Shoulders Display',sans-serif;font-weight:900;">&#120000;</div>
+        <div class="tool-icon" style="color:#46EDA5;font-size:22px;font-family:'CreatoDisplay',sans-serif;font-weight:900;">&#120000;</div>
         <svg class="tool-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
       </div>
       <div><div class="tool-name">Font Picker</div><div class="tool-desc">Browse 100+ Google Fonts by category, preview them live, multi-select and copy @import links instantly.</div></div>
